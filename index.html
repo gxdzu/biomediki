@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0c0c14">
+<title>Биомедики</title>
+<!-- build: 1773954698 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   TOKENS
+══════════════════════════════════════════════ */
+:root {
+  --bg:    #0c0c14;
+  --bg1:   #12121e;
+  --bg2:   #18182a;
+  --bg3:   #20203a;
+  --bg4:   #2a2a46;
+  --gold:  #c9a96e;
+  --gold2: rgba(201,169,110,.45);
+  --gold3: rgba(201,169,110,.10);
+  --gold4: rgba(201,169,110,.05);
+  --text:  #eae6d8;
+  --text2: #9b9785;
+  --text3: #55534a;
+  --pur:   #8b7fcf; --pur2: rgba(139,127,207,.18);
+  --teal:  #6ab4a0; --teal2:rgba(106,180,160,.18);
+  --rose:  #c4748a; --rose2:rgba(196,116,138,.18);
+  --blue:  #6a96c4; --blue2:rgba(106,150,196,.18);
+  --red:   #c47474; --red2: rgba(196,116,116,.20);
+  --yel:   #c4a874; --yel2: rgba(196,168,116,.20);
+  --grn:   #74c490; --grn2: rgba(116,196,144,.20);
+  --bdr:   rgba(201,169,110,.10);
+  --bdr2:  rgba(201,169,110,.22);
+  --r:14px; --rs:8px;
+  --nav:68px;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --mono:'JetBrains Mono',monospace;
+}
+[data-theme="light"] {
+  --bg:    #f5f2eb;
+  --bg1:   #ede9e0;
+  --bg2:   #e4dfd4;
+  --bg3:   #d8d2c6;
+  --bg4:   #ccc5b6;
+  --gold:  #8a6a30;
+  --gold2: rgba(138,106,48,.45);
+  --gold3: rgba(138,106,48,.10);
+  --gold4: rgba(138,106,48,.05);
+  --text:  #2a2620;
+  --text2: #6b6558;
+  --text3: #9e9688;
+  --pur:   #5a4fa0; --pur2: rgba(90,79,160,.14);
+  --teal:  #2e7d68; --teal2:rgba(46,125,104,.14);
+  --rose:  #9a3d55; --rose2:rgba(154,61,85,.14);
+  --blue:  #2d5f8a; --blue2:rgba(45,95,138,.14);
+  --red:   #9a3a3a; --red2: rgba(154,58,58,.16);
+  --yel:   #7a5c1e; --yel2: rgba(122,92,30,.16);
+  --grn:   #2e7a4a; --grn2: rgba(46,122,74,.16);
+  --bdr:   rgba(138,106,48,.12);
+  --bdr2:  rgba(138,106,48,.28);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6;overflow:hidden}
+button{cursor:pointer;font-family:var(--mono)}
+input,select{font-family:var(--mono)}
+a{text-decoration:none}
+
+/* ══════════════════════════════════════════════
+   GATE
+══════════════════════════════════════════════ */
+#gate{
+  position:fixed;inset:0;z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 55%,#1a1230 0%,#0c0c14 68%);
+}
+#gate::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,169,110,.025) 40px),
+    repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,169,110,.025) 40px);
+  pointer-events:none;
+}
+.gc{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 28px;max-width:340px;width:100%}
+.g-title{font-family:var(--serif);font-size:38px;font-weight:300;color:var(--gold);letter-spacing:.14em;margin-top:12px}
+.g-sub{font-size:10px;letter-spacing:.22em;color:var(--text3);margin-bottom:18px}
+.g-inp{
+  width:100%;background:var(--bg2);border:.5px solid var(--bdr2);color:var(--text);
+  border-radius:var(--rs);padding:14px 18px;font-size:13px;letter-spacing:.15em;
+  text-align:center;outline:none;transition:border-color .2s;
+}
+.g-inp:focus{border-color:var(--gold2)}
+.g-inp::placeholder{color:var(--text3);letter-spacing:.06em}
+.g-btn{
+  width:100%;background:transparent;border:.5px solid var(--gold2);color:var(--gold);
+  padding:14px;border-radius:var(--rs);font-size:12px;letter-spacing:.2em;
+  transition:all .2s;
+}
+.g-btn:hover{background:var(--gold3)}
+.g-err{font-size:11px;color:var(--red);min-height:16px;letter-spacing:.04em}
+.g-dots{display:flex;gap:8px;margin-top:20px}
+.g-dots span{width:4px;height:4px;border-radius:50%;background:var(--bdr2);animation:pdot 1.8s ease-in-out infinite}
+.g-dots span:nth-child(2){animation-delay:.3s}.g-dots span:nth-child(3){animation-delay:.6s}
+@keyframes pdot{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* name overlay */
+#name-overlay{
+  position:fixed;inset:0;z-index:300;background:rgba(12,12,20,.85);
+  display:flex;align-items:center;justify-content:center;
+}
+.no-box{background:var(--bg2);border:.5px solid var(--bdr2);border-radius:var(--r);padding:28px 24px;max-width:300px;width:90%;display:flex;flex-direction:column;gap:12px}
+.no-title{font-family:var(--serif);font-size:20px;color:var(--gold);font-weight:300;letter-spacing:.06em}
+
+/* ══════════════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════════════ */
+.hidden{display:none!important}
+#app{position:fixed;inset:0;display:flex;flex-direction:column}
+.screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding-bottom:var(--nav);animation:sin .28s ease}
+.screen.active{display:flex}
+.scr-scroll{flex:1;overflow-y:auto;padding:0 16px 24px}
+.scr-scroll::-webkit-scrollbar{display:none}
+@keyframes sin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* ══════════════════════════════════════════════
+   HOME
+══════════════════════════════════════════════ */
+.h-hdr{display:flex;justify-content:space-between;align-items:flex-start;padding:22px 0 16px}
+.greeting{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--gold);letter-spacing:.04em;line-height:1.2}
+.dateline{font-size:11px;color:var(--text3);letter-spacing:.07em;margin-top:4px}
+.hdr-cat{cursor:pointer;position:relative;width:54px;height:54px}
+.mood-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg)}
+.wgt{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.wgt-lbl{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:12px}
+.dl-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:.5px solid var(--bdr)}
+.dl-item:last-child{border-bottom:none}
+.dl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dl-name{flex:1;font-size:13px}
+.dl-due{font-size:11px;color:var(--text3)}
+.si-home{display:flex;gap:10px;align-items:center;padding:5px 0}
+.si-t{font-size:11px;color:var(--text3);width:38px;flex-shrink:0}
+.si-bar{flex:1;border-radius:6px;padding:6px 10px;font-size:12px}
+.sec-title{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:8px}
+.chat-prev{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:12px 14px;margin-bottom:18px}
+.prev-row{display:flex;gap:8px;padding:3px 0}
+.prev-au{font-size:11px;color:var(--gold2);width:56px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev-tx{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quote-blk{position:relative;padding:18px 14px 18px 30px;border-left:1px solid var(--bdr2);margin:4px 0 20px}
+.q-mark{position:absolute;left:8px;top:8px;font-family:var(--serif);font-size:52px;color:var(--bdr2);line-height:1}
+.q-text{font-family:var(--serif);font-size:16px;font-weight:300;color:var(--text2);font-style:italic}
+
+/* ══════════════════════════════════════════════
+   SCHEDULE
+══════════════════════════════════════════════ */
+.scr-hdr{padding:20px 0 10px}
+.scr-title{font-family:var(--serif);font-size:30px;font-weight:300;color:var(--gold);letter-spacing:.06em}
+.wk-nav{display:flex;align-items:center;justify-content:space-between;padding:0 0 12px}
+.wk-btn{background:none;border:none;color:var(--text2);padding:6px;opacity:.7;transition:opacity .2s}
+.wk-btn:hover{opacity:1}
+.wk-lbl{font-size:12px;color:var(--text2);letter-spacing:.04em}
+.day-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:12px}
+.day-tabs::-webkit-scrollbar{display:none}
+.day-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;border:.5px solid var(--bdr);background:transparent;color:var(--text3);font-size:11px;transition:all .2s;letter-spacing:.04em}
+.day-tab.active{background:var(--gold3);border-color:var(--gold2);color:var(--gold)}
+.sched-list{display:flex;flex-direction:column;gap:10px}
+.les-card{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:14px 16px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s}
+.les-card:hover{border-color:var(--bdr2)}
+.les-tc{min-width:42px}
+.les-tm{font-size:12px;color:var(--text2)}
+.les-end{font-size:10px;color:var(--text3)}
+.les-acc{width:3px;border-radius:2px;flex-shrink:0;margin-top:2px}
+.les-body{flex:1}
+.les-subj{font-size:14px;color:var(--text);margin-bottom:2px}
+.les-room{font-size:11px;color:var(--text2)}
+.les-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--pur);margin-top:4px}
+.no-les{text-align:center;padding:40px 20px;color:var(--text3);font-size:12px}
+.no-les em{display:block;font-family:var(--serif);font-style:italic;font-size:16px;color:var(--text3);margin-top:6px}
+
+/* ══════════════════════════════════════════════
+   HOMEWORK
+══════════════════════════════════════════════ */
+.fil-row{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px}
+.fil-row::-webkit-scrollbar{display:none}
+.fil-btn{flex-shrink:0;padding:5px 12px;border-radius:20px;border:.5px solid var(--bdr);background:transparent;color:var(--text3);font-size:11px;transition:all .2s}
+.fil-btn.active{background:var(--gold3);border-color:var(--gold2);color:var(--gold)}
+.hw-list{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+.hw-card{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:14px 16px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:all .2s}
+.hw-card:hover{border-color:var(--bdr2)}
+.hw-card.done{opacity:.4}
+.hw-chk{width:20px;height:20px;border-radius:50%;border:.5px solid var(--bdr2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .2s}
+.hw-card.done .hw-chk{background:var(--grn2);border-color:var(--grn)}
+.hw-body{flex:1}
+.hw-ttl{font-size:14px;color:var(--text);margin-bottom:3px}
+.hw-card.done .hw-ttl{text-decoration:line-through;color:var(--text3)}
+.hw-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.hw-subj{font-size:11px;color:var(--text3)}
+.hw-badge{font-size:10px;padding:2px 7px;border-radius:10px;letter-spacing:.03em}
+.hw-badge.high{background:var(--red2);color:var(--red)}
+.hw-badge.mid{background:var(--yel2);color:var(--yel)}
+.hw-badge.low{background:var(--grn2);color:var(--grn)}
+.hw-cnt{font-size:11px;color:var(--text3);margin-top:4px}
+.del-btn{background:none;border:none;color:var(--text3);font-size:18px;padding:0 4px;align-self:flex-start;transition:color .2s}
+.del-btn:hover{color:var(--red)}
+
+/* ══════════════════════════════════════════════
+   CHAT
+══════════════════════════════════════════════ */
+#screen-chat{padding-bottom:0}
+.chat-hdr{flex-shrink:0;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--bdr)}
+.chat-layout{flex:1;display:flex;overflow:hidden;min-height:0}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;padding-bottom:var(--nav)}
+.chat-msgs{flex:1;overflow-y:auto;padding:10px 16px;display:flex;flex-direction:column;gap:1px;min-height:0}
+.chat-msgs::-webkit-scrollbar{display:none}
+.msg-grp{margin-bottom:10px}
+.msg-au{font-size:10px;color:var(--text3);margin-bottom:3px;padding-left:2px;letter-spacing:.05em}
+.msg-au.me{text-align:right;color:var(--gold2)}
+.msg-bbl{display:inline-block;max-width:80%;background:var(--bg2);border:.5px solid var(--bdr);border-radius:12px 12px 12px 3px;padding:8px 12px;font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.msg-grp.me{text-align:right}
+.msg-grp.me .msg-bbl{background:var(--pur2);border-color:rgba(139,127,207,.28);border-radius:12px 12px 3px 12px}
+.msg-time{font-size:10px;color:var(--text3);margin-top:2px;padding-left:2px}
+.msg-grp.me .msg-time{text-align:right}
+.chat-inp-row{flex-shrink:0;display:flex;gap:8px;padding:10px 16px;border-top:.5px solid var(--bdr);background:var(--bg);padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.chat-inp{flex:1;background:var(--bg2);border:.5px solid var(--bdr);color:var(--text);border-radius:22px;padding:10px 16px;font-size:13px;outline:none;transition:border-color .2s}
+.chat-inp:focus{border-color:var(--gold2)}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-send{width:40px;height:40px;border-radius:50%;background:var(--gold3);border:.5px solid var(--gold2);color:var(--gold);display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.chat-send:hover{background:rgba(201,169,110,.18)}
+.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px}
+/* members panel */
+.members-panel{width:110px;flex-shrink:0;border-left:.5px solid var(--bdr);overflow-y:auto;padding:10px 8px;background:var(--bg1)}
+.members-panel::-webkit-scrollbar{display:none}
+.mp-ttl{font-size:9px;letter-spacing:.14em;color:var(--text3);margin-bottom:8px;padding:0 2px}
+.mp-item{display:flex;align-items:center;gap:6px;padding:4px 3px}
+.mp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:1px}
+.mp-name{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+.mp-sub{font-size:9px;color:var(--text3)}
+.msg-grp{margin-bottom:10px}
+.msg-au{font-size:10px;color:var(--text3);margin-bottom:3px;padding-left:2px;letter-spacing:.05em}
+.msg-au.me{text-align:right;color:var(--gold2)}
+.msg-bbl{display:inline-block;max-width:80%;background:var(--bg2);border:.5px solid var(--bdr);border-radius:12px 12px 12px 3px;padding:8px 12px;font-size:13px;color:var(--text);line-height:1.5;word-break:break-word}
+.msg-grp.me{text-align:right}
+.msg-grp.me .msg-bbl{background:var(--pur2);border-color:rgba(139,127,207,.28);border-radius:12px 12px 3px 12px}
+.msg-time{font-size:10px;color:var(--text3);margin-top:2px;padding-left:2px}
+.msg-grp.me .msg-time{text-align:right}
+.chat-day{text-align:center;font-size:10px;color:var(--text3);letter-spacing:.1em;margin:8px 0}
+.chat-inp-row{display:flex;gap:8px;padding:10px 16px;border-top:.5px solid var(--bdr);background:var(--bg);padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.chat-inp{flex:1;background:var(--bg2);border:.5px solid var(--bdr);color:var(--text);border-radius:22px;padding:10px 16px;font-size:13px;outline:none;transition:border-color .2s}
+.chat-inp:focus{border-color:var(--gold2)}
+.chat-inp::placeholder{color:var(--text3)}
+.chat-send{width:40px;height:40px;border-radius:50%;background:var(--gold3);border:.5px solid var(--gold2);color:var(--gold);display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.chat-send:hover{background:rgba(201,169,110,.18)}
+.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px}
+
+/* PROFILE */
+.prof-scr{padding:0 16px 40px}
+.prof-hdr{padding:22px 0 18px;border-bottom:.5px solid var(--bdr);margin-bottom:18px;display:flex;align-items:center;gap:16px}
+.prof-avatar{width:56px;height:56px;border-radius:50%;background:var(--bg3);border:.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:22px;color:var(--gold);flex-shrink:0}
+.prof-name-blk{}
+.prof-name{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--gold);letter-spacing:.06em}
+.prof-role-lbl{font-size:10px;color:var(--text3);letter-spacing:.1em;margin-top:2px}
+.prof-section{margin-bottom:18px}
+.prof-sec-ttl{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:10px}
+.prof-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:.5px solid var(--bdr)}
+.prof-row:last-child{border-bottom:none}
+.prof-row-lbl{font-size:13px;color:var(--text2)}
+.prof-row-val{font-size:12px;color:var(--text3)}
+.prof-inp{background:var(--bg2);border:.5px solid var(--bdr2);color:var(--text);border-radius:var(--rs);padding:10px 14px;font-size:13px;outline:none;transition:border-color .2s;width:100%;margin-bottom:8px}
+.prof-inp:focus{border-color:var(--gold2)}
+.prof-inp::placeholder{color:var(--text3)}
+.sg-btns{display:flex;gap:8px;margin-bottom:8px}
+.sg-btn{flex:1;padding:9px;border-radius:var(--rs);border:.5px solid var(--bdr);background:transparent;color:var(--text3);font-size:12px;transition:all .2s}
+.sg-btn.active{background:var(--pur2);border-color:var(--pur);color:var(--pur)}
+.save-btn{width:100%;background:transparent;border:.5px solid var(--bdr2);color:var(--text2);padding:11px;border-radius:var(--rs);font-size:12px;letter-spacing:.1em;transition:all .2s;margin-bottom:8px}
+.save-btn:hover{border-color:var(--gold2);color:var(--gold)}
+.logout-btn{width:100%;background:transparent;border:.5px solid var(--red2);color:var(--red);padding:11px;border-radius:var(--rs);font-size:12px;letter-spacing:.1em;transition:all .2s}
+.logout-btn:hover{background:var(--red2)}
+
+/* LESSON TYPE + SUBGROUP */
+.les-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.les-type{font-size:9px;padding:2px 7px;border-radius:10px;letter-spacing:.04em}
+.les-type.лекция{background:var(--pur2);color:var(--pur)}
+.les-type.семинар{background:var(--teal2);color:var(--teal)}
+.les-type.лаба{background:var(--rose2);color:var(--rose)}
+.les-type.общая,.les-type.все{background:var(--gold3);color:var(--gold)}
+.les-sg{font-size:9px;padding:2px 7px;border-radius:10px;background:var(--bg3);color:var(--text3);letter-spacing:.04em}
+
+/* ADMIN LIST ITEMS */
+.adm-les-item,.adm-hw-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:.5px solid var(--bdr)}
+.adm-les-item:last-child,.adm-hw-item:last-child{border-bottom:none}
+.adm-item-info{flex:1}
+.adm-item-name{font-size:12px;color:var(--text)}
+.adm-item-meta{font-size:10px;color:var(--text3);margin-top:1px}
+
+/* LINK CARDS */
+.link-card{display:flex;align-items:center;gap:12px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:13px 14px;margin-bottom:8px;transition:border-color .2s}
+.link-card:hover{border-color:var(--bdr2)}
+.link-icon{width:32px;height:32px;border-radius:var(--rs);background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0}
+.link-body{flex:1;min-width:0}
+.link-title{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-meta{font-size:10px;color:var(--text3);letter-spacing:.05em;margin-top:2px}
+
+/* ══════════════════════════════════════════════
+   CAT SCREEN
+══════════════════════════════════════════════ */
+.cat-scr{display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px;text-align:center}
+.cat-name{font-family:var(--serif);font-size:24px;font-weight:300;color:var(--gold);letter-spacing:.14em;margin-bottom:4px}
+
+/* ─ CSS 2D Cat ─ */
+.css-cat{
+  position:relative;width:140px;height:140px;
+  margin:16px 0 24px;cursor:pointer;
+  animation:catbob 3s ease-in-out infinite;
+}
+.css-cat:active{transform:scale(.95)}
+@keyframes catbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* body */
+.cat-body{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:90px;height:80px;
+  background:#2a2050;
+  border-radius:50% 50% 45% 45% / 60% 60% 40% 40%;
+  border:2px solid rgba(201,169,110,.3);
+}
+/* belly */
+.cat-body::after{
+  content:'';position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  width:48px;height:38px;
+  background:rgba(201,169,110,.08);
+  border-radius:50%;
+  border:1px solid rgba(201,169,110,.12);
+}
+/* head */
+.cat-head{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:72px;height:66px;
+  background:#2a2050;
+  border-radius:50% 50% 46% 46% / 55% 55% 45% 45%;
+  border:2px solid rgba(201,169,110,.3);
+  z-index:2;
+}
+/* ears */
+.cat-ear-l,.cat-ear-r{
+  position:absolute;top:-16px;
+  width:0;height:0;
+  border-left:12px solid transparent;
+  border-right:12px solid transparent;
+  border-bottom:20px solid #2a2050;
+  filter:drop-shadow(0 -1px 0 rgba(201,169,110,.3));
+}
+.cat-ear-l{left:6px;transform:rotate(-10deg)}
+.cat-ear-r{right:6px;transform:rotate(10deg)}
+/* inner ears */
+.cat-ear-l::after,.cat-ear-r::after{
+  content:'';position:absolute;top:4px;left:-6px;
+  width:0;height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-bottom:12px solid rgba(201,169,110,.18);
+}
+/* eyes */
+.cat-eyes{position:absolute;top:24px;left:50%;transform:translateX(-50%);width:52px;display:flex;justify-content:space-between}
+.cat-eye{
+  width:14px;height:18px;background:#0c0c14;border-radius:50%;
+  position:relative;overflow:hidden;
+  animation:blink 4s ease-in-out infinite;
+}
+.cat-eye::after{
+  content:'';position:absolute;top:3px;left:3px;
+  width:5px;height:5px;background:rgba(201,169,110,.7);border-radius:50%;
+}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}96%,98%{transform:scaleY(.05)}}
+/* pupils reaction on pet */
+.css-cat.happy .cat-eye{height:10px;border-radius:50% 50% 0 0}
+/* nose */
+.cat-nose{
+  position:absolute;top:38px;left:50%;transform:translateX(-50%);
+  width:0;height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-top:6px solid rgba(201,169,110,.55);
+}
+/* mouth */
+.cat-mouth{
+  position:absolute;top:45px;left:50%;transform:translateX(-50%);
+  width:24px;display:flex;gap:3px;justify-content:center;
+}
+.cat-mouth-l,.cat-mouth-r{
+  width:9px;height:6px;
+  border-bottom:1.5px solid rgba(201,169,110,.4);
+  border-radius:0 0 50% 50%;
+}
+/* whiskers */
+.cat-whi{position:absolute;top:36px;left:50%;transform:translateX(-50%);width:90px;pointer-events:none}
+.whi-l1,.whi-l2,.whi-l3,.whi-r1,.whi-r2,.whi-r3{
+  position:absolute;height:1px;background:rgba(201,169,110,.35);
+  transform-origin:right center;
+}
+.whi-l1{width:26px;right:50%;top:0;transform:rotate(10deg)}
+.whi-l2{width:28px;right:50%;top:5px;transform:rotate(0deg)}
+.whi-l3{width:26px;right:50%;top:10px;transform:rotate(-10deg)}
+.whi-r1{width:26px;left:50%;top:0;transform:rotate(-10deg)}
+.whi-r2{width:28px;left:50%;top:5px;transform:rotate(0deg)}
+.whi-r3{width:26px;left:50%;top:10px;transform:rotate(10deg)}
+/* tail */
+.cat-tail{
+  position:absolute;bottom:6px;right:-14px;
+  width:40px;height:16px;
+  border-radius:0 50% 50% 0;
+  border-right:3px solid rgba(201,169,110,.35);
+  border-top:3px solid rgba(201,169,110,.25);
+  border-bottom:3px solid rgba(201,169,110,.15);
+  transform-origin:left center;
+  animation:tailwag 2.5s ease-in-out infinite;
+}
+@keyframes tailwag{0%,100%{transform:rotate(-15deg)}50%{transform:rotate(15deg)}}
+.css-cat.happy .cat-tail{animation:tailwagfast 0.8s ease-in-out infinite}
+@keyframes tailwagfast{0%,100%{transform:rotate(-25deg)}50%{transform:rotate(25deg)}}
+/* purr effect */
+.css-cat.purring{animation:purr .3s ease-in-out 4}
+@keyframes purr{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-2px) rotate(-1deg)}75%{transform:translateY(-2px) rotate(1deg)}}
+
+/* mini cat for header */
+.mini-cat{position:relative;width:46px;height:46px}
+.mini-body{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:36px;height:30px;background:#2a2050;border-radius:50% 50% 45% 45%/60% 60% 40% 40%;border:1.5px solid rgba(201,169,110,.3)}
+.mini-head{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:30px;height:27px;background:#2a2050;border-radius:50%;border:1.5px solid rgba(201,169,110,.3);z-index:2}
+.mini-ear-l,.mini-ear-r{position:absolute;top:-6px;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:8px solid #2a2050}
+.mini-ear-l{left:3px;transform:rotate(-8deg)}.mini-ear-r{right:3px;transform:rotate(8deg)}
+.mini-eye-l,.mini-eye-r{position:absolute;top:9px;width:6px;height:8px;background:#0c0c14;border-radius:50%;animation:blink 5s ease-in-out infinite}
+.mini-eye-l{left:6px}.mini-eye-r{right:6px}
+
+.cat-stats{width:100%;max-width:260px;display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.stat-lbl{font-size:10px;color:var(--text3);letter-spacing:.1em;margin-bottom:5px;text-align:left}
+.stat-bar{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.stat-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .6s ease}
+.stat-fill.food{background:var(--teal)}
+
+.cat-acts{display:flex;gap:12px;margin-bottom:14px}
+.cat-btn{display:flex;align-items:center;gap:7px;background:var(--bg2);border:.5px solid var(--bdr);color:var(--text2);border-radius:var(--rs);padding:10px 18px;font-size:12px;letter-spacing:.05em;transition:all .2s}
+.cat-btn:hover{border-color:var(--gold2);color:var(--gold)}
+.cat-btn:active{transform:scale(.97)}
+
+.cat-msg-txt{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--text2);min-height:22px;margin-bottom:24px;transition:opacity .3s}
+
+.cat-lore{background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r);padding:18px;text-align:left;max-width:320px;width:100%}
+.lore-ttl{font-size:10px;letter-spacing:.14em;color:var(--text3);margin-bottom:10px}
+.lore-txt{font-family:var(--serif);font-size:15px;font-weight:300;color:var(--text2);font-style:italic;line-height:1.7}
+
+/* ══════════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════════ */
+.bnav{
+  position:absolute;bottom:0;left:0;right:0;
+  height:var(--nav);display:flex;align-items:stretch;
+  background:var(--bg1);border-top:.5px solid var(--bdr);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--text3);font-size:8px;letter-spacing:.04em;padding:6px 0;transition:color .2s}
+.nav-btn:hover{color:var(--text2)}
+.nav-btn.active{color:var(--gold)}
+.nav-btn svg{display:block}
+
+/* ══════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════ */
+#admin{position:fixed;inset:0;z-index:150;background:var(--bg);display:flex;flex-direction:column;animation:sin .28s ease}
+.adm-hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 20px 14px;border-bottom:.5px solid var(--bdr);flex-shrink:0}
+.adm-title{font-size:11px;letter-spacing:.15em;color:var(--text3)}
+.adm-close{background:none;border:none;color:var(--text3);font-size:20px;padding:2px 8px;transition:color .2s}
+.adm-close:hover{color:var(--text)}
+.adm-body{flex:1;overflow-y:auto;padding:16px 20px 40px}
+.adm-body::-webkit-scrollbar{display:none}
+.adm-sec{margin-bottom:28px;padding-bottom:28px;border-bottom:.5px solid var(--bdr)}
+.adm-sec:last-child{border-bottom:none}
+.adm-sec-ttl{font-size:10px;letter-spacing:.15em;color:var(--text3);margin-bottom:12px}
+.adm-form{display:flex;flex-direction:column;gap:8px}
+.adm-inp{background:var(--bg2);border:.5px solid var(--bdr);color:var(--text);border-radius:var(--rs);padding:11px 14px;font-size:12px;outline:none;transition:border-color .2s;width:100%}
+.adm-inp:focus{border-color:var(--gold2)}
+.adm-inp::placeholder{color:var(--text3)}
+.adm-btn{background:transparent;border:.5px solid var(--bdr2);color:var(--text2);padding:11px;border-radius:var(--rs);font-size:12px;letter-spacing:.1em;transition:all .2s}
+.adm-btn:hover{border-color:var(--gold2);color:var(--gold)}
+.inv-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--bdr)}
+.inv-code{font-size:13px;color:var(--gold);letter-spacing:.1em}
+.inv-stat{font-size:11px;color:var(--text3)}
+.inv-del{background:none;border:none;color:var(--text3);font-size:18px;padding:0 4px;transition:color .2s}
+.inv-del:hover{color:var(--red)}
+.mem-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--bdr)}
+.mem-name{font-size:13px}
+.mem-role{font-size:10px;letter-spacing:.07em;color:var(--text3)}
+.mem-role.admin{color:var(--gold2)}
+
+/* ══════════════════════════════════════════════
+   MISC
+══════════════════════════════════════════════ */
+.ac-purple{background:var(--pur2);color:var(--pur)}
+.ac-teal{background:var(--teal2);color:var(--teal)}
+.ac-gold{background:var(--gold3);color:var(--gold)}
+.ac-rose{background:var(--rose2);color:var(--rose)}
+.ac-blue{background:var(--blue2);color:var(--blue)}
+.bar-purple{background:var(--pur)}.bar-teal{background:var(--teal)}
+.bar-gold{background:var(--gold)}.bar-rose{background:var(--rose)}.bar-blue{background:var(--blue)}
+
+#toast{
+  position:fixed;bottom:calc(var(--nav) + 14px);left:50%;transform:translateX(-50%) translateY(14px);
+  background:var(--bg3);border:.5px solid var(--bdr2);color:var(--text2);
+  padding:9px 20px;border-radius:20px;font-size:12px;letter-spacing:.04em;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:99;white-space:nowrap;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#admin-fab{
+  position:fixed;bottom:calc(var(--nav) + 14px);right:16px;z-index:40;
+  width:40px;height:40px;border-radius:50%;background:var(--bg2);
+  border:.5px solid var(--bdr2);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+}
+#admin-fab:hover{background:var(--gold3)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+  GATE
+═══════════════════════════════════════════ -->
+<div id="gate">
+  <div class="gc">
+    <!-- Animated CSS cat in gate -->
+    <div class="css-cat" style="animation:catbob 3s ease-in-out infinite" onclick="this.classList.toggle('happy')">
+      <div class="cat-body"></div>
+      <div class="cat-head">
+        <div class="cat-ear-l"></div>
+        <div class="cat-ear-r"></div>
+        <div class="cat-eyes">
+          <div class="cat-eye"></div>
+          <div class="cat-eye"></div>
+        </div>
+        <div class="cat-nose"></div>
+        <div class="cat-mouth"><div class="cat-mouth-l"></div><div class="cat-mouth-r"></div></div>
+        <div class="cat-whi">
+          <div class="whi-l1"></div><div class="whi-l2"></div><div class="whi-l3"></div>
+          <div class="whi-r1"></div><div class="whi-r2"></div><div class="whi-r3"></div>
+        </div>
+      </div>
+      <div class="cat-tail"></div>
+    </div>
+    <div class="g-title" id="gate-title">биомедики</div>
+    <div class="g-sub">место для своих</div>
+    <div id="gate-loading" style="font-size:11px;color:var(--text3);letter-spacing:.1em;margin:12px 0">загрузка...</div>
+    <div id="gate-form" style="display:none;width:100%;display:flex;flex-direction:column;gap:10px">
+      <input class="g-inp" id="inv-inp" placeholder="инвайт-код" autocomplete="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button class="g-btn" onclick="doLogin()">войти</button>
+      <div class="g-err" id="g-err"></div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:.06em;text-align:center">повторный вход — тот же код</div>
+    </div>
+    <div class="g-dots"><span></span><span></span><span></span></div>
+  </div>
+</div>
+
+<!-- name prompt overlay -->
+<div id="name-overlay" class="hidden">
+  <div class="no-box">
+    <div class="no-title">как тебя зовут?</div>
+    <input class="adm-inp" id="name-inp" placeholder="твоё имя" maxlength="20"
+      onkeydown="if(event.key==='Enter')confirmName()">
+    <button class="adm-btn" onclick="confirmName()">продолжить</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+  APP
+═══════════════════════════════════════════ -->
+<div id="app" class="hidden">
+  <main class="screens">
+
+    <!-- HOME -->
+    <section class="screen active" id="screen-home">
+      <div class="scr-scroll">
+        <div class="h-hdr">
+          <div>
+            <div class="greeting" id="greeting"></div>
+            <div class="dateline" id="dateline"></div>
+          </div>
+          <div class="hdr-cat" onclick="navigate('cat')">
+            <div class="mini-cat">
+              <div class="mini-body"></div>
+              <div class="mini-head">
+                <div class="mini-ear-l"></div><div class="mini-ear-r"></div>
+                <div class="mini-eye-l"></div><div class="mini-eye-r"></div>
+              </div>
+            </div>
+            <div class="mood-dot" id="mood-dot"></div>
+          </div>
+        </div>
+        <div class="wgt">
+          <div class="wgt-lbl">сдать скоро</div>
+          <div id="home-dl"></div>
+        </div>
+        <div class="wgt">
+          <div class="wgt-lbl">сегодня</div>
+          <div id="home-sched"></div>
+        </div>
+        <div class="sec-title" style="margin-top:4px">последнее в чате</div>
+        <div class="chat-prev" id="home-chat"></div>
+        <div class="quote-blk">
+          <div class="q-mark">"</div>
+          <div class="q-text" id="quote"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section class="screen" id="screen-schedule">
+      <div class="scr-scroll">
+        <div class="scr-hdr"><div class="scr-title">расписание</div></div>
+        <div class="wk-nav">
+          <button class="wk-btn" onclick="prevWeek()">
+            <svg viewBox="0 0 16 16" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+          </button>
+          <span class="wk-lbl" id="wk-lbl"></span>
+          <button class="wk-btn" onclick="nextWeek()">
+            <svg viewBox="0 0 16 16" width="16" height="16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="day-tabs" id="day-tabs"></div>
+        <div class="sched-list" id="sched-list"></div>
+      </div>
+    </section>
+
+    <!-- HOMEWORK -->
+    <section class="screen" id="screen-hw">
+      <div class="scr-scroll">
+        <div class="scr-hdr"><div class="scr-title">задания</div></div>
+        <div class="fil-row" id="hw-fils"></div>
+        <div class="hw-list" id="hw-list"></div>
+      </div>
+    </section>
+
+    <!-- CHAT -->
+    <section class="screen" id="screen-chat">
+      <div class="chat-hdr" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:var(--serif);font-size:20px;font-weight:300;color:var(--gold);letter-spacing:.06em">чат</div>
+        <div style="font-size:10px;color:var(--text3);letter-spacing:.08em" id="chat-online-count"></div>
+      </div>
+      <div class="chat-layout">
+        <div class="chat-main">
+          <div class="chat-msgs" id="chat-msgs"></div>
+          <div class="chat-inp-row">
+            <input class="chat-inp" id="chat-inp" placeholder="написать..."
+              onkeydown="if(event.key==='Enter')sendMsg()">
+            <button class="chat-send" onclick="sendMsg()">
+              <svg viewBox="0 0 20 20" width="17" height="17"><path d="M3 10L17 3l-4 7 4 7L3 10z" fill="currentColor"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="members-panel" id="members-panel"></div>
+      </div>
+    </section>
+
+    <!-- CAT -->
+    <section class="screen" id="screen-cat">
+      <div class="scr-scroll">
+        <div class="cat-scr">
+          <div class="cat-name">мурзик</div>
+          <!-- Big animated CSS cat -->
+          <div class="css-cat" id="big-cat" onclick="petCat()" style="width:160px;height:160px">
+            <div class="cat-body" style="width:108px;height:96px;bottom:0"></div>
+            <div class="cat-head" style="width:88px;height:80px;top:6px">
+              <div class="cat-ear-l" style="border-left-width:14px;border-right-width:14px;border-bottom-width:24px;top:-19px;left:8px"></div>
+              <div class="cat-ear-r" style="border-left-width:14px;border-right-width:14px;border-bottom-width:24px;top:-19px;right:8px"></div>
+              <div class="cat-eyes" style="top:26px;width:62px">
+                <div class="cat-eye" style="width:16px;height:20px"></div>
+                <div class="cat-eye" style="width:16px;height:20px"></div>
+              </div>
+              <div class="cat-nose" style="top:44px;border-left-width:6px;border-right-width:6px;border-top-width:7px"></div>
+              <div class="cat-mouth" style="top:52px;width:28px">
+                <div class="cat-mouth-l" style="width:11px;height:7px"></div>
+                <div class="cat-mouth-r" style="width:11px;height:7px"></div>
+              </div>
+              <div class="cat-whi" style="top:40px;width:110px">
+                <div class="whi-l1" style="width:30px"></div><div class="whi-l2" style="width:32px"></div><div class="whi-l3" style="width:30px"></div>
+                <div class="whi-r1" style="width:30px"></div><div class="whi-r2" style="width:32px"></div><div class="whi-r3" style="width:30px"></div>
+              </div>
+            </div>
+            <div class="cat-tail" style="right:-18px;width:50px;height:20px"></div>
+          </div>
+
+          <div class="cat-stats">
+            <div>
+              <div class="stat-lbl">настроение</div>
+              <div class="stat-bar"><div class="stat-fill" id="mood-fill" style="width:72%"></div></div>
+            </div>
+            <div>
+              <div class="stat-lbl">сытость</div>
+              <div class="stat-bar"><div class="stat-fill food" id="food-fill" style="width:55%"></div></div>
+            </div>
+          </div>
+          <div class="cat-acts">
+            <button class="cat-btn" onclick="petCat()">
+              <svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 17s-7-4.5-7-9a4 4 0 018 0 4 4 0 018 0c0 4.5-7 9-7 9z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+              погладить
+            </button>
+            <button class="cat-btn" onclick="feedCat()">
+              <svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="4" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M10 2v3M10 15v3M2 10h3M15 10h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              покормить
+            </button>
+          </div>
+          <div class="cat-msg-txt" id="cat-msg">мурр...</div>
+          <div class="cat-lore">
+            <div class="lore-ttl">философия мурзика</div>
+            <div class="lore-txt">Мурзик живёт в пространстве между лекциями и снами. Его настроение — зеркало группы. Когда все сдают задания вовремя, он мурлычет. Когда чат молчит три дня — он смотрит в окно и думает о вечном.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATERIALS -->
+    <section class="screen" id="screen-links">
+      <div class="scr-scroll">
+        <div class="scr-hdr" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="scr-title">материалы</div>
+        </div>
+        <div id="links-list"></div>
+        <div style="height:16px"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="screen" id="screen-profile">
+      <div class="scr-scroll prof-scr">
+        <div class="prof-hdr">
+          <div class="prof-avatar" id="prof-avatar">?</div>
+          <div class="prof-name-blk">
+            <div class="prof-name" id="prof-name-display">—</div>
+            <div class="prof-role-lbl" id="prof-role-display">участник</div>
+          </div>
+        </div>
+
+        <div class="prof-section">
+          <div class="prof-sec-ttl">изменить имя</div>
+          <input class="prof-inp" id="prof-name-inp" placeholder="твоё имя" maxlength="20">
+          <button class="save-btn" onclick="saveProfileName()">сохранить имя</button>
+        </div>
+
+        <div class="prof-section">
+          <div class="prof-sec-ttl">подгруппа</div>
+          <div class="sg-btns">
+            <button class="sg-btn" id="sg1-btn" onclick="setSubgroup(1)">подгруппа 1</button>
+            <button class="sg-btn" id="sg2-btn" onclick="setSubgroup(2)">подгруппа 2</button>
+          </div>
+          <div style="font-size:11px;color:var(--text3)">влияет на отображение расписания</div>
+        </div>
+
+        <div class="prof-section">
+          <div class="prof-sec-ttl">оформление</div>
+          <div class="prof-row" style="cursor:pointer" onclick="toggleTheme()">
+            <div class="prof-row-lbl">тема</div>
+            <div class="prof-row-val" id="theme-label">тёмная</div>
+          </div>
+          <div class="prof-row" style="cursor:pointer" onclick="requestNotifs()">
+            <div class="prof-row-lbl">уведомления</div>
+            <div class="prof-row-val" id="notif-label">включить</div>
+          </div>
+        </div>
+
+        <div class="prof-section">
+          <div class="prof-sec-ttl">информация</div>
+          <div class="prof-row">
+            <div class="prof-row-lbl">группа</div>
+            <div class="prof-row-val">биомедики</div>
+          </div>
+          <div class="prof-row">
+            <div class="prof-row-lbl">участников</div>
+            <div class="prof-row-val" id="prof-member-count">—</div>
+          </div>
+          <div class="prof-row">
+            <div class="prof-row-lbl">заданий выполнено</div>
+            <div class="prof-row-val" id="prof-done-count">—</div>
+          </div>
+          <div class="prof-row" style="cursor:pointer" onclick="navigate('cat')">
+            <div class="prof-row-lbl">мурзик</div>
+            <div class="prof-row-val" id="prof-cat-mood">→</div>
+          </div>
+        </div>
+
+        <button class="logout-btn" onclick="doLogout()">выйти из аккаунта</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bnav">
+    <button class="nav-btn active" onclick="navigate('home')" data-s="home">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      главная
+    </button>
+    <button class="nav-btn" onclick="navigate('schedule')" data-s="schedule">
+      <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      пары
+    </button>
+    <button class="nav-btn" onclick="navigate('hw')" data-s="hw">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      задания
+    </button>
+    <button class="nav-btn" onclick="navigate('chat')" data-s="chat">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      чат
+    </button>
+    <button class="nav-btn" onclick="navigate('links')" data-s="links">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      файлы
+    </button>
+    <button class="nav-btn" onclick="navigate('profile')" data-s="profile">
+      <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+      профиль
+    </button>
+  </nav>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="hidden">
+  <div class="adm-hdr">
+    <div class="adm-title">⚙ панель управления</div>
+    <button class="adm-close" onclick="closeAdmin()">✕</button>
+  </div>
+  <div class="adm-body">
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">инвайт-коды</div>
+      <div id="inv-list"></div>
+      <button class="adm-btn" style="margin-top:10px" onclick="genInvite()">+ создать инвайт</button>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">расписание — удалить пару</div>
+      <div id="adm-sched-list"></div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">добавить пару</div>
+      <div class="adm-form">
+        <select class="adm-inp" id="n-day">
+          <option value="0">Понедельник</option><option value="1">Вторник</option>
+          <option value="2">Среда</option><option value="3">Четверг</option>
+          <option value="4">Пятница</option><option value="5">Суббота</option>
+        </select>
+        <input class="adm-inp" id="n-time" placeholder="Время начала (9:00)" type="text">
+        <input class="adm-inp" id="n-end" placeholder="Время конца (10:30)" type="text">
+        <input class="adm-inp" id="n-subj" placeholder="Предмет" type="text">
+        <input class="adm-inp" id="n-room" placeholder="Аудитория" type="text">
+        <input class="adm-inp" id="n-link" placeholder="Ссылка Zoom (если онлайн)" type="text">
+        <select class="adm-inp" id="n-type">
+          <option value="лекция">Лекция</option>
+          <option value="семинар">Семинар</option>
+          <option value="лаба">Лаба</option>
+        </select>
+        <select class="adm-inp" id="n-sg">
+          <option value="все">Все (общая)</option>
+          <option value="подгруппа 1">Подгруппа 1</option>
+          <option value="подгруппа 2">Подгруппа 2</option>
+        </select>
+        <select class="adm-inp" id="n-color">
+          <option value="purple">Фиолетовый</option><option value="teal">Бирюзовый</option>
+          <option value="gold">Золотой</option><option value="rose">Розовый</option><option value="blue">Синий</option>
+        </select>
+        <button class="adm-btn" onclick="addLesson()">добавить пару</button>
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">задания — удалить</div>
+      <div id="adm-hw-list"></div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">добавить задание</div>
+      <div class="adm-form">
+        <input class="adm-inp" id="n-htitle" placeholder="Название задания" type="text">
+        <input class="adm-inp" id="n-hsubj" placeholder="Предмет" type="text">
+        <input class="adm-inp" id="n-hdue" type="date" style="color-scheme:dark">
+        <select class="adm-inp" id="n-hurg">
+          <option value="high">Срочно</option><option value="mid">Обычное</option><option value="low">Не горит</option>
+        </select>
+        <button class="adm-btn" onclick="addHw()">добавить задание</button>
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">цитата дня</div>
+      <div class="adm-form">
+        <input class="adm-inp" id="n-quote" placeholder="Текст цитаты" type="text">
+        <button class="adm-btn" onclick="setQuote()">сохранить</button>
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">материалы — удалить</div>
+      <div id="adm-links-list"></div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">добавить материал</div>
+      <div class="adm-form">
+        <input class="adm-inp" id="n-ltitle" placeholder="Название (Конспект по анатомии)" type="text">
+        <input class="adm-inp" id="n-lsubj" placeholder="Предмет" type="text">
+        <input class="adm-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
+        <select class="adm-inp" id="n-ltype">
+          <option value="конспект">Конспект</option>
+          <option value="задачи">Задачи</option>
+          <option value="презентация">Презентация</option>
+          <option value="книга">Книга</option>
+          <option value="другое">Другое</option>
+        </select>
+        <button class="adm-btn" onclick="addLink()">добавить материал</button>
+      </div>
+    </div>
+    <div class="adm-sec">
+      <div class="adm-sec-ttl">участники</div>
+      <div id="mem-list"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="text/javascript">
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+const SK = 'sg304v3';
+const ADMIN_CODE = 'BIO-7X4K-MED9';
+
+const DEFAULTS = {
+  invites:[
+    {code:'PQRS-7842',used:false,usedBy:null},
+    {code:'MNOP-3391',used:false,usedBy:null},
+    {code:'WXYZ-5520',used:false,usedBy:null},
+  ],
+  members:[{name:'Саша',role:'admin',code:ADMIN_CODE,subgroup:0}],
+  schedule:[],
+  homework:[],
+  chat:{
+    general:[],math:[],history:[],philosophy:[],programming:[],
+  },
+  quote:'Всё, что мы знаем — это то, что мы ничего не знаем. — Сократ',
+  cat:{mood:72,food:55,lastFed:null,lastPet:null},
+  currentUser:null,
+  hwNextId:1,
+};
+
+const QUOTES=[
+  'Всё, что мы знаем — это то, что мы ничего не знаем. — Сократ',
+  'Красота спасёт мир. — Достоевский',
+  'Существование предшествует сущности. — Сартр',
+  'Человек — это верёвка над пропастью. — Ницше',
+  'Я мыслю, следовательно, существую. — Декарт',
+  'Всё течёт, всё меняется. — Гераклит',
+  'Учись так, словно тебе всегда будет мало.',
+];
+
+const DAYS_RU=['понедельник','вторник','среда','четверг','пятница','суббота','воскресенье'];
+const DAYS_S=['пн','вт','ср','чт','пт','сб','вс'];
+const MON_RU=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const CHANNELS={general:'общий',math:'матан',history:'история',philosophy:'философия',programming:'программирование'};
+const CAT_HAPPY=['мурр... всё хорошо','жизнь прекрасна','мурмурмур','тепло и уютно'];
+const CAT_NEU=['смотрит в окно','думает о своём','моргает медленно'];
+const CAT_SAD=['где все?','давно никто...','мяу?','одиноко...'];
+const CAT_FED=['спасибо за еду!','вкусно...','мммм','ещё?'];
+const CAT_PET=['мррр...','чуть громче мурчит','щурится от удовольствия'];
+
+function loadApp(){
+  try{
+    const r=localStorage.getItem(SK);
+    if(r){
+      const p=JSON.parse(r);
+      return mergeDeep(JSON.parse(JSON.stringify(DEFAULTS)),p);
+    }
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULTS));
+}
+function mergeDeep(d,s){
+  if(!s||typeof s!=='object') return d;
+  const o=Object.assign({},d);
+  for(const k in s){
+    if(Array.isArray(d[k])&&Array.isArray(s[k])) o[k]=s[k];
+    else if(d[k]&&typeof d[k]==='object'&&typeof s[k]==='object') o[k]=mergeDeep(d[k],s[k]);
+    else o[k]=s[k];
+  }
+  return o;
+}
+const D=loadApp();
+const save=()=>localStorage.setItem(SK,JSON.stringify(D));
+
+// ══════════════════════════════════════════════
+// AUTH / GATE
+// ══════════════════════════════════════════════
+let pendingInviteCode=null;
+
+function doLogin(){
+  const raw = document.getElementById('inv-inp').value.trim().toUpperCase();
+  const err = document.getElementById('g-err');
+
+  // Admin — always works, no Firebase needed
+  if(raw === ADMIN_CODE){
+    const m = D.members.find(x=>x.role==='admin') || {name:'Саша',role:'admin',subgroup:0};
+    D.currentUser = {name:m.name, role:'admin', subgroup:m.subgroup||0};
+    save(); launchApp(); return;
+  }
+
+  // Merge Firebase + local invites
+  const allInvites = fbInvites.length ? fbInvites : D.invites;
+
+  // Re-login with used invite
+  const usedInv = allInvites.find(i => i.code===raw && i.used);
+  if(usedInv){
+    const member = D.members.find(m => m.code===raw);
+    if(member){
+      D.currentUser = {name:member.name, role:member.role||'member', subgroup:member.subgroup||0};
+      save(); launchApp(); return;
+    }
+  }
+
+  // Fresh unused invite
+  const inv = allInvites.find(i => i.code===raw && !i.used);
+  if(inv){
+    pendingInviteCode = raw;
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('name-overlay').classList.remove('hidden');
+    setTimeout(()=>document.getElementById('name-inp').focus(), 50);
+    return;
+  }
+
+  // If Firebase hasn't loaded yet, show different message
+  if(fbInvites.length === 0 && D.invites.length === 0){
+    err.textContent = 'подождите, идёт загрузка...';
+    setTimeout(()=>err.textContent='', 2000);
+    return;
+  }
+
+  err.textContent = 'неверный код';
+  document.getElementById('inv-inp').style.borderColor = 'rgba(196,116,116,.6)';
+  setTimeout(()=>{ err.textContent=''; document.getElementById('inv-inp').style.borderColor=''; }, 2500);
+}
+
+async function confirmName(){
+  const name=(document.getElementById('name-inp').value||'').trim().slice(0,20);
+  if(!name) return;
+  // Mark invite used in Firebase
+  const allInvites = fbInvites.length ? fbInvites : D.invites;
+  const inv = allInvites.find(i=>i.code===pendingInviteCode);
+  if(inv){
+    inv.used=true; inv.usedBy=name;
+    if(inv._key){
+      try { await fbSet(`invites/${inv._key}`, {code:inv.code,used:true,usedBy:name}); } catch(e){}
+    }
+  }
+  let member=D.members.find(m=>m.name===name);
+  if(!member){member={name,role:'member',code:pendingInviteCode,subgroup:0};D.members.push(member);}
+  D.currentUser={name,role:'member',subgroup:member.subgroup||0};
+  save();
+  document.getElementById('name-overlay').classList.add('hidden');
+  launchApp();
+}
+
+function launchApp(){
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('name-overlay').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  renderAll();
+  renderProfile();
+  fbInit();
+  if(D.currentUser?.role==='admin') addAdminFab();
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+let curScreen='home',curChat='general',curDay=todayIdx(),curWkOff=0,hwFil='all';
+
+function todayIdx(){
+  const d=new Date().getDay();
+  return d===0?6:d-1;
+}
+
+function navigate(s){
+  curScreen=s;
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
+  const el=document.getElementById('screen-'+s);
+  if(el) el.classList.add('active');
+  if(s==='home') renderHome();
+  if(s==='schedule') renderSchedule();
+  if(s==='hw') renderHw();
+  if(s==='chat'){renderChat();renderMembersPanel();}
+  if(s==='links') renderLinks();
+  if(s==='cat') renderCat();
+  if(s==='profile'){renderProfile();updateNotifLabel();}
+}
+
+function renderAll(){
+  renderHome();renderSchedule();renderHw();renderChat();renderLinks();renderCat();renderMembersPanel();
+}
+
+function addAdminFab(){
+  if(document.getElementById('admin-fab')) return;
+  const b=document.createElement('button');
+  b.id='admin-fab';
+  b.title='админка';
+  b.innerHTML=`<svg viewBox="0 0 20 20" width="18" height="18"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.5L10 14.8l-4.9 2.4.9-5.5L2 7.8l5.5-.8L10 2z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>`;
+  b.onclick=openAdmin;
+  document.body.appendChild(b);
+}
+
+// ══════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════
+function renderHome(){
+  const h=new Date().getHours();
+  const g=h<6?'не спишь?':h<12?'доброе утро':h<17?'добрый день':'добрый вечер';
+  document.getElementById('greeting').textContent=g;
+  const n=new Date();
+  document.getElementById('dateline').textContent=`${DAYS_RU[n.getDay()===0?6:n.getDay()-1]}, ${n.getDate()} ${MON_RU[n.getMonth()]}`;
+  // deadlines
+  const dl=document.getElementById('home-dl');
+  const items=D.homework.filter(h=>!h.doneBy.includes(D.currentUser?.name));
+  dl.innerHTML=items.length
+    ?items.slice(0,4).map(h=>`<div class="dl-item"><div class="dl-dot" style="background:${urgC(h.urgency)}"></div><div class="dl-name">${h.title}</div><div class="dl-due">${h.due}</div></div>`).join('')
+    :`<div style="color:var(--text3);font-size:12px;padding:4px 0">всё сделано ✓</div>`;
+  // schedule
+  const sd=document.getElementById('home-sched');
+  const ls=D.schedule.filter(l=>l.day===todayIdx()).sort((a,b)=>a.time.localeCompare(b.time));
+  sd.innerHTML=ls.length
+    ?ls.map(l=>`<div class="si-home"><div class="si-t">${l.time}</div><div class="si-bar ac-${l.color}">${l.subject}</div></div>`).join('')
+    :`<div style="color:var(--text3);font-size:12px">пар нет — отдыхаем</div>`;
+  // chat preview
+  const cp=document.getElementById('home-chat');
+  const msgs=D.chat.general.slice(-3);
+  cp.innerHTML=msgs.length
+    ?msgs.map(m=>`<div class="prev-row"><div class="prev-au">${m.author}</div><div class="prev-tx">${esc(m.text)}</div></div>`).join('')
+    :`<div style="color:var(--text3);font-size:12px">тишина...</div>`;
+  // quote
+  document.getElementById('quote').textContent=D.quote||QUOTES[new Date().getDay()%QUOTES.length];
+  // mood dot
+  document.getElementById('mood-dot').style.background=D.cat.mood>60?'var(--grn)':D.cat.mood>30?'var(--yel)':'var(--red)';
+}
+
+// ══════════════════════════════════════════════
+// SCHEDULE
+// ══════════════════════════════════════════════
+function getMonday(off=0){
+  const d=new Date();const day=d.getDay()||7;
+  d.setDate(d.getDate()-day+1+off*7);d.setHours(0,0,0,0);return d;
+}
+function renderSchedule(){
+  const mon=getMonday(curWkOff);
+  const fri=new Date(mon);fri.setDate(fri.getDate()+4);
+  document.getElementById('wk-lbl').textContent=`${mon.getDate()} — ${fri.getDate()} ${MON_RU[fri.getMonth()]}`;
+  // day tabs
+  const ti=todayIdx();
+  document.getElementById('day-tabs').innerHTML=DAYS_S.slice(0,6).map((d,i)=>{
+    const dt=new Date(mon);dt.setDate(dt.getDate()+i);
+    const dot=curWkOff===0&&i===ti?' ·':'';
+    return `<button class="day-tab ${i===curDay?'active':''}" onclick="selDay(${i})">${d} ${dt.getDate()}${dot}</button>`;
+  }).join('');
+  renderLessons();
+}
+function prevWeek(){curWkOff--;renderSchedule()}
+function nextWeek(){curWkOff++;renderSchedule()}
+function selDay(i){curDay=i;renderSchedule()}
+function renderLessons(){
+  const el=document.getElementById('sched-list');
+  const userSg=D.currentUser?.subgroup||0;
+  let ls=D.schedule.filter(l=>l.day===curDay);
+  if(userSg>0){
+    ls=ls.filter(l=>!l.subgroup||l.subgroup==='все'||l.subgroup===`подгруппа ${userSg}`);
+  }
+  ls=ls.sort((a,b)=>{
+    const [ah,am]=a.time.split(':').map(Number);
+    const [bh,bm]=b.time.split(':').map(Number);
+    return (ah*60+am)-(bh*60+bm);
+  });
+  if(!ls.length){el.innerHTML='<div class="no-les">в этот день пар нет<em>время для себя</em></div>';return}
+  el.innerHTML=ls.map(l=>{
+    const gi=D.schedule.indexOf(l);
+    const sgLabel=l.subgroup&&l.subgroup!=='все'
+      ?`<span class="les-sg">${l.subgroup}</span>`
+      :`<span class="les-type все">общая</span>`;
+    return `<div class="les-card">
+      <div class="les-tc"><div class="les-tm">${l.time}</div><div class="les-end">${l.end||''}</div></div>
+      <div class="les-acc bar-${l.color}" style="height:52px"></div>
+      <div class="les-body">
+        <div class="les-subj">${l.subject}</div>
+        <div class="les-room">${l.room}</div>
+        <div class="les-badges">
+          ${l.type?`<span class="les-type ${l.type}">${l.type}</span>`:''}
+          ${sgLabel}
+        </div>
+        ${l.link?`<a href="${l.link}" target="_blank" class="les-link">
+          <svg viewBox="0 0 14 14" width="11" height="11"><path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V8M9 1h4v4M13 1L6 8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+          подключиться</a>`:''}
+      </div>
+      ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="delLessonByIdx(${gi})">×</button>`:''}
+    </div>`;
+  }).join('');
+}
+function delLessonByIdx(idx){
+  const lesson = D.schedule[idx];
+  if (!lesson) return;
+  fbDelLesson(lesson._key, idx);
+}
+
+// ══════════════════════════════════════════════
+// HOMEWORK
+// ══════════════════════════════════════════════
+function urgC(u){return u==='high'?'var(--red)':u==='mid'?'var(--yel)':'var(--grn)'}
+function renderHw(){
+  const subjs=['all',...new Set(D.homework.map(h=>h.subject))];
+  document.getElementById('hw-fils').innerHTML=subjs.map(s=>`<button class="fil-btn ${hwFil===s?'active':''}" onclick="setFil('${s}')">${s==='all'?'все':s}</button>`).join('');
+  const items=hwFil==='all'?D.homework:D.homework.filter(h=>h.subject===hwFil);
+  const el=document.getElementById('hw-list');
+  if(!items.length){el.innerHTML='<div class="no-les">заданий нет</div>';return}
+  el.innerHTML=items.map(hw=>{
+    const done=hw.doneBy.includes(D.currentUser?.name);
+    return `<div class="hw-card ${done?'done':''}" onclick="toggleHw(${hw.id})">
+      <div class="hw-chk">${done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
+      <div class="hw-body">
+        <div class="hw-ttl">${hw.title}</div>
+        <div class="hw-meta"><div class="hw-subj">${hw.subject}</div><div class="hw-badge ${urgencyFromDate(hw.dueDate)||hw.urgency}">${hw.dueDate?formatDue(hw.dueDate):hw.due}</div></div>
+        <div class="hw-cnt">${hw.doneBy.length} из ${D.members.length} сделали</div>
+      </div>
+      ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="event.stopPropagation();delHw(${hw.id})">×</button>`:''}
+    </div>`;
+  }).join('');
+}
+function setFil(f){hwFil=f;renderHw()}
+function toggleHw(id){
+  const hw=D.homework.find(h=>h.id===id);
+  if(!hw||!D.currentUser) return;
+  fbToggleHw(hw);
+}
+function delHw(id){D.homework=D.homework.filter(h=>h.id!==id);save();renderHw()}
+
+// ══════════════════════════════════════════════
+// CHAT
+// ══════════════════════════════════════════════
+function renderChat(){
+  renderMsgs();
+  renderMembersPanel();
+  const cnt = document.getElementById('chat-online-count');
+  if (cnt) cnt.textContent = `${D.members.length} участников`;
+}
+function renderMsgs(){
+  const el = document.getElementById('chat-msgs');
+  if (!el) return;
+  const msgs = fbMessages.length ? fbMessages : (D.chat.general || []);
+  if (!msgs.length) {
+    el.innerHTML = '<div class="chat-empty">начните разговор...</div>';
+    return;
+  }
+  const wasAtBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 60;
+  el.innerHTML = '<div style="flex:1"></div>' + msgs.map(m => {
+    const me = m.author === D.currentUser?.name;
+    return `<div class="msg-grp ${me ? 'me' : ''}">
+      ${!me ? `<div class="msg-au">${esc(m.author)}</div>` : ''}
+      <div class="msg-bbl">${esc(m.text)}</div>
+      <div class="msg-time">${m.time}</div>
+    </div>`;
+  }).join('');
+  if (wasAtBottom || msgs[msgs.length-1]?.author === D.currentUser?.name) {
+    el.scrollTop = el.scrollHeight;
+  }
+}
+function sendMsg(){
+  const inp = document.getElementById('chat-inp');
+  const txt = inp.value.trim();
+  if (!txt) return;
+  inp.value = '';
+  D.cat.mood = Math.min(100, D.cat.mood + 1);
+  save();
+  fbSend(D.currentUser?.name || 'Аноним', txt);
+  renderHome();
+}
+
+// ══════════════════════════════════════════════
+// CAT
+// ══════════════════════════════════════════════
+function renderCat(){
+  document.getElementById('mood-fill').style.width=D.cat.mood+'%';
+  document.getElementById('food-fill').style.width=D.cat.food+'%';
+  const msgs=D.cat.mood>60?CAT_HAPPY:D.cat.mood>30?CAT_NEU:CAT_SAD;
+  document.getElementById('cat-msg').textContent=rnd(msgs);
+  updateBigCat();
+}
+function updateBigCat(){
+  const bc=document.getElementById('big-cat');
+  if(D.cat.mood>60) bc.classList.add('happy'); else bc.classList.remove('happy');
+}
+function petCat(){
+  D.cat.mood=Math.min(100,D.cat.mood+10);D.cat.lastPet=Date.now();
+  save();showCatMsg(CAT_PET);
+  const bc=document.getElementById('big-cat');
+  bc.classList.add('purring');setTimeout(()=>bc.classList.remove('purring'),1500);
+  updateBigCat();renderHome();
+}
+function feedCat(){
+  D.cat.food=Math.min(100,D.cat.food+22);D.cat.mood=Math.min(100,D.cat.mood+5);D.cat.lastFed=Date.now();
+  save();showCatMsg(CAT_FED);updateBigCat();
+}
+function showCatMsg(arr){
+  const el=document.getElementById('cat-msg');
+  el.style.opacity='0';
+  setTimeout(()=>{el.textContent=rnd(arr);el.style.opacity='1'},200);
+}
+
+// ══════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════
+function openAdmin(){document.getElementById('admin').classList.remove('hidden');renderAdmin()}
+function closeAdmin(){document.getElementById('admin').classList.add('hidden')}
+function renderAdmin(){
+  renderInviteList();
+  document.getElementById('mem-list').innerHTML=D.members.map(m=>`
+    <div class="mem-item"><div class="mem-name">${m.name}</div><div class="mem-role ${m.role}">${m.role==='admin'?'администратор':'участник'}${m.subgroup?` · пг${m.subgroup}`:''}</div></div>`).join('');
+  renderAdminLists();
+}
+function renderAdminLists(){
+  const sl=document.getElementById('adm-sched-list');
+  if(sl){
+    const sorted=[...D.schedule].sort((a,b)=>a.day-b.day||a.time.localeCompare(b.time));
+    sl.innerHTML=sorted.length?sorted.map(l=>{
+      const gi=D.schedule.indexOf(l);
+      return `<div class="adm-les-item">
+        <div class="adm-item-info">
+          <div class="adm-item-name">${l.subject}</div>
+          <div class="adm-item-meta">${DAYS_RU[l.day]}, ${l.time}${l.end?'–'+l.end:''} · ${l.room}${l.type?' · '+l.type:''}${l.subgroup?' · '+l.subgroup:''}</div>
+        </div>
+        <button class="inv-del" onclick="delLessonByIdx(${gi})">×</button>
+      </div>`;
+    }).join(''):'<div style="color:var(--text3);font-size:12px;padding:8px 0">расписание пусто</div>';
+  }
+  const hl=document.getElementById('adm-hw-list');
+  if(hl){
+    hl.innerHTML=D.homework.length?D.homework.map(hw=>`
+      <div class="adm-hw-item">
+        <div class="adm-item-info">
+          <div class="adm-item-name">${hw.title}</div>
+          <div class="adm-item-meta">${hw.subject} · ${hw.due}</div>
+        </div>
+        <button class="inv-del" onclick="delHwAdmin(${hw.id})">×</button>
+      </div>`).join(''):'<div style="color:var(--text3);font-size:12px;padding:8px 0">заданий нет</div>';
+  }
+  const ll = document.getElementById('adm-links-list');
+  if(ll){
+    ll.innerHTML = fbLinks.length ? fbLinks.map(l=>`
+      <div class="adm-les-item">
+        <div class="adm-item-info">
+          <div class="adm-item-name">${esc(l.title)}</div>
+          <div class="adm-item-meta">${l.subject||'—'} · ${l.type}</div>
+        </div>
+        <button class="inv-del" onclick="fbDelLink('${l._key}')">×</button>
+      </div>`).join('')
+      :'<div style="color:var(--text3);font-size:12px;padding:8px 0">материалов нет</div>';
+  }
+}
+function delHwAdmin(id){
+  const hw = D.homework.find(h=>h.id===id);
+  if (hw) fbDelHw(hw._key);
+}
+// ── INVITES via Firebase ──
+let fbInvites = [];
+
+async function fbPollInvites() {
+  try {
+    const data = await fbGet('invites');
+    const arr = data ? Object.entries(data).map(([k,v]) => ({...v, _key:k})) : [];
+    if (JSON.stringify(arr) !== JSON.stringify(fbInvites)) {
+      fbInvites = arr;
+      D.invites = arr;
+      if (document.getElementById('inv-list')) renderInviteList();
+    }
+  } catch(e) {}
+  // Always show the gate form after first attempt (success or fail)
+  const loading = document.getElementById('gate-loading');
+  const form = document.getElementById('gate-form');
+  if (loading) loading.style.display = 'none';
+  if (form) { form.style.display = 'flex'; setTimeout(()=>document.getElementById('inv-inp')?.focus(), 50); }
+}
+
+async function genInvite() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const p = n => Array.from({length:n}, () => c[Math.floor(Math.random()*c.length)]).join('');
+  const code = `${p(4)}-${p(4)}`;
+  const inv = {code, used:false, usedBy:null};
+  toast('создаю инвайт...');
+  try {
+    const res = await fbPost('invites', inv);
+    console.log('Firebase invite response:', res);
+    if(!res || !res.name) throw new Error('no key returned: ' + JSON.stringify(res));
+    inv._key = res.name;
+    fbInvites.push(inv);
+    D.invites = [...fbInvites];
+    renderAdmin();
+    toast('создан: ' + code);
+  } catch(e) {
+    console.error('genInvite Firebase error:', e);
+    toast('⚠ ошибка Firebase: ' + e.message);
+    // fallback: save locally so at least admin can see it
+    D.invites.push(inv); save(); renderAdmin();
+  }
+}
+
+async function delInvite(i) {
+  const inv = fbInvites[i] || D.invites[i];
+  if (inv?._key) {
+    try { await fbDelete(`invites/${inv._key}`); } catch(e) {}
+  }
+  fbInvites = fbInvites.filter((_,idx) => idx !== i);
+  D.invites = D.invites.filter((_,idx) => idx !== i);
+  save(); renderAdmin();
+}
+
+function renderInviteList() {
+  const invites = fbInvites.length ? fbInvites : D.invites;
+  document.getElementById('inv-list').innerHTML = invites.map((inv,i) => `
+    <div class="inv-item">
+      <div class="inv-code">${inv.code}</div>
+      <div class="inv-stat">${inv.used ? `использован · ${inv.usedBy}` : 'свободен'}</div>
+      <button class="inv-del" onclick="delInvite(${i})" title="удалить">×</button>
+    </div>`).join('') || '<div style="color:var(--text3);font-size:12px;padding:8px 0">нет инвайтов</div>';
+}
+function addLesson(){
+  const day=+v('n-day'),time=v('n-time').trim(),end=v('n-end').trim(),subject=v('n-subj').trim();
+  const room=v('n-room').trim(),link=v('n-link').trim(),color=v('n-color');
+  const type=v('n-type'),subgroup=v('n-sg');
+  if(!time||!subject||!room){toast('заполни все поля');return}
+  const endTime=end||calcEnd(time);
+  const lesson={day,time,end:endTime,subject,room,color,link,type,subgroup};
+  ['n-time','n-end','n-subj','n-room','n-link'].forEach(id=>document.getElementById(id).value='');
+  fbAddLesson(lesson);
+}
+function calcEnd(time){
+  const[h,m]=(time.split(':').map(Number));
+  const em=m+30,eh=h+1+Math.floor(em/60);
+  return `${eh}:${String(em%60).padStart(2,'0')}`;
+}
+function addHw(){
+  const title=v('n-htitle').trim(),subject=v('n-hsubj').trim();
+  const dueDate=v('n-hdue'),urgency=v('n-hurg');
+  if(!title||!subject||!dueDate){toast('заполни все поля');return}
+  const hw={id:D.hwNextId++,title,subject,dueDate,due:formatDue(dueDate),urgency:urgency||urgencyFromDate(dueDate),doneBy:[]};
+  ['n-htitle','n-hsubj'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('n-hdue').value='';
+  fbAddHw(hw);
+}
+function setQuote(){
+  const q=v('n-quote').trim();if(!q)return;
+  document.getElementById('n-quote').value='';
+  fbSetQuote(q);
+}
+
+// ══════════════════════════════════════════════
+// PROFILE
+// ══════════════════════════════════════════════
+function renderProfile(){
+  const u=D.currentUser;if(!u)return;
+  document.getElementById('prof-avatar').textContent=u.name?u.name[0].toUpperCase():'?';
+  document.getElementById('prof-name-display').textContent=u.name||'—';
+  document.getElementById('prof-role-display').textContent=u.role==='admin'?'администратор':'участник';
+  document.getElementById('prof-name-inp').value=u.name||'';
+  document.getElementById('prof-member-count').textContent=D.members.length;
+  const done=D.homework.reduce((s,h)=>s+(h.doneBy.includes(u.name)?1:0),0);
+  document.getElementById('prof-done-count').textContent=done;
+  const sg=u.subgroup||0;
+  document.getElementById('sg1-btn').classList.toggle('active',sg===1);
+  document.getElementById('sg2-btn').classList.toggle('active',sg===2);
+  const mood=D.cat.mood;
+  const moodEl=document.getElementById('prof-cat-mood');
+  if(moodEl) moodEl.textContent=mood>60?'доволен 🐱':mood>30?'задумчив...':'скучает →';
+  updateThemeLabel();
+  updateNotifLabel();
+}
+function saveProfileName(){
+  const name=document.getElementById('prof-name-inp').value.trim().slice(0,20);
+  if(!name){toast('введи имя');return}
+  const oldName=D.currentUser.name;
+  D.currentUser.name=name;
+  const m=D.members.find(x=>x.name===oldName);
+  if(m)m.name=name;
+  save();renderProfile();renderHome();toast('имя обновлено');
+}
+function setSubgroup(n){
+  D.currentUser.subgroup=D.currentUser.subgroup===n?0:n;
+  const m=D.members.find(x=>x.name===D.currentUser.name);
+  if(m)m.subgroup=D.currentUser.subgroup;
+  save();renderProfile();renderSchedule();toast(D.currentUser.subgroup?`подгруппа ${D.currentUser.subgroup}`:'подгруппа снята');
+}
+function doLogout(){
+  D.currentUser=null;save();
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('gate').classList.remove('hidden');
+  document.getElementById('inv-inp').value='';
+  const fab=document.getElementById('admin-fab');if(fab)fab.remove();
+}
+
+// ══════════════════════════════════════════════
+// MEMBERS PANEL IN CHAT
+// ══════════════════════════════════════════════
+function renderMembersPanel(){
+  const el=document.getElementById('members-panel');
+  if(!el)return;
+  el.innerHTML=`<div class="mp-ttl">участники</div>`+
+    D.members.map(m=>`
+      <div class="mp-item">
+        <div class="mp-dot" style="background:${m.role==='admin'?'var(--gold)':'var(--grn)'}"></div>
+        <div>
+          <div class="mp-name">${m.name}</div>
+          ${m.subgroup?`<div class="mp-sub">пг${m.subgroup}</div>`:''}
+        </div>
+      </div>`).join('');
+}
+
+// ══════════════════════════════════════════════
+// FIREBASE — синхронизация всего
+// ══════════════════════════════════════════════
+const FB_URL = 'https://biomed-chat-3df3f-default-rtdb.firebaseio.com';
+
+let fbMessages = [];
+let fbSchedule = [];
+let fbHomework = [];
+let fbQuote    = '';
+
+// ── helpers ──
+async function fbGet(path) {
+  const r = await fetch(`${FB_URL}/${path}.json`);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+async function fbSet(path, data) {
+  await fetch(`${FB_URL}/${path}.json`, {
+    method: 'PUT',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+}
+async function fbPost(path, data) {
+  const r = await fetch(`${FB_URL}/${path}.json`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(data)
+  });
+  return r.json(); // {name: key}
+}
+async function fbDelete(path) {
+  await fetch(`${FB_URL}/${path}.json`, { method: 'DELETE' });
+}
+
+function nowTime() {
+  const n = new Date();
+  return `${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;
+}
+
+// ── poll all data every 4s ──
+function fbInit() {
+  fbPollAll();
+  setInterval(fbPollAll, 4000);
+}
+
+async function fbPollAll() {
+  await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites()]);
+}
+
+// ── CHAT ──
+async function fbPollChat() {
+  try {
+    const data = await fbGet('chat');
+    const arr = data ? Object.values(data).sort((a,b) => a.ts - b.ts) : [];
+    if (JSON.stringify(arr) !== JSON.stringify(fbMessages)) {
+      const oldLen = fbMessages.length;
+      fbMessages = arr;
+      // notify if new message from someone else and not on chat screen
+      if(arr.length > oldLen && curScreen !== 'chat') {
+        const last = arr[arr.length-1];
+        if(last.author !== D.currentUser?.name) {
+          notifyIfNeeded(`💬 ${last.author}`, last.text);
+        }
+      }
+      if (curScreen === 'chat') renderMsgs();
+      renderHome();
+    }
+  } catch(e) { fbMessages = D.chat.general || []; }
+}
+
+async function fbSend(author, text) {
+  const msg = { author, text, time: nowTime(), ts: Date.now() };
+  fbMessages.push(msg); // optimistic
+  renderMsgs();
+  try {
+    await fbPost('chat', msg);
+  } catch(e) {
+    if (!D.chat.general) D.chat.general = [];
+    D.chat.general.push(msg);
+    save();
+  }
+}
+
+// ── SCHEDULE ──
+async function fbPollSchedule() {
+  try {
+    const data = await fbGet('schedule');
+    // data is object {key: lesson} or null
+    const arr = data
+      ? Object.entries(data).map(([k,v]) => ({...v, _key: k}))
+      : [];
+    if (JSON.stringify(arr) !== JSON.stringify(fbSchedule)) {
+      fbSchedule = arr;
+      D.schedule = arr; // keep local in sync for rendering
+      if (curScreen === 'schedule') renderSchedule();
+      renderHome();
+    }
+  } catch(e) { /* keep local */ }
+}
+
+async function fbAddLesson(lesson) {
+  try {
+    const res = await fbPost('schedule', lesson);
+    lesson._key = res.name;
+    fbSchedule.push(lesson);
+    D.schedule = [...fbSchedule];
+    renderSchedule(); renderAdminLists();
+    toast('пара добавлена');
+  } catch(e) {
+    D.schedule.push(lesson); save();
+    renderSchedule(); renderAdminLists();
+    toast('пара добавлена (офлайн)');
+  }
+}
+
+async function fbDelLesson(key, localIdx) {
+  // remove locally immediately
+  D.schedule.splice(localIdx, 1);
+  fbSchedule = fbSchedule.filter(l => l._key !== key);
+  renderSchedule(); renderAdminLists();
+  try {
+    await fbDelete(`schedule/${key}`);
+  } catch(e) { save(); }
+}
+
+// ── HOMEWORK ──
+async function fbPollHomework() {
+  try {
+    const data = await fbGet('homework');
+    const arr = data
+      ? Object.entries(data).map(([k,v]) => ({...v, _key: k}))
+      : [];
+    if (JSON.stringify(arr) !== JSON.stringify(fbHomework)) {
+      // detect truly new items (not just doneBy changes)
+      const oldIds = new Set(fbHomework.map(h=>h._key));
+      const newItems = arr.filter(h=>!oldIds.has(h._key));
+      newItems.forEach(h=>{
+        notifyIfNeeded('📚 Новое задание', `${h.title} · ${h.dueDate?formatDue(h.dueDate):h.due}`);
+      });
+      fbHomework = arr;
+      D.homework = arr;
+      if (curScreen === 'hw') renderHw();
+      renderHome();
+    }
+  } catch(e) { /* keep local */ }
+}
+
+async function fbAddHw(hw) {
+  try {
+    const res = await fbPost('homework', hw);
+    hw._key = res.name;
+    fbHomework.push(hw);
+    D.homework = [...fbHomework];
+    renderHw(); renderHome(); renderAdminLists();
+    toast('задание добавлено');
+  } catch(e) {
+    D.homework.push(hw); save();
+    renderHw(); renderHome(); renderAdminLists();
+    toast('задание добавлено (офлайн)');
+  }
+}
+
+async function fbDelHw(key) {
+  D.homework = D.homework.filter(h => h._key !== key);
+  fbHomework = fbHomework.filter(h => h._key !== key);
+  renderHw(); renderHome(); renderAdminLists();
+  try { await fbDelete(`homework/${key}`); } catch(e) { save(); }
+}
+
+async function fbToggleHw(hw) {
+  const name = D.currentUser?.name;
+  if (!name) return;
+  const doneBy = hw.doneBy || [];
+  const i = doneBy.indexOf(name);
+  if (i > -1) doneBy.splice(i, 1);
+  else { doneBy.push(name); D.cat.mood = Math.min(100, D.cat.mood+4); toast('задание отмечено ✓'); }
+  hw.doneBy = doneBy;
+  save();
+  renderHw(); renderHome();
+  if (hw._key) {
+    try { await fbSet(`homework/${hw._key}/doneBy`, doneBy); } catch(e) {}
+  }
+}
+
+// ── QUOTE ──
+async function fbPollQuote() {
+  try {
+    const data = await fbGet('quote');
+    if (data && data !== fbQuote) {
+      fbQuote = data;
+      D.quote = data;
+      if (curScreen === 'home') renderHome();
+    }
+  } catch(e) {}
+}
+
+async function fbSetQuote(text) {
+  D.quote = text; fbQuote = text; save(); renderHome();
+  try { await fbSet('quote', text); toast('цитата обновлена'); }
+  catch(e) { toast('цитата обновлена (офлайн)'); }
+}
+
+// ══════════════════════════════════════════════
+// THEME TOGGLE
+// ══════════════════════════════════════════════
+function initTheme(){
+  const saved = localStorage.getItem('sg_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.querySelector('meta[name=theme-color]').content = saved==='dark'?'#0c0c14':'#f5f2eb';
+  updateThemeLabel();
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  document.querySelector('meta[name=theme-color]').content = next==='dark'?'#0c0c14':'#f5f2eb';
+  localStorage.setItem('sg_theme', next);
+  updateThemeLabel();
+  // update date input color-scheme
+  document.querySelectorAll('input[type=date]').forEach(el=>{
+    el.style.colorScheme = next;
+  });
+}
+function updateThemeLabel(){
+  const el = document.getElementById('theme-label');
+  if(el) el.textContent = document.documentElement.getAttribute('data-theme')==='dark'?'тёмная ✓':'светлая ✓';
+}
+
+// ══════════════════════════════════════════════
+// NOTIFICATIONS (Web Push via Notification API)
+// ══════════════════════════════════════════════
+function requestNotifs(){
+  const el = document.getElementById('notif-label');
+  if(!('Notification' in window)){
+    if(el) el.textContent = 'не поддерживается';
+    return;
+  }
+  if(Notification.permission === 'granted'){
+    if(el) el.textContent = 'включены ✓';
+    toast('уведомления уже включены');
+    return;
+  }
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){
+      if(el) el.textContent = 'включены ✓';
+      toast('уведомления включены');
+      new Notification('Биомедики', {body:'уведомления работают 🐱', icon:''});
+    } else {
+      if(el) el.textContent = 'отклонено';
+    }
+  });
+}
+function updateNotifLabel(){
+  const el = document.getElementById('notif-label');
+  if(!el) return;
+  if(!('Notification' in window)) el.textContent = 'не поддерживается';
+  else if(Notification.permission==='granted') el.textContent = 'включены ✓';
+  else el.textContent = 'включить';
+}
+function notifyIfNeeded(title, body){
+  if(typeof Notification!=='undefined' && Notification.permission==='granted'){
+    new Notification(title, {body, icon:''});
+  }
+}
+
+// ══════════════════════════════════════════════
+// DEADLINE DATE FORMATTING
+// ══════════════════════════════════════════════
+function formatDue(dateStr){
+  if(!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  if(isNaN(d)) return dateStr;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const diff = Math.round((d-now)/86400000);
+  const days = ['вс','пн','вт','ср','чт','пт','сб'];
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  if(diff < 0) return `просрочено`;
+  if(diff === 0) return `сегодня`;
+  if(diff === 1) return `завтра`;
+  if(diff <= 6) return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]}`;
+  return `${d.getDate()} ${months[d.getMonth()]}`;
+}
+function urgencyFromDate(dateStr){
+  if(!dateStr) return 'mid';
+  const d = new Date(dateStr + 'T00:00:00');
+  const diff = Math.round((d - new Date().setHours(0,0,0,0))/86400000);
+  if(diff <= 1) return 'high';
+  if(diff <= 4) return 'mid';
+  return 'low';
+}
+
+// ══════════════════════════════════════════════
+// MATERIALS — Firebase sync
+// ══════════════════════════════════════════════
+let fbLinks = [];
+
+async function fbPollLinks(){
+  try {
+    const data = await fbGet('links');
+    const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})) : [];
+    if(JSON.stringify(arr) !== JSON.stringify(fbLinks)){
+      fbLinks = arr;
+      D.links = arr;
+      if(curScreen==='links') renderLinks();
+    }
+  } catch(e){}
+}
+async function fbAddLink(link){
+  try {
+    const res = await fbPost('links', link);
+    link._key = res.name;
+    fbLinks.push(link); D.links = [...fbLinks];
+    renderLinks(); renderAdminLists();
+    toast('материал добавлен');
+  } catch(e){ toast('ошибка'); }
+}
+async function fbDelLink(key){
+  fbLinks = fbLinks.filter(l=>l._key!==key);
+  D.links = [...fbLinks];
+  renderLinks(); renderAdminLists();
+  try { await fbDelete(`links/${key}`); } catch(e){}
+}
+
+const LINK_ICONS = {
+  конспект:    `<svg viewBox="0 0 20 20" width="16" height="16"><path d="M4 3h8l4 4v10a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M12 3v5h4M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+  задачи:      `<svg viewBox="0 0 20 20" width="16" height="16"><path d="M9 5H7a1 1 0 00-1 1v9a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-2M9 5a1 1 0 001 1h2a1 1 0 001-1M9 5a1 1 0 011-1h2a1 1 0 011 1" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M8 11l2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  презентация: `<svg viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="3" width="16" height="11" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M10 14v3M7 17h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+  книга:       `<svg viewBox="0 0 20 20" width="16" height="16"><path d="M4 2h9l3 3v13H4V2z" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M13 2v4h3M7 8h6M7 11h6M7 14h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+  другое:      `<svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 13a5 5 0 007.54.54l2-2a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7.54-.54l-2 2a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>`,
+};
+
+function renderLinks(){
+  const el = document.getElementById('links-list');
+  if(!el) return;
+  const items = fbLinks.length ? fbLinks : (D.links||[]);
+  // group by subject
+  const bySubj = {};
+  items.forEach(l=>{
+    const s = l.subject||'общее';
+    if(!bySubj[s]) bySubj[s]=[];
+    bySubj[s].push(l);
+  });
+  if(!items.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px">материалы появятся здесь</div>`;
+    return;
+  }
+  el.innerHTML = Object.entries(bySubj).map(([subj,links])=>`
+    <div style="margin-bottom:20px">
+      <div class="sec-title" style="padding:0 0 8px">${subj}</div>
+      ${links.map(l=>`
+        <a href="${l.url}" target="_blank" style="text-decoration:none">
+          <div class="link-card">
+            <div class="link-icon">${LINK_ICONS[l.type]||LINK_ICONS.другое}</div>
+            <div class="link-body">
+              <div class="link-title">${esc(l.title)}</div>
+              <div class="link-meta">${l.type}</div>
+            </div>
+            <svg viewBox="0 0 16 16" width="12" height="12" style="flex-shrink:0;color:var(--text3)"><path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </a>`).join('')}
+    </div>`).join('');
+}
+
+function addLink(){
+  const title=v('n-ltitle').trim(), subject=v('n-lsubj').trim();
+  const url=v('n-lurl').trim(), type=v('n-ltype');
+  if(!title||!url){toast('заполни название и ссылку');return}
+  ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>document.getElementById(id).value='');
+  fbAddLink({title, subject, url, type, ts: Date.now()});
+}
+
+// ══════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════
+const v=id=>document.getElementById(id).value;
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+// ══════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  curDay=todayIdx();
+  initTheme();
+  // fetch invites immediately so login can validate them
+  fbPollInvites();
+  if(D.currentUser) launchApp();
+  // tap title 5x to autofill admin
+  let taps=0;
+  document.querySelector('.g-title').addEventListener('click',()=>{
+    if(++taps>=5){document.getElementById('inv-inp').value='BIO-7X4K-MED9';taps=0}
+  });
+  document.getElementById('inv-inp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+});
+// ── expose all functions to global scope (survives Netlify IIFE bundling) ──
+window.doLogin=doLogin; window.confirmName=confirmName;
+window.navigate=navigate; window.prevWeek=prevWeek; window.nextWeek=nextWeek; window.selDay=selDay;
+window.petCat=petCat; window.feedCat=feedCat; window.toggleHw=toggleHw;
+window.setFil=setFil; window.sendMsg=sendMsg;
+window.openAdmin=openAdmin; window.closeAdmin=closeAdmin;
+window.genInvite=genInvite; window.delInvite=delInvite;
+window.addLesson=addLesson; window.addHw=addHw; window.addLink=addLink;
+window.setQuote=setQuote; window.saveProfileName=saveProfileName;
+window.setSubgroup=setSubgroup; window.doLogout=doLogout;
+window.toggleTheme=toggleTheme; window.requestNotifs=requestNotifs;
+window.delLessonByIdx=delLessonByIdx; window.delHwAdmin=delHwAdmin;
+window.fbDelLink=fbDelLink; window.fbDelHw=fbDelHw;
+</script>
+</body>
+</html>
