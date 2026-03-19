@@ -1114,7 +1114,7 @@ function addAdminFab(){
 // ══════════════════════════════════════════════
 function renderHome(){
   const h=new Date().getHours();
-  const g=h<6?'ночью учиться':h<12?'доброе утро':h<17?'добрый день':h<22?'добрый вечер':'ночью учиться';
+  const g=h<6?'ночью учиться':h<12?'доброе утро':h<17?'добрый день':h<22?'добрый вечер':'не спишь?';
   document.getElementById('greeting').textContent=g;
   const n=new Date();
   document.getElementById('dateline').textContent=`${DAYS_RU[n.getDay()===0?6:n.getDay()-1]}, ${n.getDate()} ${MON_RU[n.getMonth()]}`;
