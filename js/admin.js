@@ -4,6 +4,10 @@ function openAdmin(){document.getElementById('admin').classList.remove('hidden')
 function closeAdmin(){document.getElementById('admin').classList.add('hidden')}
 function renderAdmin(){
   renderInviteList();
+  // Week type buttons
+  const wt = fbWeekType || D.weekType || 'red';
+  document.getElementById('wk-red-btn')?.classList.toggle('active', wt==='red');
+  document.getElementById('wk-blue-btn')?.classList.toggle('active', wt==='blue');
   const members = fbMembers.length ? fbMembers : D.members;
   document.getElementById('mem-list').innerHTML=members.map(m=>`
     <div class="mem-item">
@@ -123,10 +127,12 @@ function addLesson(){
   const day=+v('n-day'),time=v('n-time').trim(),end=v('n-end').trim(),subject=v('n-subj').trim();
   const room=v('n-room').trim(),link=v('n-link').trim(),color=v('n-color');
   const type=v('n-type'),subgroup=v('n-sg');
+  const week=v('n-week')||'both';
+  const notes=v('n-notes').trim();
   if(!time||!subject||!room){toast('заполни все поля');return}
   const endTime=end||calcEnd(time);
-  const lesson={day,time,end:endTime,subject,room,color,link,type,subgroup};
-  ['n-time','n-end','n-subj','n-room','n-link'].forEach(id=>document.getElementById(id).value='');
+  const lesson={day,time,end:endTime,subject,room,color,link,type,subgroup,week,notes};
+  ['n-time','n-end','n-subj','n-room','n-link','n-notes'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   fbAddLesson(lesson);
 }
 function calcEnd(time){

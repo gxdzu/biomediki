@@ -42,11 +42,15 @@ function openLesEdit(idx){
   editingLesIdx = idx;
   const l = D.schedule[idx];
   if(!l) return;
-  document.getElementById('les-edit-time').value = l.time||'';
-  document.getElementById('les-edit-end').value  = l.end||'';
-  document.getElementById('les-edit-subj').value = l.subject||'';
-  document.getElementById('les-edit-room').value = l.room||'';
-  document.getElementById('les-edit-link').value = l.link||'';
+  document.getElementById('les-edit-time').value  = l.time||'';
+  document.getElementById('les-edit-end').value   = l.end||'';
+  document.getElementById('les-edit-subj').value  = l.subject||'';
+  document.getElementById('les-edit-room').value  = l.room||'';
+  document.getElementById('les-edit-link').value  = l.link||'';
+  const notesEl = document.getElementById('les-edit-notes');
+  if(notesEl) notesEl.value = l.notes||'';
+  const weekEl = document.getElementById('les-edit-week');
+  if(weekEl) weekEl.value = l.week||'both';
   document.getElementById('les-modal').classList.remove('hidden');
 }
 function closeLesModal(){
@@ -62,10 +66,15 @@ async function saveLesEdit(){
   l.subject = document.getElementById('les-edit-subj').value.trim() || l.subject;
   l.room    = document.getElementById('les-edit-room').value.trim() || l.room;
   l.link    = document.getElementById('les-edit-link').value.trim();
+  const notesEl = document.getElementById('les-edit-notes');
+  if(notesEl) l.notes = notesEl.value.trim();
+  const weekEl = document.getElementById('les-edit-week');
+  if(weekEl) l.week = weekEl.value;
   try {
     if(l._key) await fbSet(`schedule/${l._key}`, {
       day:l.day, time:l.time, end:l.end, subject:l.subject,
-      room:l.room, color:l.color, link:l.link, type:l.type, subgroup:l.subgroup
+      room:l.room, color:l.color, link:l.link, type:l.type,
+      subgroup:l.subgroup, week:l.week||'both', notes:l.notes||''
     });
     save(); renderSchedule(); renderAdminLists();
     toast('пара обновлена');

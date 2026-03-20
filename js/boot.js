@@ -45,3 +45,6 @@ window.openLesEdit=openLesEdit; window.closeLesModal=closeLesModal; window.saveL
 window.openProfileEdit=openProfileEdit; window.closeProfEdit=closeProfEdit; window.saveProfileEdit=saveProfileEdit;
 window.openPostEditor=openPostEditor; window.closePostEditor=closePostEditor; window.publishPost=publishPost; window.deletePost=deletePost;
 window.setWeekType=setWeekType;
+window.pinMsg=pinMsg; window.scrollToPinned=scrollToPinned;
+window.toggleEmojiPicker=toggleEmojiPicker; window.insertEmoji=insertEmoji;
+window.toggleFaq=toggleFaq;

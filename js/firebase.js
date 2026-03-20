@@ -81,28 +81,6 @@ async function fbDelMember(key) {
 }
 
 // ── unread tracking ──
-let lastSeenTs = parseInt(localStorage.getItem('sg_last_seen') || '0');
-
-function markChatRead() {
-  if (!fbMessages.length) return;
-  const last = fbMessages[fbMessages.length-1];
-  lastSeenTs = last.ts || Date.now();
-  localStorage.setItem('sg_last_seen', String(lastSeenTs));
-  updateChatBadge(0);
-}
-
-function updateChatBadge(count) {
-  const el = document.getElementById('chat-badge');
-  if (!el) return;
-  if (count <= 0) { el.style.display = 'none'; return; }
-  el.style.display = 'block';
-  el.textContent = count > 99 ? '99+' : String(count);
-}
-
-function countUnread() {
-  const myName = D.currentUser?.name;
-  return fbMessages.filter(m => m.author !== myName && (m.ts||0) > lastSeenTs).length;
-}
 
 function nowTime() {
   const n = new Date();
@@ -116,7 +94,7 @@ function fbInit() {
 }
 
 async function fbPollAll() {
-  await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites(), fbPollMembers(), fbPollWeekType(), fbPollFeed()]);
+  await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites(), fbPollMembers(), fbPollWeekType(), fbPollFeed(), fbPollPinned()]);
 }
 
 // ── CHAT ──
