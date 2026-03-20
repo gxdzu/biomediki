@@ -9,10 +9,26 @@ function todayIdx(){
 
 function navigate(s){
   curScreen=s;
+  
+  // Переключаем экраны
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===s));
+  
   const el=document.getElementById('screen-'+s);
   if(el) el.classList.add('active');
+  
+  // Управляем отображением нижней навигации
+  const nav = document.querySelector('.bnav');
+  if(nav) {
+    // Скрываем навигацию на экране поста, показываем на всех остальных
+    if(s === 'post') {
+      nav.style.display = 'none';
+    } else {
+      nav.style.display = 'flex';
+    }
+  }
+  
+  // Рендерим нужный экран
   if(s==='home') renderHome();
   if(s==='schedule') renderSchedule();
   if(s==='hw') renderHw();
@@ -40,7 +56,7 @@ function addAdminFab(){
 }
 
 // ══════════════════════════════════════════════
-// HOME
+// HOME (дублируем для чистоты, но он уже есть в home.js)
 // ══════════════════════════════════════════════
 function renderHome(){
   const h=new Date().getHours();
