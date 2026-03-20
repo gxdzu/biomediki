@@ -961,3 +961,7 @@ a{text-decoration:none}
 body:has(#screen-post.active) .bnav {
   display: none;
 }
+
+.members-panel {
+  display: none !important;
+}
