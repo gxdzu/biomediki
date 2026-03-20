@@ -19,6 +19,7 @@ function navigate(s){
   if(s==='chat'){renderChat();markChatRead();}
   if(s==='links') renderLinks();
   if(s==='feed') renderFeed();
+  if(s==='post') renderPostScreen();
   if(s==='faq') renderFaq();
   if(s==='cat') renderCat();
   if(s==='profile'){renderProfile();updateNotifLabel();}

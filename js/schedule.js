@@ -138,6 +138,8 @@ async function setWeekType(type){
 function urgC(u){return u==='high'?'var(--red)':u==='mid'?'var(--yel)':'var(--grn)'}
 
 function renderHw(){
+  if(hwTab==='personal'){ renderPersonalHw(); return; }
+  // ── COMMON ──
   const subjs=['all',...new Set(D.homework.map(h=>h.subject))];
   document.getElementById('hw-fils').innerHTML=subjs.map(s=>
     `<button class="fil-btn ${hwFil===s?'active':''}" onclick="setFil('${s}')">${s==='all'?'все':s}</button>`
@@ -145,18 +147,50 @@ function renderHw(){
   const items=hwFil==='all'?D.homework:D.homework.filter(h=>h.subject===hwFil);
   const el=document.getElementById('hw-list');
   if(!items.length){el.innerHTML='<div class="no-les">заданий нет</div>';return}
-  el.innerHTML=items.map(hw=>{
-    const done=hw.doneBy.includes(D.currentUser?.name);
-    return `<div class="hw-card ${done?'done':''}" onclick="toggleHw(${hw.id})">
-      <div class="hw-chk">${done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
+
+  if(hwFil==='all'){
+    // group by subject
+    const bySubj={};
+    items.forEach(hw=>{ if(!bySubj[hw.subject]) bySubj[hw.subject]=[]; bySubj[hw.subject].push(hw); });
+    el.innerHTML=Object.entries(bySubj).map(([subj,hws])=>`
+      <div class="sec-title" style="padding:12px 0 6px">${subj}</div>
+      ${hws.map(hw=>hwCardHtml(hw)).join('')}
+    `).join('');
+  } else {
+    el.innerHTML=items.map(hw=>hwCardHtml(hw)).join('');
+  }
+}
+
+function hwCardHtml(hw){
+  const done=hw.doneBy.includes(D.currentUser?.name);
+  return `<div class="hw-card ${done?'done':''}" onclick="toggleHw(${hw.id})">
+    <div class="hw-chk">${done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
+    <div class="hw-body">
+      <div class="hw-ttl">${hw.title}</div>
+      <div class="hw-meta"><div class="hw-subj">${hw.subject}</div><div class="hw-badge ${urgencyFromDate(hw.dueDate)||hw.urgency}">${hw.dueDate?formatDue(hw.dueDate):hw.due}</div></div>
+      <div class="hw-cnt">${hw.doneBy.length} из ${D.members.length} сделали</div>
+    </div>
+    ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="event.stopPropagation();delHw(${hw.id})">×</button>`:''}
+  </div>`;
+}
+
+function renderPersonalHw(){
+  document.getElementById('hw-fils').innerHTML='';
+  const arr=getPersonalHw();
+  const el=document.getElementById('hw-list');
+  if(!arr.length){
+    el.innerHTML='<div class="personal-hw-empty">личных заданий нет<br><span style="font-size:12px">добавь ниже</span></div>';
+    return;
+  }
+  el.innerHTML=arr.map(hw=>`
+    <div class="hw-card ${hw.done?'done':''}" onclick="togglePersonalHw(${hw.id})">
+      <div class="hw-chk">${hw.done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
       <div class="hw-body">
         <div class="hw-ttl">${hw.title}</div>
-        <div class="hw-meta"><div class="hw-subj">${hw.subject}</div><div class="hw-badge ${urgencyFromDate(hw.dueDate)||hw.urgency}">${hw.dueDate?formatDue(hw.dueDate):hw.due}</div></div>
-        <div class="hw-cnt">${hw.doneBy.length} из ${D.members.length} сделали</div>
+        ${hw.dueDate?`<div class="hw-meta"><div class="hw-badge ${urgencyFromDate(hw.dueDate)}">${formatDue(hw.dueDate)}</div></div>`:''}
       </div>
-      ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="event.stopPropagation();delHw(${hw.id})">×</button>`:''}
-    </div>`;
-  }).join('');
+      <button class="del-btn" onclick="event.stopPropagation();delPersonalHw(${hw.id})">×</button>
+    </div>`).join('');
 }
 function setFil(f){hwFil=f;renderHw()}
 function toggleHw(id){
@@ -165,3 +199,51 @@ function toggleHw(id){
   fbToggleHw(hw);
 }
 function delHw(id){D.homework=D.homework.filter(h=>h.id!==id);save();renderHw()}
+
+// ══════════════════════════════════════════════
+// PERSONAL HOMEWORK
+// ══════════════════════════════════════════════
+let hwTab = 'common'; // 'common' | 'personal'
+
+function switchHwTab(tab){
+  hwTab = tab;
+  document.getElementById('hw-tab-common')?.classList.toggle('active', tab==='common');
+  document.getElementById('hw-tab-personal')?.classList.toggle('active', tab==='personal');
+  const addBlock = document.getElementById('personal-hw-add');
+  if(addBlock) addBlock.classList.toggle('hidden', tab!=='personal');
+  hwFil = 'all';
+  renderHw();
+}
+
+function getPersonalHw(){
+  const key = 'sg_phw_'+(D.currentUser?.name||'');
+  try{ return JSON.parse(localStorage.getItem(key)||'[]'); } catch(e){ return []; }
+}
+function savePersonalHw(arr){
+  const key = 'sg_phw_'+(D.currentUser?.name||'');
+  localStorage.setItem(key, JSON.stringify(arr));
+}
+
+function addPersonalHw(){
+  const title = document.getElementById('phw-title')?.value.trim();
+  const due = document.getElementById('phw-due')?.value;
+  if(!title){ toast('введи название'); return; }
+  const arr = getPersonalHw();
+  arr.push({id: Date.now(), title, dueDate: due||'', done: false});
+  savePersonalHw(arr);
+  document.getElementById('phw-title').value='';
+  document.getElementById('phw-due').value='';
+  renderHw(); toast('добавлено');
+}
+
+function togglePersonalHw(id){
+  const arr = getPersonalHw();
+  const item = arr.find(h=>h.id===id);
+  if(item) item.done = !item.done;
+  savePersonalHw(arr); renderHw();
+}
+
+function delPersonalHw(id){
+  savePersonalHw(getPersonalHw().filter(h=>h.id!==id));
+  renderHw();
+}

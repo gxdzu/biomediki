@@ -90,7 +90,7 @@ function nowTime() {
 // ── poll all data every 4s ──
 function fbInit() {
   fbPollAll();
-  setInterval(fbPollAll, 4000);
+  setInterval(fbPollAll, 2000);
 }
 
 async function fbPollAll() {
