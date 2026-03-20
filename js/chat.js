@@ -18,24 +18,56 @@ function avatarHtml(name,size=28){
 
 // ── MEMBER PROFILE SHEET ──
 function openMemberProfile(name){
+  // Ищем участника сначала в fbMembers, потом в D.members
   const members = fbMembers.length ? fbMembers : D.members;
   const m = members.find(x=>x.name===name);
-  if(!m) return;
+  if(!m){
+    toast('профиль не найден');
+    return;
+  }
+  
   const c = avatarColor(m.name);
   const av = document.getElementById('msheet-av');
-  if(av){ av.textContent=(m.name||'?')[0].toUpperCase(); av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`; }
+  if(av){ 
+    av.textContent=(m.name||'?')[0].toUpperCase(); 
+    av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`; 
+  }
+  
   document.getElementById('msheet-name').textContent = m.name;
-  document.getElementById('msheet-role').textContent = m.role==='admin'?'администратор':(m.subgroup?`подгруппа ${m.subgroup}`:'участник');
-  document.getElementById('msheet-bio').textContent = m.bio||'';
-  const soc = m.socials||{};
-  const defs=[{k:'vk',l:'VK'},{k:'tg',l:'Telegram'},{k:'inst',l:'Instagram'},{k:'other',l:'Сайт'}];
-  document.getElementById('msheet-socials').innerHTML = defs.filter(d=>soc[d.k]).map(d=>
-    `<a class="social-chip" href="${soc[d.k]}" target="_blank">${d.l}</a>`
+  
+  // Роль
+  let roleText = 'участник';
+  if(m.role === 'admin') roleText = 'администратор';
+  else if(m.subgroup) roleText = `подгруппа ${m.subgroup}`;
+  document.getElementById('msheet-role').textContent = roleText;
+  
+  // Био (если есть)
+  const bio = m.bio || '';
+  document.getElementById('msheet-bio').textContent = bio;
+  
+  // Соцсети (если есть)
+  const soc = m.socials || {};
+  const defs = [
+    {k:'vk', l:'VK'}, 
+    {k:'tg', l:'Telegram'}, 
+    {k:'inst', l:'Instagram'}, 
+    {k:'other', l:'Сайт'}
+  ];
+  
+  const socialsHtml = defs.filter(d=>soc[d.k] && soc[d.k].trim()).map(d=>
+    `<a class="social-chip" href="${soc[d.k]}" target="_blank" rel="noopener noreferrer">${d.l}</a>`
   ).join('');
+  
+  const socialsContainer = document.getElementById('msheet-socials');
+  if(socialsContainer){
+    if(socialsHtml){
+      socialsContainer.innerHTML = socialsHtml;
+    } else {
+      socialsContainer.innerHTML = '<div style="font-size:11px;color:var(--text3);text-align:center">нет соцсетей</div>';
+    }
+  }
+  
   document.getElementById('member-profile-modal').classList.remove('hidden');
-}
-function closeMemberProfile(){
-  document.getElementById('member-profile-modal').classList.add('hidden');
 }
 
 // ── PINNED MESSAGE ──
