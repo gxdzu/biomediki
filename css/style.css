@@ -664,3 +664,61 @@ a{text-decoration:none}
   display:flex;align-items:center;justify-content:center;transition:all .2s;
 }
 #admin-fab:hover{background:var(--gold3)}
+/* ══════════════════════════════════════════════
+   PINNED MESSAGE
+══════════════════════════════════════════════ */
+.pinned-bar{
+  flex-shrink:0;display:flex;align-items:center;gap:8px;
+  padding:8px 16px;background:var(--bg2);
+  border-bottom:.5px solid var(--bdr);cursor:pointer;
+  transition:background .2s;
+}
+.pinned-bar:hover{background:var(--bg3)}
+.pinned-text{font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.msg-pinned-mark{font-size:10px;color:var(--gold2);margin-bottom:2px}
+
+/* ══════════════════════════════════════════════
+   EMOJI PICKER
+══════════════════════════════════════════════ */
+.emoji-picker{
+  flex-shrink:0;display:flex;flex-wrap:wrap;gap:2px;
+  padding:8px 12px;background:var(--bg2);
+  border-top:.5px solid var(--bdr);
+  max-height:120px;overflow-y:auto;
+}
+.emoji-picker::-webkit-scrollbar{display:none}
+.emoji-item{
+  background:none;border:none;font-size:20px;
+  width:36px;height:36px;border-radius:6px;
+  cursor:pointer;transition:background .15s;
+  display:flex;align-items:center;justify-content:center;
+}
+.emoji-item:hover{background:var(--bg3)}
+.emoji-btn{
+  width:36px;height:36px;border-radius:50%;
+  background:none;border:none;color:var(--text3);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;transition:color .2s;
+}
+.emoji-btn:hover{color:var(--text2)}
+
+/* ══════════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════════ */
+.faq-list{padding-bottom:20px}
+.faq-item{
+  background:var(--bg2);border:.5px solid var(--bdr);
+  border-radius:var(--r);margin-bottom:8px;overflow:hidden;
+  transition:border-color .2s;
+}
+.faq-item:hover{border-color:var(--bdr2)}
+.faq-q{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;cursor:pointer;font-size:13px;color:var(--text);
+  gap:10px;
+}
+.faq-arrow{flex-shrink:0;color:var(--text3);transition:transform .2s}
+.faq-a{
+  padding:0 16px 14px;font-size:13px;color:var(--text2);
+  line-height:1.6;border-top:.5px solid var(--bdr);padding-top:12px;
+}
