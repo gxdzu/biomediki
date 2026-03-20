@@ -1,44 +1,89 @@
+// ══════════════════════════════════════════════
 // SCHEDULE
 // ══════════════════════════════════════════════
+let fbWeekType = '';
+
 function getMonday(off=0){
-  const d=new Date();const day=d.getDay()||7;
-  d.setDate(d.getDate()-day+1+off*7);d.setHours(0,0,0,0);return d;
+  const d=new Date(); const day=d.getDay()||7;
+  d.setDate(d.getDate()-day+1+off*7); d.setHours(0,0,0,0); return d;
 }
+
 function renderSchedule(){
   const mon=getMonday(curWkOff);
-  const fri=new Date(mon);fri.setDate(fri.getDate()+4);
+  const fri=new Date(mon); fri.setDate(fri.getDate()+4);
   document.getElementById('wk-lbl').textContent=`${mon.getDate()} — ${fri.getDate()} ${MON_RU[fri.getMonth()]}`;
-  // day tabs
+
+  // Week type badge
+  const wt = fbWeekType || D.weekType || 'red';
+  const badge = document.getElementById('week-type-badge');
+  if(badge){ badge.textContent = wt==='red'?'красная':'синяя'; badge.className=`week-badge ${wt}`; }
+
+  // Week buttons in admin
+  document.getElementById('wk-red-btn')?.classList.toggle('active', wt==='red');
+  document.getElementById('wk-blue-btn')?.classList.toggle('active', wt==='blue');
+
+  // Schedule quote
+  const sq = document.getElementById('sched-quote');
+  if(sq) sq.textContent = D.quote||QUOTES[new Date().getDay()%QUOTES.length];
+
   const ti=todayIdx();
   document.getElementById('day-tabs').innerHTML=DAYS_S.slice(0,6).map((d,i)=>{
-    const dt=new Date(mon);dt.setDate(dt.getDate()+i);
+    const dt=new Date(mon); dt.setDate(dt.getDate()+i);
     const dot=curWkOff===0&&i===ti?' ·':'';
     return `<button class="day-tab ${i===curDay?'active':''}" onclick="selDay(${i})">${d} ${dt.getDate()}${dot}</button>`;
   }).join('');
   renderLessons();
 }
+
 function prevWeek(){curWkOff--;renderSchedule()}
 function nextWeek(){curWkOff++;renderSchedule()}
 function selDay(i){curDay=i;renderSchedule()}
+
 function renderLessons(){
   const el=document.getElementById('sched-list');
-  const userSg=D.currentUser?.subgroup||0;
-  let ls=D.schedule.filter(l=>l.day===curDay);
+  const wt = fbWeekType || D.weekType || 'red';
+  const userSg = D.currentUser?.subgroup||0;
+  let ls = D.schedule.filter(l=>l.day===curDay);
+
+  // Filter by week type
+  ls = ls.filter(l => !l.week || l.week==='both' || l.week===wt);
+
+  // Filter by subgroup
   if(userSg>0){
     ls=ls.filter(l=>!l.subgroup||l.subgroup==='все'||l.subgroup===`подгруппа ${userSg}`);
   }
+
   ls=ls.sort((a,b)=>{
-    const [ah,am]=a.time.split(':').map(Number);
-    const [bh,bm]=b.time.split(':').map(Number);
+    const[ah,am]=a.time.split(':').map(Number);
+    const[bh,bm]=b.time.split(':').map(Number);
     return (ah*60+am)-(bh*60+bm);
   });
+
   if(!ls.length){el.innerHTML='<div class="no-les">в этот день пар нет<em>время для себя</em></div>';return}
+
+  // Current time for dimming past lessons
+  const now = new Date();
+  const nowMins = now.getHours()*60 + now.getMinutes();
+  const isToday = curWkOff===0 && curDay===todayIdx();
+
   el.innerHTML=ls.map(l=>{
     const gi=D.schedule.indexOf(l);
     const sgLabel=l.subgroup&&l.subgroup!=='все'
       ?`<span class="les-sg">${l.subgroup}</span>`
       :`<span class="les-type все">общая</span>`;
-    return `<div class="les-card">
+
+    // Check if lesson is in the past
+    let isPast = false;
+    if(isToday && l.end){
+      const[eh,em]=l.end.split(':').map(Number);
+      isPast = (eh*60+em) < nowMins;
+    }
+
+    // Week badge on card
+    const weekLabel = l.week&&l.week!=='both'
+      ? `<span class="week-badge ${l.week}" style="font-size:9px;padding:1px 6px">${l.week==='red'?'кр':'си'}</span>` : '';
+
+    return `<div class="les-card${isPast?' past':''}">
       <div class="les-tc"><div class="les-tm">${l.time}</div><div class="les-end">${l.end||''}</div></div>
       <div class="les-acc bar-${l.color}" style="height:52px"></div>
       <div class="les-body">
@@ -46,29 +91,57 @@ function renderLessons(){
         <div class="les-room">${l.room}</div>
         <div class="les-badges">
           ${l.type?`<span class="les-type ${l.type}">${l.type}</span>`:''}
-          ${sgLabel}
+          ${sgLabel}${weekLabel}
         </div>
+        ${l.notes?`<div class="les-notes">${l.notes}</div>`:''}
         ${l.link?`<a href="${l.link}" target="_blank" class="les-link">
           <svg viewBox="0 0 14 14" width="11" height="11"><path d="M5 2H2a1 1 0 00-1 1v8a1 1 0 001 1h8a1 1 0 001-1V8M9 1h4v4M13 1L6 8" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
           подключиться</a>`:''}
       </div>
-      ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="delLessonByIdx(${gi})">×</button>`:''}
+      ${D.currentUser?.role==='admin'?`
+        <button class="msg-act" onclick="openLesEdit(${gi})" style="font-size:12px;padding:4px 6px">✎</button>
+        <button class="del-btn" onclick="delLessonByIdx(${gi})">×</button>`:''}
     </div>`;
   }).join('');
 }
+
 function delLessonByIdx(idx){
-  const lesson = D.schedule[idx];
-  if (!lesson) return;
-  fbDelLesson(lesson._key, idx);
+  const lesson=D.schedule[idx]; if(!lesson) return;
+  fbDelLesson(lesson._key,idx);
+}
+
+// Week type sync from Firebase
+async function fbPollWeekType(){
+  try{
+    const data = await fbGet('weekType');
+    if(data && data !== fbWeekType){
+      fbWeekType = data;
+      D.weekType = data;
+      if(curScreen==='schedule') renderSchedule();
+      if(document.getElementById('admin') && !document.getElementById('admin').classList.contains('hidden')) renderAdmin();
+    }
+  }catch(e){}
+}
+
+async function setWeekType(type){
+  fbWeekType = type; D.weekType = type; save();
+  document.getElementById('wk-red-btn')?.classList.toggle('active',type==='red');
+  document.getElementById('wk-blue-btn')?.classList.toggle('active',type==='blue');
+  renderSchedule();
+  try{ await fbSet('weekType', type); toast(type==='red'?'красная неделя':'синяя неделя'); }
+  catch(e){ toast('обновлено локально'); }
 }
 
 // ══════════════════════════════════════════════
 // HOMEWORK
 // ══════════════════════════════════════════════
 function urgC(u){return u==='high'?'var(--red)':u==='mid'?'var(--yel)':'var(--grn)'}
+
 function renderHw(){
   const subjs=['all',...new Set(D.homework.map(h=>h.subject))];
-  document.getElementById('hw-fils').innerHTML=subjs.map(s=>`<button class="fil-btn ${hwFil===s?'active':''}" onclick="setFil('${s}')">${s==='all'?'все':s}</button>`).join('');
+  document.getElementById('hw-fils').innerHTML=subjs.map(s=>
+    `<button class="fil-btn ${hwFil===s?'active':''}" onclick="setFil('${s}')">${s==='all'?'все':s}</button>`
+  ).join('');
   const items=hwFil==='all'?D.homework:D.homework.filter(h=>h.subject===hwFil);
   const el=document.getElementById('hw-list');
   if(!items.length){el.innerHTML='<div class="no-les">заданий нет</div>';return}

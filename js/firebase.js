@@ -116,7 +116,7 @@ function fbInit() {
 }
 
 async function fbPollAll() {
-  await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites(), fbPollMembers()]);
+  await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites(), fbPollMembers(), fbPollWeekType(), fbPollFeed()]);
 }
 
 // ── CHAT ──

@@ -18,12 +18,13 @@ function navigate(s){
   if(s==='hw') renderHw();
   if(s==='chat'){renderChat();markChatRead();}
   if(s==='links') renderLinks();
+  if(s==='feed') renderFeed();
   if(s==='cat') renderCat();
   if(s==='profile'){renderProfile();updateNotifLabel();}
 }
 
 function renderAll(){
-  renderHome();renderSchedule();renderHw();renderChat();renderLinks();renderCat();renderMembersPanel();
+  renderHome();renderSchedule();renderHw();renderChat();renderLinks();renderFeed();renderCat();renderMembersPanel();
 }
 
 function addAdminFab(){
