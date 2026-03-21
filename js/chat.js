@@ -18,9 +18,11 @@ function avatarHtml(name,size=28){
 
 // ── MEMBER PROFILE SHEET ──
 function openMemberProfile(name){
-  const members = fbMembers.length ? fbMembers : D.members;
-  const m = members.find(x=>x.name===name);
-  if(!m) return;
+  // Try fbMembers first, then D.members, then construct minimal profile
+  const allMembers = [...(fbMembers.length ? fbMembers : []), ...D.members];
+  const seen = new Set();
+  const members = allMembers.filter(m=>{ if(seen.has(m.name)) return false; seen.add(m.name); return true; });
+  const m = members.find(x=>x.name===name) || {name, role:'member'};
   const c = avatarColor(m.name);
   const av = document.getElementById('msheet-av');
   if(av){ av.textContent=(m.name||'?')[0].toUpperCase(); av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`; }
@@ -36,6 +38,35 @@ function openMemberProfile(name){
 }
 function closeMemberProfile(){
   document.getElementById('member-profile-modal').classList.add('hidden');
+}
+
+function toggleMembersList(){
+  const sheet = document.getElementById('members-sheet');
+  if(!sheet) return;
+  const isHidden = sheet.classList.contains('hidden');
+  if(isHidden){
+    // populate list
+    const allMembers = fbMembers.length ? fbMembers : D.members;
+    const listEl = document.getElementById('members-sheet-list');
+    if(listEl){
+      listEl.innerHTML = allMembers.map(m=>{
+        const c = avatarColor(m.name);
+        return `<div class="mention-item" onclick="closeMembersList();openMemberProfile('${m.name}')">
+          <div style="width:38px;height:38px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0">${m.name[0].toUpperCase()}</div>
+          <div>
+            <div class="mention-item-name">${esc(m.name)}</div>
+            <div style="font-size:11px;color:var(--text3)">${m.role==='admin'?'администратор':m.subgroup?`пг ${m.subgroup}`:'участник'}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    sheet.classList.remove('hidden');
+  } else {
+    sheet.classList.add('hidden');
+  }
+}
+function closeMembersList(){
+  document.getElementById('members-sheet')?.classList.add('hidden');
 }
 
 // ── PINNED MESSAGE ──
@@ -97,11 +128,15 @@ function highlightText(text, query){
 // ── MENTIONS ──
 function handleChatInput(val){
   const atIdx = val.lastIndexOf('@');
-  if(atIdx>=0 && atIdx===val.length-1 || (atIdx>=0 && !val.slice(atIdx+1).includes(' '))){
-    const query = val.slice(atIdx+1).toLowerCase();
-    const members = (fbMembers.length?fbMembers:D.members).filter(m=>m.name!==D.currentUser?.name);
+  const afterAt = atIdx >= 0 ? val.slice(atIdx + 1) : '';
+  const hasSpace = afterAt.includes(' ');
+  if(atIdx >= 0 && !hasSpace){
+    const query = afterAt.toLowerCase();
+    const allMembers = fbMembers.length ? fbMembers : D.members;
+    const members = allMembers.filter(m=>m.name !== D.currentUser?.name);
     const matches = query ? members.filter(m=>m.name.toLowerCase().startsWith(query)) : members;
-    renderMentionList(matches, atIdx);
+    if(matches.length) renderMentionList(matches, atIdx);
+    else hideMentionList();
   } else {
     hideMentionList();
   }

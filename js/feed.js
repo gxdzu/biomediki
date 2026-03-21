@@ -185,7 +185,7 @@ function renderFeed(){
         <button class="react-btn ${myReact==='👎'?'active':''}" onclick="reactToPost('${p._key}','👎')">
           👎 <span>${dislikes||''}</span>
         </button>
-        ${commCount?`<span class="comment-count-lbl">💬 ${commCount}</span>`:'<span class="comment-count-lbl">комментировать</span>'}
+        ${commCount?`<button class="react-btn" onclick="openPost('${p._key}')">💬 <span>${commCount}</span></button>`:`<button class="react-btn" onclick="openPost('${p._key}')">💬 <span style="font-size:11px">комментировать</span></button>`}
       </div>
     </div>`;
   }).join('');

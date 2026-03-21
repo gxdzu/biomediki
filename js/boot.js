@@ -55,3 +55,4 @@ window.openPost=openPost; window.submitComment=submitComment;
 window.reactToPost=reactToPost;
 window.switchHwTab=switchHwTab; window.addPersonalHw=addPersonalHw;
 window.togglePersonalHw=togglePersonalHw; window.delPersonalHw=delPersonalHw;
+window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembersList;
