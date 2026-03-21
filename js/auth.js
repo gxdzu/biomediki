@@ -38,9 +38,11 @@ async function doLogin(){
   }
 
   const allInvites = fbInvites;
-  // DEBUG — временно показываем что нашли
-  err.textContent = `найдено инвайтов: ${allInvites.length}`;
+  // DEBUG
+  err.textContent = `найдено: ${allInvites.length}, ищу: "${raw}"`;
   await new Promise(r=>setTimeout(r,1500));
+  err.textContent = allInvites.map(i=>i.code).join(', ');
+  await new Promise(r=>setTimeout(r,3000));
   err.textContent = '';
 
   // Повторный вход по использованному инвайту
