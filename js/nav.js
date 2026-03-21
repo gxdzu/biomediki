@@ -23,8 +23,7 @@ function navigate(s){
   if(s==='schedule') renderSchedule();
   if(s==='hw') renderHw();
   if(s==='chat'){
-    // Reset only if messages empty (first open)
-    if(fbMessages.length===0){ chatAllLoaded=false; chatOldestTs=null; }
+    if(fbMessages.length===0){ chatAllLoaded=false; chatDisplayFrom=0; }
     renderChat();markChatRead();
   }
   if(s==='links') renderLinks();

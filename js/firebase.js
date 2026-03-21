@@ -121,35 +121,26 @@ async function fbPollAll() {
 const CHAT_PAGE = 50;
 let chatAllLoaded = false;
 let chatLoadingOld = false;
-let chatOldestTs = null;
-
-async function fbGetChatPage(limitToLast = CHAT_PAGE, endAtKey = null) {
-  // Firebase REST: limitToLast без orderBy работает без индекса
-  let url = `${FB_URL}/chat.json?limitToLast=${limitToLast}`;
-  if (endAtKey) url += `&endAt="${endAtKey}"&orderBy="$key"`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(r.status);
-  return r.json();
-}
+let chatDisplayFrom = 0; // индекс с которого показываем сообщения
 
 async function fbPollChat() {
   try {
-    // Всегда грузим последние CHAT_PAGE без orderBy — это работает без индекса
-    const url = `${FB_URL}/chat.json?limitToLast=${CHAT_PAGE}`;
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(r.status);
-    const data = await r.json();
-
+    // Простой GET без параметров — работает всегда
+    const data = await fbGet('chat');
     const arr = data
       ? Object.entries(data).map(([k,v]) => ({...v, _key:k})).sort((a,b) => (a.ts||0) - (b.ts||0))
       : [];
 
-    if (fbMessages.length === 0) {
+    const hadMessages = fbMessages.length > 0;
+    const oldLen = fbMessages.length;
+
+    if (!hadMessages) {
+      // Первая загрузка — показываем последние CHAT_PAGE
       fbMessages = arr;
-      if (arr.length < CHAT_PAGE) chatAllLoaded = true;
-      if (arr.length > 0) chatOldestTs = arr[0].ts;
+      chatDisplayFrom = Math.max(0, arr.length - CHAT_PAGE);
+      chatAllLoaded = chatDisplayFrom === 0;
     } else {
-      // Обновляем/добавляем новые сообщения в конец
+      // Обновление — добавляем новые в конец, не трогаем chatDisplayFrom
       const existingKeys = new Set(fbMessages.map(m => m._key));
       const newMsgs = arr.filter(m => !existingKeys.has(m._key));
       // Обновляем отредактированные
@@ -172,48 +163,32 @@ async function fbPollChat() {
     renderHome();
   } catch(e) {
     console.error('fbPollChat:', e);
-    fbMessages = D.chat?.general || [];
+    if (fbMessages.length === 0) fbMessages = D.chat?.general || [];
   }
 }
 
 // Подгрузить старые сообщения при скролле вверх
 async function loadOlderMessages() {
-  if (chatAllLoaded || chatLoadingOld || fbMessages.length === 0) return;
+  if (chatAllLoaded || chatLoadingOld || chatDisplayFrom === 0) return;
   chatLoadingOld = true;
 
   const indicator = document.getElementById('chat-load-indicator');
   if (indicator) { indicator.style.display = 'block'; indicator.textContent = 'загрузка...'; }
 
-  try {
-    // Берём ключ первого известного сообщения и грузим CHAT_PAGE до него
-    const firstKey = fbMessages[0]._key;
-    const url = `${FB_URL}/chat.json?orderBy="$key"&endAt="${firstKey}"&limitToLast=${CHAT_PAGE + 1}`;
-    const r = await fetch(url);
-    const data = await r.json();
+  const el = document.getElementById('chat-msgs');
+  const prevH = el ? el.scrollHeight : 0;
 
-    const arr = data
-      ? Object.entries(data).map(([k,v]) => ({...v, _key:k})).sort((a,b) => (a.ts||0) - (b.ts||0))
-      : [];
+  chatDisplayFrom = Math.max(0, chatDisplayFrom - CHAT_PAGE);
+  if (chatDisplayFrom === 0) chatAllLoaded = true;
 
-    // Убираем первый элемент — он уже есть (это firstKey)
-    const older = arr.filter(m => m._key !== firstKey);
+  renderMsgs();
 
-    if (older.length === 0) {
-      chatAllLoaded = true;
-      if (indicator) indicator.textContent = 'начало чата';
-    } else {
-      const el = document.getElementById('chat-msgs');
-      const prevH = el ? el.scrollHeight : 0;
-      fbMessages = [...older, ...fbMessages];
-      chatOldestTs = fbMessages[0].ts;
-      renderMsgs();
-      if (el) el.scrollTop = el.scrollHeight - prevH;
-      if (indicator) indicator.style.display = 'none';
-      if (older.length < CHAT_PAGE) { chatAllLoaded = true; }
-    }
-  } catch(e) {
-    console.error('loadOlderMessages:', e);
-    if (indicator) indicator.style.display = 'none';
+  // Сохраняем позицию скролла
+  if (el) el.scrollTop = el.scrollHeight - prevH;
+
+  if (indicator) {
+    if (chatAllLoaded) indicator.textContent = 'начало чата';
+    else indicator.style.display = 'none';
   }
 
   chatLoadingOld = false;

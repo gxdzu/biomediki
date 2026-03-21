@@ -231,8 +231,14 @@ function renderChat(){
 
 function renderMsgs(){
   const el=document.getElementById('chat-msgs'); if(!el) return;
-  let msgs=fbMessages.length?fbMessages:(D.chat.general||[]);
-  if(searchQuery) msgs=msgs.filter(m=>m.text?.toLowerCase().includes(searchQuery)||m.author?.toLowerCase().includes(searchQuery));
+  const allMsgs=fbMessages.length?fbMessages:(D.chat?.general||[]);
+  // Apply search or pagination slice
+  let msgs;
+  if(searchQuery){
+    msgs=allMsgs.filter(m=>m.text?.toLowerCase().includes(searchQuery)||m.author?.toLowerCase().includes(searchQuery));
+  } else {
+    msgs=allMsgs.slice(typeof chatDisplayFrom!=='undefined'?chatDisplayFrom:0);
+  }
   if(!msgs.length){
     el.innerHTML=searchQuery?'<div class="chat-empty">ничего не найдено</div>':'<div class="chat-empty">начните разговор...</div>';
     return;
