@@ -118,14 +118,15 @@ async function fbPollAll() {
 
 // ── CHAT ──
 // ── CHAT PAGINATION ──
-const CHAT_PAGE = 50; // сообщений за раз
-let chatOldestTs = null; // для подгрузки старых
+const CHAT_PAGE = 50;
 let chatAllLoaded = false;
 let chatLoadingOld = false;
+let chatOldestTs = null;
 
-async function fbGetChatPage(limitToLast = CHAT_PAGE, endAt = null) {
-  let url = `${FB_URL}/chat.json?orderBy="ts"&limitToLast=${limitToLast}`;
-  if (endAt !== null) url += `&endAt=${endAt}`;
+async function fbGetChatPage(limitToLast = CHAT_PAGE, endAtKey = null) {
+  // Firebase REST: limitToLast без orderBy работает без индекса
+  let url = `${FB_URL}/chat.json?limitToLast=${limitToLast}`;
+  if (endAtKey) url += `&endAt="${endAtKey}"&orderBy="$key"`;
   const r = await fetch(url);
   if (!r.ok) throw new Error(r.status);
   return r.json();
@@ -133,71 +134,89 @@ async function fbGetChatPage(limitToLast = CHAT_PAGE, endAt = null) {
 
 async function fbPollChat() {
   try {
-    const data = await fbGetChatPage(CHAT_PAGE);
-    const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>a.ts-b.ts) : [];
+    // Всегда грузим последние CHAT_PAGE без orderBy — это работает без индекса
+    const url = `${FB_URL}/chat.json?limitToLast=${CHAT_PAGE}`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
 
-    // Merge: keep old pages + update last page
+    const arr = data
+      ? Object.entries(data).map(([k,v]) => ({...v, _key:k})).sort((a,b) => (a.ts||0) - (b.ts||0))
+      : [];
+
     if (fbMessages.length === 0) {
       fbMessages = arr;
       if (arr.length < CHAT_PAGE) chatAllLoaded = true;
+      if (arr.length > 0) chatOldestTs = arr[0].ts;
     } else {
-      // Update/append new messages at the end
-      const existingKeys = new Set(fbMessages.map(m=>m._key));
-      const newMsgs = arr.filter(m=>!existingKeys.has(m._key));
-      // Update edited messages
-      arr.forEach(m=>{ const ex=fbMessages.find(x=>x._key===m._key); if(ex){ ex.text=m.text; ex.edited=m.edited; }});
+      // Обновляем/добавляем новые сообщения в конец
+      const existingKeys = new Set(fbMessages.map(m => m._key));
+      const newMsgs = arr.filter(m => !existingKeys.has(m._key));
+      // Обновляем отредактированные
+      arr.forEach(m => {
+        const ex = fbMessages.find(x => x._key === m._key);
+        if (ex) { ex.text = m.text; ex.edited = m.edited; }
+      });
       if (newMsgs.length > 0) {
-        const oldLen = fbMessages.length;
         fbMessages = [...fbMessages, ...newMsgs];
-        // notify
-        if(curScreen !== 'chat') {
-          const last = newMsgs[newMsgs.length-1];
-          if(last.author !== D.currentUser?.name) notifyIfNeeded(`💬 ${last.author}`, last.msgType==='image'?'📷 фото':last.text);
+        if (curScreen !== 'chat') {
+          const last = newMsgs[newMsgs.length - 1];
+          if (last.author !== D.currentUser?.name)
+            notifyIfNeeded(`💬 ${last.author}`, last.msgType === 'image' ? '📷 фото' : last.text);
         }
       }
     }
 
-    if (arr.length > 0) chatOldestTs = fbMessages[0].ts;
-
     if (curScreen === 'chat') { renderMsgs(); markChatRead(); }
     else updateChatBadge(countUnread());
     renderHome();
-  } catch(e) { fbMessages = D.chat.general || []; }
+  } catch(e) {
+    console.error('fbPollChat:', e);
+    fbMessages = D.chat?.general || [];
+  }
 }
 
-// Подгрузить более старые сообщения (вызывается при скролле вверх)
+// Подгрузить старые сообщения при скролле вверх
 async function loadOlderMessages() {
-  if (chatAllLoaded || chatLoadingOld || !chatOldestTs) return;
+  if (chatAllLoaded || chatLoadingOld || fbMessages.length === 0) return;
   chatLoadingOld = true;
 
   const indicator = document.getElementById('chat-load-indicator');
-  if (indicator) indicator.style.display = 'block';
+  if (indicator) { indicator.style.display = 'block'; indicator.textContent = 'загрузка...'; }
 
   try {
-    // endAt = chatOldestTs - 1 чтобы не дублировать первое сообщение
-    const data = await fbGetChatPage(CHAT_PAGE, chatOldestTs - 1);
-    const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>a.ts-b.ts) : [];
+    // Берём ключ первого известного сообщения и грузим CHAT_PAGE до него
+    const firstKey = fbMessages[0]._key;
+    const url = `${FB_URL}/chat.json?orderBy="$key"&endAt="${firstKey}"&limitToLast=${CHAT_PAGE + 1}`;
+    const r = await fetch(url);
+    const data = await r.json();
 
-    if (arr.length === 0 || arr.length < CHAT_PAGE) chatAllLoaded = true;
+    const arr = data
+      ? Object.entries(data).map(([k,v]) => ({...v, _key:k})).sort((a,b) => (a.ts||0) - (b.ts||0))
+      : [];
 
-    if (arr.length > 0) {
-      const existingKeys = new Set(fbMessages.map(m=>m._key));
-      const older = arr.filter(m=>!existingKeys.has(m._key));
-      fbMessages = [...older, ...fbMessages];
-      chatOldestTs = fbMessages[0].ts;
+    // Убираем первый элемент — он уже есть (это firstKey)
+    const older = arr.filter(m => m._key !== firstKey);
 
-      // Сохранить позицию скролла чтобы не прыгало
+    if (older.length === 0) {
+      chatAllLoaded = true;
+      if (indicator) indicator.textContent = 'начало чата';
+    } else {
       const el = document.getElementById('chat-msgs');
       const prevH = el ? el.scrollHeight : 0;
+      fbMessages = [...older, ...fbMessages];
+      chatOldestTs = fbMessages[0].ts;
       renderMsgs();
       if (el) el.scrollTop = el.scrollHeight - prevH;
+      if (indicator) indicator.style.display = 'none';
+      if (older.length < CHAT_PAGE) { chatAllLoaded = true; }
     }
-
-    if (chatAllLoaded && indicator) indicator.textContent = 'начало чата';
-  } catch(e) { console.error('loadOlderMessages:', e); }
+  } catch(e) {
+    console.error('loadOlderMessages:', e);
+    if (indicator) indicator.style.display = 'none';
+  }
 
   chatLoadingOld = false;
-  if (indicator && !chatAllLoaded) indicator.style.display = 'none';
 }
 
 async function fbSend(author, text, replyTo=null, msgType='text') {
