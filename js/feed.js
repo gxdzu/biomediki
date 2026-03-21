@@ -46,6 +46,11 @@ function countReactions(post, type){
 async function openPost(key){
   curPostKey = key;
   navigate('post');
+  // If post not yet in fbFeed - fetch fresh data first
+  if(!fbFeed.find(p=>p._key===key)){
+    await fbPollFeed();
+  }
+  renderPostScreen();
 }
 
 async function submitComment(){
