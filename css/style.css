@@ -110,6 +110,7 @@ a{text-decoration:none}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;padding-bottom:var(--nav);animation:sin .28s ease}
 .screen.active{display:flex}
+.screen-post.active{display:flex;flex-direction:column;padding-bottom:0}
 .scr-scroll{flex:1;overflow-y:auto;padding:0 16px 24px}
 .scr-scroll::-webkit-scrollbar{display:none}
 @keyframes sin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
