@@ -40,11 +40,16 @@ function renderHome(){
 }
 
 // ── POST Dня ──
+let _lastPostDayKey = '';
+
 function renderPostOfDay(){
   const el=document.getElementById('home-post-day'); if(!el) return;
   const best=getBestPost();
-  if(!best){el.innerHTML='';return;}
+  if(!best){el.innerHTML=''; _lastPostDayKey=''; return;}
   const likes=countReactions(best,'👍');
+  const key=best._key+'|'+likes;
+  if(key===_lastPostDayKey) return;
+  _lastPostDayKey=key;
   el.innerHTML=`
     <div class="wgt-lbl" style="margin-bottom:10px">пост дня</div>
     <div class="feed-post" style="margin:0;cursor:pointer" onclick="openPost('${best._key}')">

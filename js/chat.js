@@ -229,21 +229,25 @@ function renderChat(){
   renderPinnedBar(); renderMsgs();
 }
 
+let _lastMsgsHash = '';
+
 function renderMsgs(){
   const el=document.getElementById('chat-msgs'); if(!el) return;
-  const allMsgs=fbMessages.length?fbMessages:(D.chat?.general||[]);
-  // Apply search or pagination slice
-  let msgs;
-  if(searchQuery){
-    msgs=allMsgs.filter(m=>m.text?.toLowerCase().includes(searchQuery)||m.author?.toLowerCase().includes(searchQuery));
-  } else {
-    msgs=allMsgs.slice(typeof chatDisplayFrom!=='undefined'?chatDisplayFrom:0);
-  }
+  let msgs=fbMessages.length?fbMessages:(D.chat?.general||[]);
+  if(searchQuery) msgs=msgs.filter(m=>m.text?.toLowerCase().includes(searchQuery)||m.author?.toLowerCase().includes(searchQuery));
   if(!msgs.length){
     el.innerHTML=searchQuery?'<div class="chat-empty">ничего не найдено</div>':'<div class="chat-empty">начните разговор...</div>';
+    _lastMsgsHash='';
     return;
   }
-  const wasAtBottom=el.scrollHeight-el.scrollTop-el.clientHeight<80;
+
+  // Не перерисовывать если ничего не изменилось
+  const hash = msgs.map(m=>m._key+'|'+(m.text||'')+'|'+(m.edited||'')).join(',');
+  if(hash === _lastMsgsHash) return;
+  _lastMsgsHash = hash;
+
+  const wasAtBottom = el.scrollHeight===0 || el.scrollHeight-el.scrollTop-el.clientHeight < 100;
+  const prevScrollTop = el.scrollTop;
   const isAdmin=D.currentUser?.role==='admin';
   const myName=D.currentUser?.name;
   const myMsgs=msgs.filter(m=>m.author===myName);
@@ -278,8 +282,9 @@ function renderMsgs(){
       </div>`;
     }
 
+    const safeText = (m.msgType==='image'?'📷 фото':m.msgType==='file'?'📎 файл':m.text||'').replace(/'/g,"\\'").slice(0,100);
     const actions=`<div class="msg-actions">
-      <button class="msg-act" onclick="setReply('${m._key}','${esc(m.author).replace(/'/g,"\\'")}','${esc(m.text).replace(/'/g,"\\'")}')">↩</button>
+      <button class="msg-act" onclick="setReply('${m._key}','${esc(m.author).replace(/'/g,"\\'")}','${safeText}')">↩</button>
       ${canEdit?`<button class="msg-act" onclick="openMsgEdit('${m._key}','${esc(m.text).replace(/'/g,"\\'")}')">✎</button>`:''}
       ${isAdmin?`<button class="msg-act" onclick="pinMsg('${m._key}')">${isPinned?'📌':'📍'}</button>`:''}
       ${canDel?`<button class="msg-act" onclick="delMsg('${m._key}')">✕</button>`:''}
@@ -312,12 +317,14 @@ function renderMsgs(){
   });
   el.innerHTML=html;
   if(wasAtBottom) el.scrollTop=el.scrollHeight;
+  else el.scrollTop=prevScrollTop;
 }
 
 function sendMsg(){
   const inp=document.getElementById('chat-inp');
   const txt=inp.value.trim(); if(!txt) return;
   inp.value='';
+  _lastMsgsHash=''; // сбрасываем чтобы renderMsgs точно перерисовал
   hideMentionList();
   document.getElementById('emoji-picker')?.classList.add('hidden');
   D.cat.mood=Math.min(100,D.cat.mood+1); save();
@@ -326,7 +333,6 @@ function sendMsg(){
     if(m.name!==D.currentUser?.name&&txt.includes('@'+m.name))
       notifyIfNeeded(`📣 ${D.currentUser?.name} упомянул вас`,txt);
   });
-  // notify replied-to author
   if(replyTo && replyTo.author !== D.currentUser?.name)
     notifyIfNeeded(`↩ ${D.currentUser?.name} ответил вам`,txt);
   fbSend(D.currentUser?.name||'Аноним', txt, replyTo);
