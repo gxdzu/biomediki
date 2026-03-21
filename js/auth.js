@@ -43,9 +43,16 @@ async function doLogin(){
   // Re-login with used invite
   const usedInv = allInvites.find(i => i.code===raw && i.used);
   if(usedInv){
-    const member = (fbMembers.length?fbMembers:D.members).find(m=>m.code===raw);
+    // Wait for members to load if needed
+    if(fbMembers.length === 0){
+      let w = 0;
+      while(fbMembers.length === 0 && w < 3000){ await new Promise(r=>setTimeout(r,300)); w+=300; }
+    }
+    const allMembers = fbMembers.length ? fbMembers : D.members;
+    const member = allMembers.find(m => m.code===raw || m.name===usedInv.usedBy);
     if(member){
-      D.currentUser = {name:member.name, role:member.role||'member', subgroup:member.subgroup||0, code:raw};
+      D.currentUser = {name:member.name, role:member.role||'member', subgroup:member.subgroup||0, code:raw,
+        bio:member.bio||'', socials:member.socials||{}, avatarUrl:member.avatarUrl||'', _key:member._key};
       save(); launchApp(); return;
     }
   }
