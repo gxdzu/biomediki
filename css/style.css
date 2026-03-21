@@ -1054,3 +1054,22 @@ body:has(#screen-post.active) .bnav {
   border-radius:20px;transition:all .2s;
 }
 .hw-link:hover{background:var(--gold2);color:var(--bg)}
+
+/* ══════════════════════════════════════════════
+   CHAT ATTACH SHEET
+══════════════════════════════════════════════ */
+.attach-sheet{
+  position:absolute;bottom:100%;left:0;
+  background:var(--bg2);border:.5px solid var(--bdr2);
+  border-radius:var(--r);overflow:hidden;z-index:50;
+  box-shadow:0 -4px 20px rgba(0,0,0,.3);min-width:160px;
+  margin-bottom:4px;
+}
+.attach-opt{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 16px;width:100%;background:none;border:none;
+  color:var(--text);font-size:13px;cursor:pointer;
+  text-align:left;transition:background .15s;
+}
+.attach-opt:hover{background:var(--bg3)}
+.attach-opt svg{flex-shrink:0;color:var(--gold2)}
