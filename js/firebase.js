@@ -40,14 +40,28 @@ async function fbPollMembers() {
     const data = await fbGet('members');
     const arr = data ? Object.entries(data).map(([k,v]) => ({...v, _key:k})) : [];
     if (JSON.stringify(arr) !== JSON.stringify(fbMembers)) {
-      fbMembers = arr;
-      // merge into D.members — keep currentUser entry, add/update others
+      // Deduplicate by name — keep the one with more data (bio/socials)
+      const seen = new Map();
       arr.forEach(fm => {
-        const existing = D.members.find(m => m.code === fm.code);
+        const existing = seen.get(fm.name);
+        if (!existing || (fm.bio || fm.socials)) seen.set(fm.name, fm);
+      });
+      fbMembers = [...seen.values()];
+
+      fbMembers.forEach(fm => {
+        const existing = D.members.find(m =>
+          (m.code && m.code === fm.code) || m.name === fm.name
+        );
         if (existing) {
-          existing.name = fm.name;
+          existing.name     = fm.name;
           existing.subgroup = fm.subgroup;
-          existing._key = fm._key;
+          existing.bio      = fm.bio || existing.bio;
+          existing.socials  = fm.socials || existing.socials;
+          existing._key     = fm._key;
+          if (D.currentUser && D.currentUser.name === fm.name) {
+            D.currentUser.bio     = fm.bio || D.currentUser.bio;
+            D.currentUser.socials = fm.socials || D.currentUser.socials;
+          }
         } else {
           D.members.push(fm);
         }
@@ -61,16 +75,18 @@ async function fbPollMembers() {
 
 async function fbSaveMember(member) {
   try {
+    const payload = {
+      name:     member.name,
+      role:     member.role,
+      code:     member.code || '',
+      subgroup: member.subgroup || 0,
+      bio:      member.bio     || '',
+      socials:  member.socials || {},
+    };
     if (member._key) {
-      await fbSet(`members/${member._key}`, {
-        name: member.name, role: member.role,
-        code: member.code, subgroup: member.subgroup || 0
-      });
+      await fbSet(`members/${member._key}`, payload);
     } else {
-      const res = await fbPost('members', {
-        name: member.name, role: member.role,
-        code: member.code, subgroup: member.subgroup || 0
-      });
+      const res = await fbPost('members', payload);
       member._key = res.name;
     }
   } catch(e) { console.error('fbSaveMember error:', e); }

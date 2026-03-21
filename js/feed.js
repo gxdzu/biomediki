@@ -93,7 +93,7 @@ function renderPostScreen(){
         </div>
         ${canDel?`<button class="msg-act" onclick="deletePost('${post._key}')" style="margin-left:auto">✕</button>`:''}
       </div>
-      ${post.img?`<img class="feed-post-img" src="${post.img}" onerror="this.style.display='none'" loading="lazy">`:''}
+      ${getMediaHtml(post.mediaUrl||post.img)}
       <div class="feed-post-text" style="margin-bottom:12px">${esc(post.text)}</div>
       <div class="feed-reactions">
         <button class="react-btn ${myReact==='👍'?'active':''}" onclick="reactToPost('${post._key}','👍')">
@@ -129,14 +129,14 @@ async function publishPost(){
   const post = {
     author: D.currentUser?.name||'Аноним',
     text, ts: Date.now(), time: nowTime(),
-    img: imgUrl||null, reactions:{}, comments:{}
+    mediaUrl: imgUrl||null, reactions:{}, comments:{}
   };
   try{
     const res = await fbPost('feed', post);
     post._key = res.name;
     fbFeed.unshift(post); D.feed=[...fbFeed];
     document.getElementById('post-text').value='';
-    document.getElementById('post-img').value='';
+    document.getElementById('post-img').value=''; 
     closePostEditor(); renderFeed(); renderHome();
     toast('пост опубликован');
   }catch(e){ toast('ошибка публикации'); }
@@ -181,7 +181,7 @@ function renderFeed(){
         </div>
         ${canDel?`<button class="msg-act" onclick="event.stopPropagation();deletePost('${p._key}')" style="margin-left:auto">✕</button>`:''}
       </div>
-      ${p.img?`<img class="feed-post-img" src="${p.img}" onerror="this.style.display='none'" loading="lazy">`:''}
+      ${getMediaHtml(p.mediaUrl||p.img, true)}
       <div class="feed-post-text">${esc(p.text)}</div>
       <div class="feed-reactions" onclick="event.stopPropagation()">
         <button class="react-btn ${myReact==='👍'?'active':''}" onclick="reactToPost('${p._key}','👍')">
