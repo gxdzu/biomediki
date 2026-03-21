@@ -223,6 +223,9 @@
             <button class="emoji-btn" onclick="toggleEmojiPicker()">
               <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
             </button>
+            <button class="emoji-btn" onclick="chatPickPhoto()" title="фото">
+              <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
             <input class="chat-inp" id="chat-inp" placeholder="сообщение..."
               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
               oninput="handleChatInput(this.value)">
@@ -464,6 +467,9 @@
         <button class="emoji-btn" onclick="toggleDmEmoji()">
           <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
         </button>
+        <button class="emoji-btn" onclick="dmPickPhoto()" title="фото">
+          <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <input class="chat-inp" id="dm-inp" placeholder="сообщение..."
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDm()}">
         <button class="chat-send" onclick="sendDm()">
@@ -646,12 +652,18 @@
   <div class="modal-box" style="max-width:380px">
     <div class="modal-title">редактировать профиль</div>
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-      <div id="prof-edit-av" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0"></div>
+      <div style="position:relative;cursor:pointer" onclick="pickAvatar()">
+        <div id="prof-edit-av" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;overflow:hidden"></div>
+        <div style="position:absolute;bottom:0;right:0;width:20px;height:20px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 12 12" width="10" height="10"><path d="M8 2l2 2-6 6H2V8L8 2z" stroke="currentColor" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
       <div style="flex:1">
         <div style="font-size:11px;color:var(--text3);margin-bottom:6px">имя</div>
         <input class="modal-inp" id="pe-name" placeholder="твоё имя" maxlength="24">
       </div>
     </div>
+    <input type="hidden" id="pe-avatar-url">
     <input class="modal-inp" id="pe-bio" placeholder="о себе (цитата или описание)" maxlength="120">
     <div style="font-size:11px;color:var(--text3);margin:10px 0 6px">соцсети (вставь ссылку)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -672,7 +684,25 @@
   <div class="modal-box" style="max-width:400px">
     <div class="modal-title">новый пост</div>
     <textarea class="modal-inp" id="post-text" placeholder="текст поста..." rows="4" style="resize:none;line-height:1.5"></textarea>
-    <input class="modal-inp" id="post-img" placeholder="ссылка на медиа: фото, видео или YouTube (необязательно)" type="url">
+    <!-- Media upload -->
+    <div id="post-media-preview" style="display:none;margin:8px 0;border-radius:var(--rs);overflow:hidden;max-height:200px">
+      <img id="post-media-img" style="width:100%;display:none;object-fit:cover;border-radius:var(--rs)">
+      <div id="post-media-name" style="font-size:11px;color:var(--text3);padding:4px 0"></div>
+    </div>
+    <div id="post-upload-progress" style="display:none;margin:6px 0">
+      <div style="background:var(--bg3);border-radius:20px;height:4px;overflow:hidden">
+        <div id="post-upload-bar" style="height:100%;background:var(--gold);width:0%;transition:width .2s;border-radius:20px"></div>
+      </div>
+      <div id="post-upload-pct" style="font-size:11px;color:var(--text3);text-align:center;margin-top:4px">загрузка...</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="modal-btn" style="flex:0;padding:8px 12px" onclick="postPickMedia()" id="post-media-btn">
+        <svg viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        медиа
+      </button>
+      <button class="modal-btn danger" style="flex:0;padding:8px 12px;display:none" id="post-media-clear" onclick="clearPostMedia()">✕ убрать</button>
+    </div>
+    <input type="hidden" id="post-img">
     <div class="modal-row" style="margin-top:10px">
       <button class="modal-btn" onclick="publishPost()">опубликовать</button>
       <button class="modal-btn danger" onclick="closePostEditor()">отмена</button>
@@ -798,6 +828,7 @@
 
 <script src="js/data.js"></script>
 <script src="js/firebase.js"></script>
+<script src="js/cloudinary.js"></script>
 <script src="js/feed.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/nav.js"></script>
