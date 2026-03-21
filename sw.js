@@ -1,5 +1,5 @@
 // BioMur Service Worker
-const CACHE = 'biomur-v1';
+const CACHE = 'biomur-v2';
 const STATIC = [
   '/biomediki/',
   '/biomediki/index.html',
