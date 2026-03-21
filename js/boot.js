@@ -46,6 +46,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   updateOnlineStatus();
   if(D.currentUser) launchApp();
   document.getElementById('inv-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+
+  // Chat pagination — load older when scrolling to top
+  document.addEventListener('scroll', e=>{
+    const el = e.target;
+    if(el.id==='chat-msgs' && el.scrollTop < 80) {
+      loadOlderMessages();
+    }
+  }, true);
 });
 
 // ── expose all functions to global scope ──
@@ -97,3 +105,4 @@ window.toggleChatAttach=toggleChatAttach; window.closeChatAttach=closeChatAttach
 window.chatPickFile=chatPickFile; window.chatPickLink=chatPickLink;
 window.setLinkMode=setLinkMode; window.linkPickFile=linkPickFile;
 window.toggleDmAttach=toggleDmAttach; window.closeDmAttach=closeDmAttach; window.dmPickFile=dmPickFile;
+window.loadOlderMessages=loadOlderMessages;

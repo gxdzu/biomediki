@@ -22,7 +22,11 @@ function navigate(s){
   if(s==='home') renderHome();
   if(s==='schedule') renderSchedule();
   if(s==='hw') renderHw();
-  if(s==='chat'){renderChat();markChatRead();}
+  if(s==='chat'){
+    // Reset only if messages empty (first open)
+    if(fbMessages.length===0){ chatAllLoaded=false; chatOldestTs=null; }
+    renderChat();markChatRead();
+  }
   if(s==='links') renderLinks();
   if(s==='feed') renderFeed();
   if(s==='post') renderPostScreen();
