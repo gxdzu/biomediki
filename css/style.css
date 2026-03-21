@@ -288,6 +288,8 @@ a{text-decoration:none}
   background:var(--bg1);
   padding-bottom:max(8px,env(safe-area-inset-bottom));
   align-items:flex-end;
+  position:relative;
+  position:relative;
 }
 .chat-inp{
   flex:1;background:var(--bg2);border:.5px solid var(--bdr);
