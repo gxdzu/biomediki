@@ -3,20 +3,33 @@
 // ══════════════════════════════════════════════
 
 function renderProfile(){
-  const u = D.currentUser; if(!u) return;
-  const c = avatarColor(u.name);
+  const u=D.currentUser; if(!u) return;
+  const c=avatarColor(u.name);
 
-  const av = document.getElementById('prof-tg-av');
+  // Big profile avatar
+  const av=document.getElementById('prof-tg-av');
   if(av){
-    av.textContent = (u.name||'?')[0].toUpperCase();
-    av.style.background = c.bg; av.style.borderColor = c.bd; av.style.color = c.tx;
+    if(u.avatarUrl){
+      av.innerHTML=`<img src="${u.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      av.style.background='none'; av.style.borderColor=c.bd;
+    } else {
+      av.innerHTML=(u.name||'?')[0].toUpperCase();
+      av.style.background=c.bg; av.style.borderColor=c.bd; av.style.color=c.tx;
+    }
   }
-  const navAv = document.getElementById('nav-prof-av');
+
+  // Navbar avatar
+  const navAv=document.getElementById('nav-prof-av');
   if(navAv){
-    navAv.textContent = (u.name||'?')[0].toUpperCase();
-    navAv.style.background = c.bg;
-    navAv.style.border = `.5px solid ${c.bd}`;
-    navAv.style.color = c.tx;
+    if(u.avatarUrl){
+      navAv.innerHTML=`<img src="${u.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      navAv.style.background='none';
+    } else {
+      navAv.innerHTML=(u.name||'?')[0].toUpperCase();
+      navAv.style.background=c.bg;
+      navAv.style.border=`.5px solid ${c.bd}`;
+      navAv.style.color=c.tx;
+    }
   }
   const nameEl = document.getElementById('prof-tg-name');
   if(nameEl) nameEl.textContent = u.name||'—';
@@ -50,25 +63,43 @@ function renderProfile(){
 }
 
 function openProfileEdit(){
-  const u = D.currentUser; if(!u) return;
-  const s = u.socials||{};
-  document.getElementById('pe-name').value  = u.name||'';
-  document.getElementById('pe-bio').value   = u.bio||'';
-  document.getElementById('pe-vk').value    = s.vk||'';
-  document.getElementById('pe-tg').value    = s.tg||'';
-  document.getElementById('pe-inst').value  = s.inst||'';
-  document.getElementById('pe-other').value = s.other||'';
-  refreshEditAvatar(u.name);
-  document.getElementById('pe-name').oninput = function(){ refreshEditAvatar(this.value||u.name); };
+  const u=D.currentUser; if(!u) return;
+  const s=u.socials||{};
+  document.getElementById('pe-name').value  =u.name||'';
+  document.getElementById('pe-bio').value   =u.bio||'';
+  document.getElementById('pe-vk').value    =s.vk||'';
+  document.getElementById('pe-tg').value    =s.tg||'';
+  document.getElementById('pe-inst').value  =s.inst||'';
+  document.getElementById('pe-other').value =s.other||'';
+  document.getElementById('pe-avatar-url').value=u.avatarUrl||'';
+  refreshEditAvatar(u.name, u.avatarUrl);
+  document.getElementById('pe-name').oninput=function(){ refreshEditAvatar(this.value||u.name, document.getElementById('pe-avatar-url').value); };
   document.getElementById('prof-edit-modal').classList.remove('hidden');
   setTimeout(()=>document.getElementById('pe-name').focus(),50);
 }
 
-function refreshEditAvatar(name){
-  const av = document.getElementById('prof-edit-av'); if(!av) return;
-  const c = avatarColor(name);
-  av.textContent = (name||'?')[0].toUpperCase();
-  av.style.cssText = `background:${c.bg};border:1px solid ${c.bd};color:${c.tx};width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:300;font-family:var(--serif);flex-shrink:0`;
+function refreshEditAvatar(name, avatarUrl){
+  const av=document.getElementById('prof-edit-av'); if(!av) return;
+  if(avatarUrl){
+    av.innerHTML=`<img src="${avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    av.style.cssText='width:60px;height:60px;border-radius:50%;overflow:hidden;flex-shrink:0';
+  } else {
+    const c=avatarColor(name);
+    av.innerHTML=(name||'?')[0].toUpperCase();
+    av.style.cssText=`background:${c.bg};border:1px solid ${c.bd};color:${c.tx};width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:300;font-family:var(--serif);flex-shrink:0`;
+  }
+}
+
+function pickAvatar(){
+  clPickAndUpload({
+    accept:'image/*',
+    onStart(){ toast('загружаю аватарку...'); },
+    onDone({url}){
+      document.getElementById('pe-avatar-url').value=url;
+      refreshEditAvatar(document.getElementById('pe-name').value, url);
+      toast('аватарка загружена');
+    }
+  });
 }
 
 function closeProfEdit(){
@@ -76,19 +107,20 @@ function closeProfEdit(){
 }
 
 async function saveProfileEdit(){
-  const name = document.getElementById('pe-name').value.trim().slice(0,24);
+  const name=document.getElementById('pe-name').value.trim().slice(0,24);
   if(!name){ toast('введи имя'); return; }
-  const oldName = D.currentUser.name;
-  D.currentUser.name   = name;
-  D.currentUser.bio    = document.getElementById('pe-bio').value.trim().slice(0,120);
-  D.currentUser.socials = {
-    vk:    document.getElementById('pe-vk').value.trim(),
-    tg:    document.getElementById('pe-tg').value.trim(),
-    inst:  document.getElementById('pe-inst').value.trim(),
-    other: document.getElementById('pe-other').value.trim(),
+  const oldName=D.currentUser.name;
+  D.currentUser.name     =name;
+  D.currentUser.bio      =document.getElementById('pe-bio').value.trim().slice(0,120);
+  D.currentUser.avatarUrl=document.getElementById('pe-avatar-url').value||'';
+  D.currentUser.socials  ={
+    vk:   document.getElementById('pe-vk').value.trim(),
+    tg:   document.getElementById('pe-tg').value.trim(),
+    inst: document.getElementById('pe-inst').value.trim(),
+    other:document.getElementById('pe-other').value.trim(),
   };
-  const m = D.members.find(x=>x.name===oldName);
-  if(m){ m.name=name; m.bio=D.currentUser.bio; m.socials=D.currentUser.socials; await fbSaveMember(m); }
+  const m=D.members.find(x=>x.name===oldName);
+  if(m){ m.name=name; m.bio=D.currentUser.bio; m.avatarUrl=D.currentUser.avatarUrl; m.socials=D.currentUser.socials; await fbSaveMember(m); }
   save(); closeProfEdit(); renderProfile(); renderHome(); toast('профиль обновлён');
 }
 

@@ -235,3 +235,40 @@ function getBestPost(){
     return bl-al;
   })[0];
 }
+
+// ── CLOUDINARY INTEGRATION ──
+function postPickMedia(){
+  clPickAndUpload({
+    accept: 'image/*,video/*',
+    onStart(file){
+      document.getElementById('post-upload-progress').style.display='block';
+      document.getElementById('post-media-btn').disabled=true;
+      clPreview(file, document.getElementById('post-media-img'));
+      document.getElementById('post-media-name').textContent=file.name;
+      document.getElementById('post-media-preview').style.display='block';
+    },
+    onProgress(pct){
+      document.getElementById('post-upload-bar').style.width=pct+'%';
+      document.getElementById('post-upload-pct').textContent=pct+'%';
+    },
+    onDone({url}){
+      document.getElementById('post-img').value=url;
+      document.getElementById('post-upload-progress').style.display='none';
+      document.getElementById('post-media-btn').disabled=false;
+      document.getElementById('post-media-clear').style.display='';
+      toast('медиа загружено');
+    },
+    onError(){
+      document.getElementById('post-upload-progress').style.display='none';
+      document.getElementById('post-media-btn').disabled=false;
+    }
+  });
+}
+
+function clearPostMedia(){
+  document.getElementById('post-img').value='';
+  document.getElementById('post-media-preview').style.display='none';
+  document.getElementById('post-media-clear').style.display='none';
+  document.getElementById('post-media-img').src='';
+  document.getElementById('post-media-name').textContent='';
+}

@@ -11,7 +11,13 @@ function avatarColor(name){
   let h=0; for(let i=0;i<name.length;i++) h=(h*31+name.charCodeAt(i))%AVATAR_COLORS.length;
   return AVATAR_COLORS[h];
 }
-function avatarHtml(name,size=28){
+function avatarHtml(name, size=28){
+  // Check if member has a real photo
+  const allMembers = typeof fbMembers !== 'undefined' ? (fbMembers.length?fbMembers:[]) : [];
+  const member = allMembers.find(m=>m.name===name) || (typeof D!=='undefined'?D.members?.find(m=>m.name===name):null);
+  if(member?.avatarUrl){
+    return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;cursor:pointer" onclick="openMemberProfile('${name}')"><img src="${member.avatarUrl}" style="width:100%;height:100%;object-fit:cover"></div>`;
+  }
   const c=avatarColor(name),l=(name||'?')[0].toUpperCase(),fs=Math.round(size*.43);
   return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:500;color:${c.tx};flex-shrink:0;cursor:pointer" onclick="openMemberProfile('${name}')">${l}</div>`;
 }
@@ -37,13 +43,21 @@ function clearReply(){
 
 // ── MEMBER PROFILE SHEET ──
 function openMemberProfile(name){
-  const allMembers = [...(fbMembers.length?fbMembers:[]),...D.members];
-  const seen = new Set();
-  const members = allMembers.filter(m=>{ if(seen.has(m.name)) return false; seen.add(m.name); return true; });
-  const m = members.find(x=>x.name===name)||{name,role:'member'};
-  const c = avatarColor(m.name);
-  const av = document.getElementById('msheet-av');
-  if(av){ av.textContent=(m.name||'?')[0].toUpperCase(); av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`; }
+  const allMembers=[...(fbMembers.length?fbMembers:[]),...D.members];
+  const seen=new Set();
+  const members=allMembers.filter(m=>{ if(seen.has(m.name)) return false; seen.add(m.name); return true; });
+  const m=members.find(x=>x.name===name)||{name,role:'member'};
+  const c=avatarColor(m.name);
+  const av=document.getElementById('msheet-av');
+  if(av){
+    if(m.avatarUrl){
+      av.innerHTML=`<img src="${m.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      av.style.cssText='width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 12px;border:1px solid '+c.bd;
+    } else {
+      av.textContent=(m.name||'?')[0].toUpperCase();
+      av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`;
+    }
+  }
   document.getElementById('msheet-name').textContent=m.name;
   document.getElementById('msheet-role').textContent=m.role==='admin'?'администратор':(m.subgroup?`подгруппа ${m.subgroup}`:'участник');
   document.getElementById('msheet-bio').textContent=m.bio||'';
@@ -52,6 +66,9 @@ function openMemberProfile(name){
   document.getElementById('msheet-socials').innerHTML=defs.filter(d=>soc[d.k]).map(d=>
     `<a class="social-chip" href="${soc[d.k]}" target="_blank">${d.l}</a>`
   ).join('');
+  // Hide write button if viewing own profile
+  const dmBtn=document.getElementById('msheet-dm-btn');
+  if(dmBtn) dmBtn.style.display=m.name===D.currentUser?.name?'none':'';
   document.getElementById('member-profile-modal').classList.remove('hidden');
 }
 function closeMemberProfile(){ document.getElementById('member-profile-modal').classList.add('hidden'); }
@@ -248,7 +265,10 @@ function renderMsgs(){
         ${isPinned?'<div class="msg-pinned-mark">📌</div>':''}
         <div class="msg-bbl" style="${bblStyle}">
           ${replyHtml}
-          ${renderMentionInText(m.text)}
+          ${m.msgType==='image'
+            ? `<img src="${m.text}" style="max-width:220px;max-height:220px;border-radius:10px;display:block;cursor:pointer" onclick="window.open('${m.text}','_blank')" loading="lazy">`
+            : renderMentionInText(m.text)
+          }
         </div>
         <div class="msg-footer">
           <span class="msg-time">${m.time}</span>
@@ -298,4 +318,17 @@ function updateChatBadge(count){
 function countUnread(){
   const myName=D.currentUser?.name;
   return fbMessages.filter(m=>m.author!==myName&&(m.ts||0)>lastSeenTs).length;
+}
+
+// ── CLOUDINARY — отправка фото в чат ──
+function chatPickPhoto(){
+  clPickAndUpload({
+    accept: 'image/*',
+    onStart(){ toast('загружаю фото...'); },
+    onDone({url}){
+      // Send as message with image URL embedded
+      fbSend(D.currentUser?.name||'Аноним', url, null, 'image');
+      D.cat.mood=Math.min(100,D.cat.mood+1); save();
+    }
+  });
 }

@@ -145,7 +145,11 @@ function renderDmMsgs(msgs){
     return `${dateSep}<div class="msg-row ${me?'me':''}">
       ${!me?`<div style="width:28px;flex-shrink:0"></div>`:''}
       <div class="msg-col">
-        <div class="msg-bbl" style="${bblStyle}">${replyHtml}${esc(m.text)}${m.edited?` <span style="font-size:9px;color:var(--text3)">ред.</span>`:''}</div>
+        <div class="msg-bbl" style="${bblStyle}">${replyHtml}${
+          m.msgType==='image'
+            ? `<img src="${m.text}" style="max-width:220px;max-height:220px;border-radius:10px;display:block;cursor:pointer" onclick="window.open('${m.text}','_blank')" loading="lazy">`
+            : esc(m.text)
+        }${m.edited?` <span style="font-size:9px;color:var(--text3)">ред.</span>`:''}</div>
         <div class="msg-footer"><span class="msg-time">${m.time||''}</span>${actions}</div>
       </div>
     </div>`;
@@ -229,4 +233,21 @@ function updateDmBadge(){
   });
   const badge=document.getElementById('dm-badge');
   if(badge){ badge.style.display=total?'block':'none'; badge.textContent=total; }
+}
+
+// ── CLOUDINARY — фото в DM ──
+function dmPickPhoto(){
+  clPickAndUpload({
+    accept: 'image/*',
+    onStart(){ toast('загружаю фото...'); },
+    onDone({url}){
+      const myName=D.currentUser?.name; if(!myName||!curDmPartner) return;
+      const key=dmKey(myName,curDmPartner);
+      const msg={author:myName,text:url,ts:Date.now(),time:nowTime(),msgType:'image'};
+      if(!dmMessages[key]) dmMessages[key]=[];
+      dmMessages[key].push(msg);
+      renderDmMsgs(dmMessages[key]);
+      fbPost(`dms/${key}`,msg).catch(()=>{});
+    }
+  });
 }

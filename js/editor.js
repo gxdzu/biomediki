@@ -83,3 +83,46 @@ async function saveLesEdit(){
 }
 
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// HOMEWORK EDIT
+// ══════════════════════════════════════════════
+
+
+function openHwEdit(id){
+  const hw = D.homework.find(h=>h.id===id);
+  if(!hw) return;
+  editingHwId = id;
+  document.getElementById('hw-edit-title').value = hw.title||'';
+  document.getElementById('hw-edit-subj').value  = hw.subject||'';
+  document.getElementById('hw-edit-desc').value  = hw.desc||'';
+  document.getElementById('hw-edit-url').value   = hw.url||'';
+  document.getElementById('hw-edit-due').value   = hw.dueDate||'';
+  document.getElementById('hw-edit-urg').value   = hw.urgency||'mid';
+  document.getElementById('hw-modal').classList.remove('hidden');
+}
+function closeHwModal(){
+  editingHwId=null;
+  document.getElementById('hw-modal').classList.add('hidden');
+}
+async function saveHwEdit(){
+  if(!editingHwId) return;
+  const hw=D.homework.find(h=>h.id===editingHwId);
+  if(!hw) return;
+  hw.title   = document.getElementById('hw-edit-title').value.trim()||hw.title;
+  hw.subject = document.getElementById('hw-edit-subj').value.trim()||hw.subject;
+  hw.desc    = document.getElementById('hw-edit-desc').value.trim();
+  hw.url     = document.getElementById('hw-edit-url').value.trim();
+  hw.dueDate = document.getElementById('hw-edit-due').value;
+  hw.urgency = document.getElementById('hw-edit-urg').value;
+  hw.due     = hw.dueDate ? formatDue(hw.dueDate) : '';
+  try{
+    if(hw._key) await fbSet(`homework/${hw._key}`, {
+      id:hw.id, title:hw.title, subject:hw.subject,
+      desc:hw.desc, url:hw.url,
+      dueDate:hw.dueDate, due:hw.due, urgency:hw.urgency, doneBy:hw.doneBy||[]
+    });
+    save(); renderHw(); renderAdminLists();
+    toast('задание обновлено');
+  }catch(e){ save(); renderHw(); toast('обновлено локально'); }
+  closeHwModal();
+}

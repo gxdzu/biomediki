@@ -89,3 +89,6 @@ window.switchLinksTab=switchLinksTab; window.delPersonalLink=delPersonalLink;
 window.openLinkEditor=openLinkEditor; window.closeLinkEditor=closeLinkEditor;
 window.openHwEdit=openHwEdit; window.closeHwEdit=closeHwEdit; window.saveHwEdit=saveHwEdit;
 window.checkAdminCode=checkAdminCode;
+window.postPickMedia=postPickMedia; window.clearPostMedia=clearPostMedia;
+window.pickAvatar=pickAvatar;
+window.chatPickPhoto=chatPickPhoto; window.dmPickPhoto=dmPickPhoto;

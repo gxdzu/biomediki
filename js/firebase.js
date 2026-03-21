@@ -53,14 +53,16 @@ async function fbPollMembers() {
           (m.code && m.code === fm.code) || m.name === fm.name
         );
         if (existing) {
-          existing.name     = fm.name;
-          existing.subgroup = fm.subgroup;
-          existing.bio      = fm.bio || existing.bio;
-          existing.socials  = fm.socials || existing.socials;
-          existing._key     = fm._key;
+          existing.name      = fm.name;
+          existing.subgroup  = fm.subgroup;
+          existing.bio       = fm.bio || existing.bio;
+          existing.socials   = fm.socials || existing.socials;
+          existing.avatarUrl = fm.avatarUrl || existing.avatarUrl;
+          existing._key      = fm._key;
           if (D.currentUser && D.currentUser.name === fm.name) {
-            D.currentUser.bio     = fm.bio || D.currentUser.bio;
-            D.currentUser.socials = fm.socials || D.currentUser.socials;
+            D.currentUser.bio       = fm.bio || D.currentUser.bio;
+            D.currentUser.socials   = fm.socials || D.currentUser.socials;
+            D.currentUser.avatarUrl = fm.avatarUrl || D.currentUser.avatarUrl;
           }
         } else {
           D.members.push(fm);
@@ -76,12 +78,13 @@ async function fbPollMembers() {
 async function fbSaveMember(member) {
   try {
     const payload = {
-      name:     member.name,
-      role:     member.role,
-      code:     member.code || '',
-      subgroup: member.subgroup || 0,
-      bio:      member.bio     || '',
-      socials:  member.socials || {},
+      name:      member.name,
+      role:      member.role,
+      code:      member.code || '',
+      subgroup:  member.subgroup || 0,
+      bio:       member.bio     || '',
+      socials:   member.socials || {},
+      avatarUrl: member.avatarUrl || '',
     };
     if (member._key) {
       await fbSet(`members/${member._key}`, payload);
@@ -139,12 +142,13 @@ async function fbPollChat() {
   } catch(e) { fbMessages = D.chat.general || []; }
 }
 
-async function fbSend(author, text, replyTo=null) {
+async function fbSend(author, text, replyTo=null, msgType='text') {
   const msg = {
     author, text, time: nowTime(), ts: Date.now(),
+    ...(msgType!=='text' ? {msgType} : {}),
     ...(replyTo ? {replyTo: {key: replyTo.key, author: replyTo.author, text: replyTo.text}} : {})
   };
-  fbMessages.push(msg); // optimistic
+  fbMessages.push(msg);
   renderMsgs();
   try {
     await fbPost('chat', msg);
@@ -215,6 +219,7 @@ async function fbPollHomework() {
       D.homework = arr;
       if (curScreen === 'hw') renderHw();
       renderHome();
+      if(typeof checkDeadlineReminders==='function') checkDeadlineReminders();
     }
   } catch(e) { /* keep local */ }
 }
