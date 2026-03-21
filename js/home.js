@@ -19,6 +19,8 @@ function renderHome(){
   if(hwEl){const c=D.homework.filter(h=>!h.doneBy.includes(D.currentUser?.name)).length;hwEl.textContent=c||'✓';}
   const linksEl=document.getElementById('home-links-count');
   if(linksEl) linksEl.textContent=(fbLinks.length||D.links?.length||0).toString();
+  const calCountEl=document.getElementById('home-cal-count');
+  if(calCountEl){const n=new Date();n.setHours(0,0,0,0);const c=D.homework.filter(h=>h.dueDate&&new Date(h.dueDate+'T00:00:00')>=n&&!h.doneBy.includes(D.currentUser?.name)).length;calCountEl.textContent=c||'✓';}
   // schedule today
   const sd=document.getElementById('home-sched');
   if(sd){

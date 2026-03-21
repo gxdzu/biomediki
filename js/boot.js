@@ -57,3 +57,6 @@ window.switchHwTab=switchHwTab; window.addPersonalHw=addPersonalHw;
 window.togglePersonalHw=togglePersonalHw; window.delPersonalHw=delPersonalHw;
 window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembersList;
 window.setReply=setReply; window.clearReply=clearReply; window.showReactions=showReactions;
+window.calPrev=calPrev; window.calNext=calNext; window.calSelectDay=calSelectDay;
+window.openDm=openDm; window.openDmFromSheet=openDmFromSheet; window.sendDm=sendDm;
+window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembersList;

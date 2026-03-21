@@ -17,7 +17,7 @@ function navigate(s){
 
   // Hide bottom nav on post screen
   const nav=document.querySelector('.bnav');
-  if(nav) nav.style.display = s==='post'?'none':'flex';
+  if(nav) nav.style.display = (s==='post'||s==='dm')?'none':'flex';
 
   if(s==='home') renderHome();
   if(s==='schedule') renderSchedule();
@@ -27,6 +27,10 @@ function navigate(s){
   if(s==='feed') renderFeed();
   if(s==='post') renderPostScreen();
   if(s==='faq') renderFaq();
+  if(s==='calendar') renderCalendar();
+  if(s==='dms') renderDmList();
+  if(s!=='dm'&&dmPolling){clearInterval(dmPolling);dmPolling=null;}
+  if(s==='dm') renderDmMsgs(dmMessages[dmKey(D.currentUser?.name||'',curDmPartner||'')] || []);
   if(s==='cat') renderCat();
   if(s==='profile'){renderProfile();updateNotifLabel();}
 }
