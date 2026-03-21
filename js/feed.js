@@ -4,12 +4,15 @@
 let fbFeed = [];
 let curPostKey = null;
 
-// ── медиа рендер (фото, видео, YouTube) ──
+// ── медиа рендер (фото, видео, аудио, YouTube) ──
 function getMediaHtml(url, compact=false){
   if(!url) return '';
   const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   if(ytMatch) return `<div class="video-wrap${compact?' compact':''}"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>`;
-  if(/\.(mp4|webm|ogg)(\?|$)/i.test(url)) return `<video class="feed-post-img${compact?' compact':''}" src="${url}" controls playsinline webkit-playsinline style="width:100%"></video>`;
+  if(/\.(mp4|webm|ogg|mov)(\?|$)/i.test(url)) return `<video class="feed-post-img${compact?' compact':''}" src="${url}" controls playsinline webkit-playsinline style="width:100%"></video>`;
+  if(/\.(mp3|m4a|aac|wav|ogg)(\?|$)/i.test(url)) return `<audio controls style="width:100%;margin:6px 0;border-radius:var(--rs)"><source src="${url}"></audio>`;
+  // Cloudinary audio (resource_type=video for audio in Cloudinary)
+  if(url.includes('cloudinary.com')&&/\.(mp3|m4a|aac|wav)/.test(url)) return `<audio controls style="width:100%;margin:6px 0"><source src="${url}"></audio>`;
   return `<img class="feed-post-img${compact?' compact':''}" src="${url}" onerror="this.style.display='none'" loading="lazy">`;
 }
 
@@ -181,12 +184,29 @@ async function deletePost(key){
   try{ await fbDelete(`feed/${key}`); }catch(e){}
 }
 
+function setPostMode(mode){
+  document.getElementById('post-upload-mode').style.display = mode==='upload' ? '' : 'none';
+  document.getElementById('post-link-mode').style.display   = mode==='link'   ? '' : 'none';
+  document.getElementById('post-mode-upload').classList.toggle('active', mode==='upload');
+  document.getElementById('post-mode-link').classList.toggle('active', mode==='link');
+  if(mode==='link'){
+    // clear upload state
+    document.getElementById('post-img').value='';
+    document.getElementById('post-media-preview').style.display='none';
+    document.getElementById('post-media-clear').style.display='none';
+  }
+}
+
 function openPostEditor(){
   document.getElementById('post-editor').classList.remove('hidden');
+  setPostMode('upload');
   setTimeout(()=>document.getElementById('post-text').focus(),50);
 }
 function closePostEditor(){
   document.getElementById('post-editor').classList.add('hidden');
+  document.getElementById('post-text').value='';
+  document.getElementById('post-img').value='';
+  clearPostMedia();
 }
 
 // ── рендер ленты ──
@@ -239,10 +259,11 @@ function getBestPost(){
 // ── CLOUDINARY INTEGRATION ──
 function postPickMedia(){
   clPickAndUpload({
-    accept: 'image/*,video/*',
+    accept: 'image/*,video/*,audio/*,.gif',
     onStart(file){
       document.getElementById('post-upload-progress').style.display='block';
       document.getElementById('post-media-btn').disabled=true;
+      document.getElementById('post-media-btn').textContent='загрузка...';
       clPreview(file, document.getElementById('post-media-img'));
       document.getElementById('post-media-name').textContent=file.name;
       document.getElementById('post-media-preview').style.display='block';
@@ -255,12 +276,14 @@ function postPickMedia(){
       document.getElementById('post-img').value=url;
       document.getElementById('post-upload-progress').style.display='none';
       document.getElementById('post-media-btn').disabled=false;
+      document.getElementById('post-media-btn').textContent='выбрать фото / видео / гиф';
       document.getElementById('post-media-clear').style.display='';
-      toast('медиа загружено');
+      toast('медиа загружено ✓');
     },
     onError(){
       document.getElementById('post-upload-progress').style.display='none';
       document.getElementById('post-media-btn').disabled=false;
+      document.getElementById('post-media-btn').textContent='выбрать фото / видео / гиф';
     }
   });
 }

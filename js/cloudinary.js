@@ -24,7 +24,7 @@ async function clUpload(file, onProgress){
       try{
         const res = JSON.parse(xhr.responseText);
         if(res.secure_url){
-          resolve({ url: res.secure_url, type: res.resource_type });
+          resolve({ url: res.secure_url, type: res.resource_type, originalFilename: res.original_filename, format: res.format, bytes: res.bytes });
         } else {
           reject(new Error(res.error?.message || 'upload failed'));
         }
@@ -61,7 +61,7 @@ function clPickAndUpload(options={}){
 
     try{
       const result = await clUpload(file, options.onProgress);
-      if(options.onDone) options.onDone(result);
+      if(options.onDone) options.onDone(result, file);
     }catch(e){
       console.error('Cloudinary upload error:', e);
       toast('ошибка загрузки: ' + e.message);

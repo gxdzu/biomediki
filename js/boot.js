@@ -92,3 +92,6 @@ window.checkAdminCode=checkAdminCode;
 window.postPickMedia=postPickMedia; window.clearPostMedia=clearPostMedia;
 window.pickAvatar=pickAvatar;
 window.chatPickPhoto=chatPickPhoto; window.dmPickPhoto=dmPickPhoto;
+window.setPostMode=setPostMode;
+window.toggleChatAttach=toggleChatAttach; window.closeChatAttach=closeChatAttach;
+window.chatPickFile=chatPickFile; window.chatPickLink=chatPickLink;

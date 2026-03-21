@@ -201,6 +201,28 @@ function renderMentionInText(text){
   return result;
 }
 
+// ── FILE BUBBLE ──
+function renderFileBubble(text){
+  try{
+    const {url,name,size}=JSON.parse(text);
+    const ext=(name.split('.').pop()||'').toLowerCase();
+    const isImg=/^(jpg|jpeg|png|gif|webp|svg)$/.test(ext);
+    const isPdf=ext==='pdf';
+    const icon=isImg?'🖼️':isPdf?'📄':ext==='zip'||ext==='rar'?'🗜️':ext==='mp3'||ext==='m4a'?'🎵':'📎';
+    return `<a href="${url}" target="_blank" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;min-width:160px">
+      <span style="font-size:22px">${icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)">${esc(name)}</div>
+        ${size?`<div style="font-size:10px;color:var(--text3)">${size}</div>`:''}
+      </div>
+      <svg viewBox="0 0 16 16" width="14" height="14" style="flex-shrink:0;color:var(--text3)"><path d="M3 8v5h10V8M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>`;
+  }catch(e){
+    // fallback: plain URL
+    return `<a href="${esc(text)}" target="_blank" style="color:var(--gold2);text-decoration:underline">📎 файл</a>`;
+  }
+}
+
 function renderChat(){
   const members=fbMembers.length?fbMembers:D.members;
   const cnt=document.getElementById('chat-member-count');
@@ -267,7 +289,11 @@ function renderMsgs(){
           ${replyHtml}
           ${m.msgType==='image'
             ? `<img src="${m.text}" style="max-width:220px;max-height:220px;border-radius:10px;display:block;cursor:pointer" onclick="window.open('${m.text}','_blank')" loading="lazy">`
-            : renderMentionInText(m.text)
+            : m.msgType==='file'
+              ? renderFileBubble(m.text)
+              : m.msgType==='link'
+                ? `<a href="${esc(m.text)}" target="_blank" style="color:var(--gold2);text-decoration:underline;word-break:break-all">${esc(m.text)}</a>`
+                : renderMentionInText(m.text)
           }
         </div>
         <div class="msg-footer">
@@ -332,3 +358,43 @@ function chatPickPhoto(){
     }
   });
 }
+
+// ── ATTACH SHEET ──
+function toggleChatAttach(){
+  const s=document.getElementById('chat-attach-sheet');
+  if(!s) return;
+  s.classList.toggle('hidden');
+}
+function closeChatAttach(){
+  document.getElementById('chat-attach-sheet')?.classList.add('hidden');
+}
+
+// ── FILE UPLOAD to Cloudinary ──
+function chatPickFile(){
+  clPickAndUpload({
+    accept:'*/*',
+    onStart(file){ toast('загружаю файл...'); },
+    onDone({url, originalFilename, format, bytes}, file){
+      const name = (originalFilename&&format) ? `${originalFilename}.${format}` : (file?.name||'файл');
+      const sizeStr = bytes ? (bytes>1048576?(bytes/1048576).toFixed(1)+' МБ':(bytes/1024).toFixed(0)+' КБ') : '';
+      // encode name+size into text so it's displayable
+      const payload = JSON.stringify({url, name, size:sizeStr});
+      fbSend(D.currentUser?.name||'Аноним', payload, null, 'file');
+      D.cat.mood=Math.min(100,D.cat.mood+1); save();
+    }
+  });
+}
+
+// ── SEND LINK in chat ──
+function chatPickLink(){
+  const url = prompt('Вставь ссылку:');
+  if(!url||!url.trim()) return;
+  fbSend(D.currentUser?.name||'Аноним', url.trim(), null, 'link');
+}
+
+// close attach sheet on outside click
+document.addEventListener('click', e=>{
+  const sheet=document.getElementById('chat-attach-sheet');
+  if(sheet&&!sheet.classList.contains('hidden')&&!e.target.closest('.emoji-btn')&&!e.target.closest('#chat-attach-sheet'))
+    closeChatAttach();
+});
