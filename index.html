@@ -143,18 +143,6 @@
           <div class="q-mark">"</div>
           <div class="q-text" id="sched-quote"></div>
         </div>
-        <div style="margin-top:20px">
-          <div class="sec-title" style="padding:0 0 12px;display:flex;align-items:center;justify-content:space-between">
-            <span>календарь</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <button class="wk-btn" onclick="calPrev()"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></button>
-              <span id="cal-month-label" style="font-size:12px;color:var(--text3)"></span>
-              <button class="wk-btn" onclick="calNext()"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></button>
-            </div>
-          </div>
-          <div id="cal-grid" class="cal-grid" style="margin-bottom:12px"></div>
-          <div id="cal-events" class="cal-events"></div>
-        </div>
         <div style="height:20px"></div>
       </div>
     </section>
@@ -296,27 +284,42 @@
     </section>
 
     <!-- MATERIALS -->
-    <section class="screen" id="screen-links">
-      <div class="scr-scroll">
-        <div class="scr-hdr"><div class="scr-title">материалы</div></div>
+    <section class="screen" id="screen-links" style="display:flex;flex-direction:column">
+      <!-- Fixed header with add form -->
+      <div class="links-top" style="flex-shrink:0;border-bottom:.5px solid var(--bdr);background:var(--bg1)">
+        <div class="scr-hdr" style="padding-bottom:8px"><div class="scr-title">материалы</div></div>
+        <!-- Search -->
+        <div style="padding:0 16px 10px;display:flex;gap:8px">
+          <input class="chat-search-inp" id="links-search" placeholder="поиск материалов..." oninput="renderLinks()">
+        </div>
+        <!-- Tabs -->
+        <div class="hw-tabs" style="margin:0 16px">
+          <button class="hw-tab active" id="links-tab-common" onclick="switchLinksTab('common')">общие</button>
+          <button class="hw-tab" id="links-tab-personal" onclick="switchLinksTab('personal')">личные</button>
+        </div>
+      </div>
+      <!-- Scrollable list -->
+      <div style="flex:1;overflow-y:auto;padding:12px 16px 0">
         <div id="links-list"></div>
-        <div class="wgt" style="margin-top:8px">
-          <div class="wgt-lbl">добавить материал</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <input class="adm-inp" id="n-ltitle" placeholder="Название" type="text">
-            <input class="adm-inp" id="n-lsubj" placeholder="Предмет" type="text">
-            <input class="adm-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
-            <select class="adm-inp" id="n-ltype">
+        <div style="height:16px"></div>
+      </div>
+      <!-- Fixed add form at bottom -->
+      <div class="links-add-bar" style="flex-shrink:0;border-top:.5px solid var(--bdr);padding:12px 16px;background:var(--bg1);padding-bottom:max(12px,env(safe-area-inset-bottom))">
+        <div id="links-add-form" style="display:flex;flex-direction:column;gap:8px">
+          <input class="adm-inp" id="n-ltitle" placeholder="Название" type="text">
+          <div style="display:flex;gap:8px">
+            <input class="adm-inp" id="n-lsubj" placeholder="Предмет" type="text" style="flex:1">
+            <select class="adm-inp" id="n-ltype" style="flex:0.8">
               <option value="конспект">Конспект</option>
               <option value="задачи">Задачи</option>
               <option value="презентация">Презентация</option>
               <option value="книга">Книга</option>
               <option value="другое">Другое</option>
             </select>
-            <button class="adm-btn" onclick="addLink()">добавить</button>
           </div>
+          <input class="adm-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
+          <button class="adm-btn" onclick="addLink()">добавить</button>
         </div>
-        <div style="height:16px"></div>
       </div>
     </section>
 
@@ -443,8 +446,22 @@
           <div class="chat-hdr-sub">личное сообщение</div>
         </div>
       </div>
-      <div class="chat-msgs" id="dm-msgs" style="flex:1;overflow-y:auto;padding:12px"></div>
+      <div class="chat-msgs" id="dm-msgs" style="flex:1;overflow-y:auto;padding:12px 12px 8px"></div>
+      <div id="dm-reply-bar" class="reply-bar hidden">
+        <div class="reply-bar-inner">
+          <svg viewBox="0 0 16 16" width="14" height="14" style="flex-shrink:0;color:var(--gold)"><path d="M6 3L1 8l5 5M1 8h9a4 4 0 010 8H7" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="flex:1;min-width:0">
+            <div id="dm-reply-author" style="font-size:11px;font-weight:500;color:var(--gold)"></div>
+            <div id="dm-reply-text" style="font-size:12px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis"></div>
+          </div>
+          <button class="msg-act" onclick="clearDmReply()">✕</button>
+        </div>
+      </div>
+      <div id="dm-emoji-picker" class="emoji-picker hidden"></div>
       <div class="chat-inp-row" style="flex-shrink:0">
+        <button class="emoji-btn" onclick="toggleDmEmoji()">
+          <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
+        </button>
         <input class="chat-inp" id="dm-inp" placeholder="сообщение..."
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDm()}">
         <button class="chat-send" onclick="sendDm()">
