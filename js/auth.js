@@ -38,6 +38,10 @@ async function doLogin(){
   }
 
   const allInvites = fbInvites;
+  // DEBUG — временно показываем что нашли
+  err.textContent = `найдено инвайтов: ${allInvites.length}`;
+  await new Promise(r=>setTimeout(r,1500));
+  err.textContent = '';
 
   // Повторный вход по использованному инвайту
   const usedInv = allInvites.find(i => i.code === raw && i.used);
