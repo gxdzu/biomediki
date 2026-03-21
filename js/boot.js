@@ -63,3 +63,4 @@ window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembers
 window.switchLinksTab=switchLinksTab; window.delPersonalLink=delPersonalLink;
 window.setDmReply=setDmReply; window.clearDmReply=clearDmReply;
 window.toggleDmEmoji=toggleDmEmoji; window.insertDmEmoji=insertDmEmoji;
+window.openLinkEditor=openLinkEditor; window.closeLinkEditor=closeLinkEditor;

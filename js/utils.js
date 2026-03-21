@@ -198,18 +198,27 @@ function renderLinks(){
     </div>`).join('');
 }
 
+function openLinkEditor(){
+  document.getElementById('link-editor').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('n-ltitle')?.focus(),50);
+}
+function closeLinkEditor(){
+  document.getElementById('link-editor').classList.add('hidden');
+}
+
 function addLink(){
   const title=v('n-ltitle').trim(), subject=v('n-lsubj').trim();
   const url=v('n-lurl').trim(), type=v('n-ltype');
   if(!title||!url){toast('заполни название и ссылку');return}
   ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  closeLinkEditor();
   if(linksTab==='personal'){
-    const arr = getPersonalLinks();
-    arr.push({id:Date.now(), title, subject, url, type});
+    const arr=getPersonalLinks();
+    arr.push({id:Date.now(),title,subject,url,type});
     savePersonalLinks(arr);
     renderLinks(); toast('добавлено');
   } else {
-    fbAddLink({title, subject, url, type, ts:Date.now()});
+    fbAddLink({title,subject,url,type,ts:Date.now()});
   }
 }
 
