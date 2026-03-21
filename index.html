@@ -223,9 +223,23 @@
             <button class="emoji-btn" onclick="toggleEmojiPicker()">
               <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
             </button>
-            <button class="emoji-btn" onclick="chatPickPhoto()" title="фото">
-              <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button class="emoji-btn" onclick="toggleChatAttach()" title="прикрепить">
+              <svg viewBox="0 0 20 20" width="18" height="18"><path d="M16.5 10.5l-7.7 7.7a5 5 0 01-7-7l8.4-8.4a3 3 0 014.2 4.2L6.2 15.2a1 1 0 01-1.4-1.4L12 6.6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
+            <div id="chat-attach-sheet" class="attach-sheet hidden">
+              <button class="attach-opt" onclick="chatPickPhoto();closeChatAttach()">
+                <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                фото / видео
+              </button>
+              <button class="attach-opt" onclick="chatPickFile();closeChatAttach()">
+                <svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 4h8l4 4v9a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M12 4v4h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                файл (любой)
+              </button>
+              <button class="attach-opt" onclick="chatPickLink();closeChatAttach()">
+                <svg viewBox="0 0 20 20" width="18" height="18"><path d="M8 12l4-4M6 10a3 3 0 000 4l2 2a3 3 0 004 0l1-1M14 10a3 3 0 000-4l-2-2a3 3 0 00-4 0l-1 1" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                ссылка
+              </button>
+            </div>
             <input class="chat-inp" id="chat-inp" placeholder="сообщение..."
               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
               oninput="handleChatInput(this.value)">
@@ -684,25 +698,42 @@
   <div class="modal-box" style="max-width:400px">
     <div class="modal-title">новый пост</div>
     <textarea class="modal-inp" id="post-text" placeholder="текст поста..." rows="4" style="resize:none;line-height:1.5"></textarea>
-    <!-- Media upload -->
-    <div id="post-media-preview" style="display:none;margin:8px 0;border-radius:var(--rs);overflow:hidden;max-height:200px">
-      <img id="post-media-img" style="width:100%;display:none;object-fit:cover;border-radius:var(--rs)">
-      <div id="post-media-name" style="font-size:11px;color:var(--text3);padding:4px 0"></div>
+
+    <!-- Media section -->
+    <div id="post-media-preview" style="display:none;margin:8px 0">
+      <img id="post-media-img" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--rs);display:none">
+      <div id="post-media-name" style="font-size:11px;color:var(--text3);padding:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
     </div>
-    <div id="post-upload-progress" style="display:none;margin:6px 0">
+    <div id="post-upload-progress" style="display:none;margin:4px 0">
       <div style="background:var(--bg3);border-radius:20px;height:4px;overflow:hidden">
         <div id="post-upload-bar" style="height:100%;background:var(--gold);width:0%;transition:width .2s;border-radius:20px"></div>
       </div>
-      <div id="post-upload-pct" style="font-size:11px;color:var(--text3);text-align:center;margin-top:4px">загрузка...</div>
+      <div id="post-upload-pct" style="font-size:11px;color:var(--text3);text-align:center;margin-top:2px">загрузка...</div>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:4px">
-      <button class="modal-btn" style="flex:0;padding:8px 12px" onclick="postPickMedia()" id="post-media-btn">
-        <svg viewBox="0 0 20 20" width="16" height="16"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        медиа
+
+    <!-- Toggle: upload vs link -->
+    <div style="display:flex;gap:6px;margin:8px 0 4px">
+      <button class="react-btn active" id="post-mode-upload" onclick="setPostMode('upload')" style="font-size:11px">
+        📎 с устройства
       </button>
-      <button class="modal-btn danger" style="flex:0;padding:8px 12px;display:none" id="post-media-clear" onclick="clearPostMedia()">✕ убрать</button>
+      <button class="react-btn" id="post-mode-link" onclick="setPostMode('link')" style="font-size:11px">
+        🔗 по ссылке
+      </button>
     </div>
-    <input type="hidden" id="post-img">
+
+    <!-- Upload mode -->
+    <div id="post-upload-mode">
+      <button class="modal-btn" style="width:100%;margin-bottom:4px" onclick="postPickMedia()" id="post-media-btn">
+        выбрать фото / видео / гиф
+      </button>
+      <button class="modal-btn danger" style="width:100%;display:none" id="post-media-clear" onclick="clearPostMedia()">✕ убрать медиа</button>
+    </div>
+
+    <!-- Link mode -->
+    <div id="post-link-mode" style="display:none">
+      <input class="modal-inp" id="post-img" placeholder="ссылка на фото, видео или YouTube" type="url">
+    </div>
+
     <div class="modal-row" style="margin-top:10px">
       <button class="modal-btn" onclick="publishPost()">опубликовать</button>
       <button class="modal-btn danger" onclick="closePostEditor()">отмена</button>
