@@ -708,7 +708,53 @@
   </div>
 </div>
 
+<!-- EDIT HOMEWORK MODAL -->
+<div id="hw-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">редактировать задание</div>
+    <input class="modal-inp" id="hw-edit-title" placeholder="Название" type="text">
+    <input class="modal-inp" id="hw-edit-subj" placeholder="Предмет" type="text">
+    <textarea class="modal-inp" id="hw-edit-desc" placeholder="Описание (необязательно)" rows="2" style="resize:none;line-height:1.5"></textarea>
+    <input class="modal-inp" id="hw-edit-url" placeholder="Ссылка на материал" type="url">
+    <div style="display:flex;gap:8px">
+      <input class="modal-inp" id="hw-edit-due" type="date" style="flex:1;color-scheme:dark">
+      <select class="modal-inp" id="hw-edit-urg" style="flex:1">
+        <option value="high">🔴 Срочно</option>
+        <option value="mid">🟡 Обычное</option>
+        <option value="low">🟢 Не горит</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn" onclick="saveHwEdit()">сохранить</button>
+      <button class="modal-btn danger" onclick="closeHwModal()">отмена</button>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT LESSON MODAL -->
+<!-- HW EDIT MODAL -->
+<div id="hw-edit-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-title">редактировать задание</div>
+    <input class="modal-inp" id="hw-edit-title" placeholder="Название" type="text">
+    <input class="modal-inp" id="hw-edit-subj" placeholder="Предмет" type="text">
+    <textarea class="modal-inp" id="hw-edit-desc" placeholder="Описание" rows="2" style="resize:none;line-height:1.5"></textarea>
+    <input class="modal-inp" id="hw-edit-url" placeholder="Ссылка на материал" type="url">
+    <div style="display:flex;gap:8px">
+      <input class="modal-inp" id="hw-edit-due" type="date" style="flex:1">
+      <select class="modal-inp" id="hw-edit-urg" style="flex:1">
+        <option value="high">🔴 Срочно</option>
+        <option value="mid">🟡 Обычное</option>
+        <option value="low">🟢 Не горит</option>
+      </select>
+    </div>
+    <div class="modal-row">
+      <button class="modal-btn" onclick="saveHwEdit()">сохранить</button>
+      <button class="modal-btn danger" onclick="closeHwEdit()">отмена</button>
+    </div>
+  </div>
+</div>
+
 <!-- DM EDIT MESSAGE MODAL -->
 <div id="dm-msg-modal" class="modal-overlay hidden">
   <div class="modal-box">
