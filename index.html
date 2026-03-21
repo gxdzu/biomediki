@@ -100,12 +100,12 @@
             <div class="quick-label">задания</div>
             <div class="quick-count" id="home-hw-count">—</div>
           </div>
-          <div class="quick-card" onclick="navigate('calendar')">
+          <div class="quick-card" onclick="navigate('links')">
             <div class="quick-icon">
-              <svg viewBox="0 0 24 24" width="22" height="22"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="12" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" width="22" height="22"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <div class="quick-label">календарь</div>
-            <div class="quick-count" id="home-cal-count">—</div>
+            <div class="quick-label">файлы</div>
+            <div class="quick-count" id="home-links-count">—</div>
           </div>
         </div>
 
@@ -143,6 +143,19 @@
           <div class="q-mark">"</div>
           <div class="q-text" id="sched-quote"></div>
         </div>
+        <div style="margin-top:20px">
+          <div class="sec-title" style="padding:0 0 12px;display:flex;align-items:center;justify-content:space-between">
+            <span>календарь</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <button class="wk-btn" onclick="calPrev()"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></button>
+              <span id="cal-month-label" style="font-size:12px;color:var(--text3)"></span>
+              <button class="wk-btn" onclick="calNext()"><svg viewBox="0 0 16 16" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></button>
+            </div>
+          </div>
+          <div id="cal-grid" class="cal-grid" style="margin-bottom:12px"></div>
+          <div id="cal-events" class="cal-events"></div>
+        </div>
+        <div style="height:20px"></div>
       </div>
     </section>
 
@@ -405,30 +418,6 @@
       </div>
     </section>
 
-    <!-- CALENDAR -->
-    <section class="screen" id="screen-calendar">
-      <div class="scr-scroll">
-        <div class="scr-hdr" style="display:flex;align-items:center;gap:10px">
-          <button onclick="navigate('home')" style="background:none;border:none;color:var(--text2);padding:0;cursor:pointer">
-            <svg viewBox="0 0 16 16" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
-          </button>
-          <div class="scr-title">календарь</div>
-          <div id="cal-month-label" style="margin-left:auto;font-size:12px;color:var(--text3)"></div>
-        </div>
-        <div class="cal-nav">
-          <button class="wk-btn" onclick="calPrev()">
-            <svg viewBox="0 0 16 16" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
-          </button>
-          <div id="cal-grid" class="cal-grid"></div>
-          <button class="wk-btn" onclick="calNext()">
-            <svg viewBox="0 0 16 16" width="16" height="16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-        <div id="cal-events" class="cal-events"></div>
-        <div style="height:16px"></div>
-      </div>
-    </section>
-
     <!-- DM LIST -->
     <section class="screen" id="screen-dms">
       <div class="scr-scroll">
@@ -516,9 +505,11 @@
   <div class="adm-body">
     <div class="adm-sec">
       <div class="adm-sec-ttl">тип текущей недели</div>
-      <div style="display:flex;gap:10px;align-items:center">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:8px">авто: чётная неделя = красная. Переключи вручную если сбилось.</div>
+        <div style="display:flex;gap:10px;align-items:center">
         <button class="sg-btn" id="wk-red-btn" onclick="setWeekType('red')" style="flex:1">🔴 красная</button>
         <button class="sg-btn" id="wk-blue-btn" onclick="setWeekType('blue')" style="flex:1">🔵 синяя</button>
+        <button class="sg-btn" onclick="setWeekType('')" style="flex:0.6;font-size:11px">авто</button>
       </div>
       <div style="font-size:11px;color:var(--text3);margin-top:6px">влияет на отображение расписания для всех</div>
     </div>
