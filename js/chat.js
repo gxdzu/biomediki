@@ -399,18 +399,18 @@ document.addEventListener('click', e=>{
 });
 
 // ── UNIVERSAL AVATAR HTML ──
-// Used by feed, dm, members panel — checks for real photo
 function getMemberAvatarHtml(name, size=36, onClick=''){
   const all=[...(typeof fbMembers!=='undefined'?fbMembers:[]), ...(typeof D!=='undefined'&&D.members?D.members:[])];
   const seen=new Set(); const members=all.filter(m=>{if(seen.has(m.name))return false;seen.add(m.name);return true;});
   const m=members.find(x=>x.name===name);
   const c=avatarColor(name);
-  const clickAttr=onClick?`onclick="${onClick}" style="cursor:pointer"`:'';
+  const clickAttr=onClick?`onclick="${onClick}" style="cursor:pointer;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}"`:`style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}"`;
   if(m?.avatarUrl){
-    return `<div ${clickAttr} style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}"><img src="${m.avatarUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`;
+    return `<div ${clickAttr}><img src="${m.avatarUrl}" style="width:100%;height:100%;object-fit:cover;display:block" loading="lazy"></div>`;
   }
   const fs=Math.round(size*.43);
-  return `<div ${clickAttr} style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:500;flex-shrink:0">${(name||'?')[0].toUpperCase()}</div>`;
+  const clickStyle=onClick?`cursor:pointer;`:'';
+  return `<div style="${clickStyle}width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:500;flex-shrink:0"${onClick?` onclick="${onClick}"`:''}>${(name||'?')[0].toUpperCase()}</div>`;
 }
 
 // ── UNIVERSAL AVATAR HTML (for feed, DM list, etc.) ──

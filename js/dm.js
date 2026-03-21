@@ -18,12 +18,23 @@ function saveDmSeen(){ localStorage.setItem('sg_dm_seen',JSON.stringify(dmLastSe
 // ── OPEN DM ──
 function openDm(partnerName){
   curDmPartner=partnerName;
-  const c=avatarColor(partnerName);
+  // Update header avatar with real photo if available
   const avEl=document.getElementById('dm-hdr-av');
-  if(avEl){ avEl.textContent=partnerName[0].toUpperCase(); avEl.style.background=c.bg; avEl.style.border=`.5px solid ${c.bd}`; avEl.style.color=c.tx; }
+  if(avEl){
+    const all=[...(fbMembers.length?fbMembers:[]),...D.members];
+    const seen=new Set(); const members=all.filter(m=>{if(seen.has(m.name))return false;seen.add(m.name);return true;});
+    const partner=members.find(x=>x.name===partnerName);
+    const c=avatarColor(partnerName);
+    if(partner?.avatarUrl){
+      avEl.innerHTML=`<img src="${partner.avatarUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+      avEl.style.cssText=`width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}`;
+    } else {
+      avEl.textContent=partnerName[0].toUpperCase();
+      avEl.style.background=c.bg; avEl.style.border=`.5px solid ${c.bd}`; avEl.style.color=c.tx;
+    }
+  }
   const nameEl=document.getElementById('dm-hdr-name');
   if(nameEl) nameEl.textContent=partnerName;
-  // Show online status
   updateDmOnlineStatus();
   document.getElementById('member-profile-modal')?.classList.add('hidden');
   navigate('dm');
@@ -148,7 +159,9 @@ function renderDmMsgs(msgs){
         <div class="msg-bbl" style="${bblStyle}">${replyHtml}${
           m.msgType==='image'
             ? `<img src="${m.text}" style="max-width:220px;max-height:220px;border-radius:10px;display:block;cursor:pointer" onclick="window.open('${m.text}','_blank')" loading="lazy">`
-            : esc(m.text)
+            : m.msgType==='file'
+              ? renderFileBubble(m.text)
+              : esc(m.text)
         }${m.edited?` <span style="font-size:9px;color:var(--text3)">ред.</span>`:''}</div>
         <div class="msg-footer"><span class="msg-time">${m.time||''}</span>${actions}</div>
       </div>
@@ -250,3 +263,37 @@ function dmPickPhoto(){
     }
   });
 }
+
+// ── DM ATTACH SHEET ──
+function toggleDmAttach(){
+  const s=document.getElementById('dm-attach-sheet'); if(!s) return;
+  s.classList.toggle('hidden');
+}
+function closeDmAttach(){
+  document.getElementById('dm-attach-sheet')?.classList.add('hidden');
+}
+
+function dmPickFile(){
+  clPickAndUpload({
+    accept:'*/*',
+    onStart(){ toast('загружаю файл...'); },
+    onDone({url,originalFilename,format,bytes},file){
+      const name=(originalFilename&&format)?`${originalFilename}.${format}`:(file?.name||'файл');
+      const sizeStr=bytes?(bytes>1048576?(bytes/1048576).toFixed(1)+' МБ':(bytes/1024).toFixed(0)+' КБ'):'';
+      const payload=JSON.stringify({url,name,size:sizeStr});
+      const myName=D.currentUser?.name; if(!myName||!curDmPartner) return;
+      const key=dmKey(myName,curDmPartner);
+      const msg={author:myName,text:payload,ts:Date.now(),time:nowTime(),msgType:'file'};
+      if(!dmMessages[key]) dmMessages[key]=[];
+      dmMessages[key].push(msg);
+      renderDmMsgs(dmMessages[key]);
+      fbPost(`dms/${key}`,msg).catch(()=>{});
+    }
+  });
+}
+
+document.addEventListener('click',e=>{
+  const sheet=document.getElementById('dm-attach-sheet');
+  if(sheet&&!sheet.classList.contains('hidden')&&!e.target.closest('.emoji-btn')&&!e.target.closest('#dm-attach-sheet'))
+    closeDmAttach();
+});

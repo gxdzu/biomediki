@@ -96,3 +96,4 @@ window.setPostMode=setPostMode;
 window.toggleChatAttach=toggleChatAttach; window.closeChatAttach=closeChatAttach;
 window.chatPickFile=chatPickFile; window.chatPickLink=chatPickLink;
 window.setLinkMode=setLinkMode; window.linkPickFile=linkPickFile;
+window.toggleDmAttach=toggleDmAttach; window.closeDmAttach=closeDmAttach; window.dmPickFile=dmPickFile;
