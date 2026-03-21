@@ -206,11 +206,10 @@ async function renderDmList(){
   }));
   previews.sort((a,b)=>{ if(!a.last&&!b.last) return 0; if(!a.last) return 1; if(!b.last) return -1; return (b.last.ts||0)-(a.last.ts||0); });
   el.innerHTML=previews.map(({member:m,last,unread})=>{
-    const c=avatarColor(m.name);
-    const online=Date.now()-getLastSeen(m.name)<90000; // online if seen <90s ago
+    const online=Date.now()-getLastSeen(m.name)<90000;
     return `<div class="dm-item" onclick="openDm('${m.name}')">
       <div style="position:relative">
-        <div style="width:46px;height:46px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500">${m.name[0].toUpperCase()}</div>
+        ${getMemberAvatarHtml(m.name,46)}
         ${online?`<div style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--grn);border:2px solid var(--bg)"></div>`:''}
       </div>
       <div class="dm-item-body">

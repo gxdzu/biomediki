@@ -79,9 +79,8 @@ function toggleMembersList(){
     const allMembers=fbMembers.length?fbMembers:D.members;
     const listEl=document.getElementById('members-sheet-list');
     if(listEl) listEl.innerHTML=allMembers.map(m=>{
-      const c=avatarColor(m.name);
       return `<div class="mention-item" onclick="closeMembersList();openMemberProfile('${m.name}')">
-        <div style="width:38px;height:38px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0">${m.name[0].toUpperCase()}</div>
+        ${getMemberAvatarHtml(m.name,38)}
         <div>
           <div class="mention-item-name">${esc(m.name)}</div>
           <div style="font-size:11px;color:var(--text3)">${m.role==='admin'?'администратор':m.subgroup?`пг ${m.subgroup}`:'участник'}</div>
@@ -398,3 +397,38 @@ document.addEventListener('click', e=>{
   if(sheet&&!sheet.classList.contains('hidden')&&!e.target.closest('.emoji-btn')&&!e.target.closest('#chat-attach-sheet'))
     closeChatAttach();
 });
+
+// ── UNIVERSAL AVATAR HTML ──
+// Used by feed, dm, members panel — checks for real photo
+function getMemberAvatarHtml(name, size=36, onClick=''){
+  const all=[...(typeof fbMembers!=='undefined'?fbMembers:[]), ...(typeof D!=='undefined'&&D.members?D.members:[])];
+  const seen=new Set(); const members=all.filter(m=>{if(seen.has(m.name))return false;seen.add(m.name);return true;});
+  const m=members.find(x=>x.name===name);
+  const c=avatarColor(name);
+  const clickAttr=onClick?`onclick="${onClick}" style="cursor:pointer"`:'';
+  if(m?.avatarUrl){
+    return `<div ${clickAttr} style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}"><img src="${m.avatarUrl}" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>`;
+  }
+  const fs=Math.round(size*.43);
+  return `<div ${clickAttr} style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:500;flex-shrink:0">${(name||'?')[0].toUpperCase()}</div>`;
+}
+
+// ── UNIVERSAL AVATAR HTML (for feed, DM list, etc.) ──
+function getAvatarUrl(name){
+  const allMembers = (typeof fbMembers!=='undefined'&&fbMembers.length?fbMembers:[]).concat(
+    typeof D!=='undefined'&&D.members?D.members:[]
+  );
+  const seen=new Set(); 
+  for(const m of allMembers){
+    if(m.name===name&&!seen.has(name)){ seen.add(name); return m.avatarUrl||''; }
+  }
+  return '';
+}
+
+function feedAvatarHtml(name, size=36){
+  const url=getAvatarUrl(name);
+  const c=avatarColor(name);
+  const letter=(name||'?')[0].toUpperCase();
+  if(url) return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd};cursor:pointer" onclick="openMemberProfile('${name}')"><img src="${url}" style="width:100%;height:100%;object-fit:cover"></div>`;
+  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*.38)}px;font-weight:500;flex-shrink:0;cursor:pointer" onclick="openMemberProfile('${name}')">${letter}</div>`;
+}

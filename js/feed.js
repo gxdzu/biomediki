@@ -117,10 +117,11 @@ function renderPostScreen(){
   const myReact = post.reactions?.[myName];
   const comments = post.comments ? Object.values(post.comments).sort((a,b)=>a.ts-b.ts) : [];
 
+  const av=getMemberAvatarHtml(post.author,38,`openMemberProfile('${post.author}')`);
   el.innerHTML = `
     <div class="feed-post" style="border-radius:0;border-left:none;border-right:none;border-top:none">
       <div class="feed-post-hdr">
-        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};cursor:pointer" onclick="openMemberProfile('${post.author}')">${(post.author||'?')[0].toUpperCase()}</div>
+        ${av}
         <div class="feed-post-meta" style="cursor:pointer" onclick="openMemberProfile('${post.author}')">
           <div class="feed-post-author">${esc(post.author)}</div>
           <div class="feed-post-time">${post.time||''}</div>
@@ -140,14 +141,13 @@ function renderPostScreen(){
       </div>
     </div>
     <div class="comments-list">
-      ${comments.length?comments.map(c=>{
-        const cc=avatarColor(c.author);
-        const canDelC=isAdmin||c.author===myName;
+      ${comments.length?comments.map(cm=>{
+        const canDelC=isAdmin||cm.author===myName;
         return `<div class="comment-item">
-          <div class="feed-post-av" style="width:28px;height:28px;font-size:12px;background:${cc.bg};border:.5px solid ${cc.bd};color:${cc.tx}">${(c.author||'?')[0].toUpperCase()}</div>
+          ${getMemberAvatarHtml(cm.author,28)}
           <div style="flex:1">
-            <div style="font-size:11px;color:var(--gold2);margin-bottom:2px">${esc(c.author)} <span style="color:var(--text3)">${c.time||''}</span></div>
-            <div style="font-size:13px;color:var(--text)">${esc(c.text)}</div>
+            <div style="font-size:11px;color:var(--gold2);margin-bottom:2px">${esc(cm.author)} <span style="color:var(--text3)">${cm.time||''}</span></div>
+            <div style="font-size:13px;color:var(--text)">${esc(cm.text)}</div>
           </div>
         </div>`;
       }).join(''):'<div style="text-align:center;padding:20px;color:var(--text3);font-style:italic;font-family:var(--serif)">первый комментарий...</div>'}
@@ -223,9 +223,10 @@ function renderFeed(){
     const dislikes=countReactions(p,'👎');
     const myReact=p.reactions?.[myName];
     const commCount=p.comments?Object.keys(p.comments).length:0;
+    const av=getMemberAvatarHtml(p.author,38,`event.stopPropagation();openMemberProfile('${p.author}')`);
     return `<div class="feed-post" onclick="openPost('${p._key}')">
       <div class="feed-post-hdr">
-        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};cursor:pointer" onclick="event.stopPropagation();openMemberProfile('${p.author}')">${(p.author||'?')[0].toUpperCase()}</div>
+        ${av}
         <div class="feed-post-meta" style="cursor:pointer" onclick="event.stopPropagation();openMemberProfile('${p.author}')">
           <div class="feed-post-author">${esc(p.author)}</div>
           <div class="feed-post-time">${p.time||''}</div>

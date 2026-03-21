@@ -198,30 +198,6 @@ function renderLinks(){
     </div>`).join('');
 }
 
-function openLinkEditor(){
-  document.getElementById('link-editor').classList.remove('hidden');
-  setTimeout(()=>document.getElementById('n-ltitle')?.focus(),50);
-}
-function closeLinkEditor(){
-  document.getElementById('link-editor').classList.add('hidden');
-}
-
-function addLink(){
-  const title=v('n-ltitle').trim(), subject=v('n-lsubj').trim();
-  const url=v('n-lurl').trim(), type=v('n-ltype');
-  if(!title||!url){toast('заполни название и ссылку');return}
-  ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  closeLinkEditor();
-  if(linksTab==='personal'){
-    const arr=getPersonalLinks();
-    arr.push({id:Date.now(),title,subject,url,type});
-    savePersonalLinks(arr);
-    renderLinks(); toast('добавлено');
-  } else {
-    fbAddLink({title,subject,url,type,ts:Date.now()});
-  }
-}
-
 function delPersonalLink(id){
   savePersonalLinks(getPersonalLinks().filter(l=>l.id!==id));
   renderLinks();
@@ -303,4 +279,87 @@ function checkDeadlineReminders(){
       });
     }
   });
+}
+
+// ══════════════════════════════════════════════
+// LINK EDITOR — upload vs url mode
+// ══════════════════════════════════════════════
+let _linkMode = 'upload';
+
+function setLinkMode(mode){
+  _linkMode = mode;
+  document.getElementById('link-upload-mode').style.display = mode==='upload'?'':'none';
+  document.getElementById('link-url-mode').style.display    = mode==='url'?'':'none';
+  document.getElementById('link-mode-upload').classList.toggle('active', mode==='upload');
+  document.getElementById('link-mode-url').classList.toggle('active', mode==='url');
+  if(mode==='upload') document.getElementById('n-lurl').value='';
+  else document.getElementById('n-lurl-hidden').value='';
+}
+
+function linkPickFile(){
+  clPickAndUpload({
+    accept: '*/*',
+    onStart(file){
+      document.getElementById('link-upload-btn').disabled=true;
+      document.getElementById('link-upload-btn').textContent='загрузка...';
+      document.getElementById('link-upload-progress').style.display='block';
+    },
+    onProgress(pct){
+      document.getElementById('link-upload-bar').style.width=pct+'%';
+      document.getElementById('link-upload-pct').textContent=pct+'%';
+    },
+    onDone({url, originalFilename, format}, file){
+      const name=(originalFilename&&format)?`${originalFilename}.${format}`:(file?.name||'файл');
+      document.getElementById('n-lurl-hidden').value=url;
+      document.getElementById('link-upload-progress').style.display='none';
+      document.getElementById('link-upload-btn').disabled=false;
+      document.getElementById('link-upload-btn').textContent='выбрать другой файл';
+      const nameEl=document.getElementById('link-upload-name');
+      nameEl.textContent='✓ '+name; nameEl.style.display='block';
+      // Auto-fill title if empty
+      const titleEl=document.getElementById('n-ltitle');
+      if(titleEl&&!titleEl.value) titleEl.value=(originalFilename||name).replace(/\.[^.]+$/,'');
+      toast('файл загружен ✓');
+    },
+    onError(){
+      document.getElementById('link-upload-btn').disabled=false;
+      document.getElementById('link-upload-btn').textContent='выбрать файл с устройства';
+      document.getElementById('link-upload-progress').style.display='none';
+    }
+  });
+}
+
+function openLinkEditor(){
+  _linkMode='upload';
+  document.getElementById('link-editor').classList.remove('hidden');
+  setLinkMode('upload');
+  document.getElementById('n-lurl-hidden').value='';
+  document.getElementById('link-upload-name').style.display='none';
+  document.getElementById('link-upload-btn').textContent='выбрать файл с устройства';
+  setTimeout(()=>document.getElementById('n-ltitle')?.focus(),50);
+}
+
+function closeLinkEditor(){
+  document.getElementById('link-editor').classList.add('hidden');
+}
+
+function addLink(){
+  const title=v('n-ltitle').trim(), subject=v('n-lsubj').trim();
+  const type=v('n-ltype');
+  // URL comes from upload or manual input
+  const url=(_linkMode==='upload'
+    ? document.getElementById('n-lurl-hidden').value
+    : v('n-lurl').trim());
+  if(!title||!url){toast('заполни название и добавь файл или ссылку');return}
+  ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('n-lurl-hidden').value='';
+  closeLinkEditor();
+  if(linksTab==='personal'){
+    const arr=getPersonalLinks();
+    arr.push({id:Date.now(),title,subject,url,type});
+    savePersonalLinks(arr);
+    renderLinks(); toast('добавлено');
+  } else {
+    fbAddLink({title,subject,url,type,ts:Date.now()});
+  }
 }
