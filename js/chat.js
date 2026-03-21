@@ -16,135 +16,127 @@ function avatarHtml(name,size=28){
   return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};display:flex;align-items:center;justify-content:center;font-size:${fs}px;font-weight:500;color:${c.tx};flex-shrink:0;cursor:pointer" onclick="openMemberProfile('${name}')">${l}</div>`;
 }
 
+// ── REPLY TO MESSAGE ──
+let replyTo = null; // {key, author, text}
+
+function setReply(key, author, text){
+  replyTo = {key, author, text};
+  const bar = document.getElementById('reply-bar');
+  const rAuthor = document.getElementById('reply-author');
+  const rText = document.getElementById('reply-text');
+  if(bar) bar.classList.remove('hidden');
+  if(rAuthor) rAuthor.textContent = author;
+  if(rText) rText.textContent = text.slice(0, 80) + (text.length > 80 ? '…' : '');
+  document.getElementById('chat-inp')?.focus();
+}
+
+function clearReply(){
+  replyTo = null;
+  document.getElementById('reply-bar')?.classList.add('hidden');
+}
+
 // ── MEMBER PROFILE SHEET ──
 function openMemberProfile(name){
-  // Try fbMembers first, then D.members, then construct minimal profile
-  const allMembers = [...(fbMembers.length ? fbMembers : []), ...D.members];
+  const allMembers = [...(fbMembers.length?fbMembers:[]),...D.members];
   const seen = new Set();
   const members = allMembers.filter(m=>{ if(seen.has(m.name)) return false; seen.add(m.name); return true; });
-  const m = members.find(x=>x.name===name) || {name, role:'member'};
+  const m = members.find(x=>x.name===name)||{name,role:'member'};
   const c = avatarColor(m.name);
   const av = document.getElementById('msheet-av');
   if(av){ av.textContent=(m.name||'?')[0].toUpperCase(); av.style.cssText=`width:64px;height:64px;border-radius:50%;background:${c.bg};border:1px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:300;font-family:var(--serif);margin:0 auto 12px`; }
-  document.getElementById('msheet-name').textContent = m.name;
-  document.getElementById('msheet-role').textContent = m.role==='admin'?'администратор':(m.subgroup?`подгруппа ${m.subgroup}`:'участник');
-  document.getElementById('msheet-bio').textContent = m.bio||'';
-  const soc = m.socials||{};
+  document.getElementById('msheet-name').textContent=m.name;
+  document.getElementById('msheet-role').textContent=m.role==='admin'?'администратор':(m.subgroup?`подгруппа ${m.subgroup}`:'участник');
+  document.getElementById('msheet-bio').textContent=m.bio||'';
+  const soc=m.socials||{};
   const defs=[{k:'vk',l:'VK'},{k:'tg',l:'Telegram'},{k:'inst',l:'Instagram'},{k:'other',l:'Сайт'}];
-  document.getElementById('msheet-socials').innerHTML = defs.filter(d=>soc[d.k]).map(d=>
+  document.getElementById('msheet-socials').innerHTML=defs.filter(d=>soc[d.k]).map(d=>
     `<a class="social-chip" href="${soc[d.k]}" target="_blank">${d.l}</a>`
   ).join('');
   document.getElementById('member-profile-modal').classList.remove('hidden');
 }
-function closeMemberProfile(){
-  document.getElementById('member-profile-modal').classList.add('hidden');
-}
+function closeMemberProfile(){ document.getElementById('member-profile-modal').classList.add('hidden'); }
 
 function toggleMembersList(){
-  const sheet = document.getElementById('members-sheet');
-  if(!sheet) return;
-  const isHidden = sheet.classList.contains('hidden');
-  if(isHidden){
-    // populate list
-    const allMembers = fbMembers.length ? fbMembers : D.members;
-    const listEl = document.getElementById('members-sheet-list');
-    if(listEl){
-      listEl.innerHTML = allMembers.map(m=>{
-        const c = avatarColor(m.name);
-        return `<div class="mention-item" onclick="closeMembersList();openMemberProfile('${m.name}')">
-          <div style="width:38px;height:38px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0">${m.name[0].toUpperCase()}</div>
-          <div>
-            <div class="mention-item-name">${esc(m.name)}</div>
-            <div style="font-size:11px;color:var(--text3)">${m.role==='admin'?'администратор':m.subgroup?`пг ${m.subgroup}`:'участник'}</div>
-          </div>
-        </div>`;
-      }).join('');
-    }
+  const sheet=document.getElementById('members-sheet'); if(!sheet) return;
+  if(sheet.classList.contains('hidden')){
+    const allMembers=fbMembers.length?fbMembers:D.members;
+    const listEl=document.getElementById('members-sheet-list');
+    if(listEl) listEl.innerHTML=allMembers.map(m=>{
+      const c=avatarColor(m.name);
+      return `<div class="mention-item" onclick="closeMembersList();openMemberProfile('${m.name}')">
+        <div style="width:38px;height:38px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;flex-shrink:0">${m.name[0].toUpperCase()}</div>
+        <div>
+          <div class="mention-item-name">${esc(m.name)}</div>
+          <div style="font-size:11px;color:var(--text3)">${m.role==='admin'?'администратор':m.subgroup?`пг ${m.subgroup}`:'участник'}</div>
+        </div>
+      </div>`;
+    }).join('');
     sheet.classList.remove('hidden');
-  } else {
-    sheet.classList.add('hidden');
-  }
+  } else sheet.classList.add('hidden');
 }
-function closeMembersList(){
-  document.getElementById('members-sheet')?.classList.add('hidden');
-}
+function closeMembersList(){ document.getElementById('members-sheet')?.classList.add('hidden'); }
 
 // ── PINNED MESSAGE ──
-let pinnedMsgKey = null;
-
+let pinnedMsgKey=null;
 async function fbPollPinned(){
   try{
-    const data = await fbGet('pinned');
-    const newKey = data ? data.key : null;
-    if(newKey !== pinnedMsgKey){ pinnedMsgKey=newKey; renderPinnedBar(); }
+    const data=await fbGet('pinned');
+    const newKey=data?data.key:null;
+    if(newKey!==pinnedMsgKey){ pinnedMsgKey=newKey; renderPinnedBar(); }
   }catch(e){}
 }
-
 function renderPinnedBar(){
-  const bar=document.getElementById('pinned-bar'), txt=document.getElementById('pinned-text');
+  const bar=document.getElementById('pinned-bar'),txt=document.getElementById('pinned-text');
   if(!bar||!txt) return;
   if(!pinnedMsgKey){ bar.classList.add('hidden'); return; }
   const msg=fbMessages.find(m=>m._key===pinnedMsgKey);
   if(msg){ txt.textContent=msg.author+': '+msg.text.slice(0,60)+(msg.text.length>60?'…':''); bar.classList.remove('hidden'); }
   else bar.classList.add('hidden');
 }
-
 function scrollToPinned(){
   if(!pinnedMsgKey) return;
   document.getElementById('msg-'+pinnedMsgKey)?.scrollIntoView({behavior:'smooth',block:'center'});
 }
-
 async function pinMsg(key){
-  const isPinned = pinnedMsgKey===key;
-  const newKey = isPinned ? null : key;
+  const isPinned=pinnedMsgKey===key;
   try{
-    await fbSet('pinned', newKey?{key:newKey}:null);
-    pinnedMsgKey=newKey; renderPinnedBar(); renderMsgs();
+    await fbSet('pinned',isPinned?null:{key});
+    pinnedMsgKey=isPinned?null:key; renderPinnedBar(); renderMsgs();
     toast(isPinned?'закреп снят':'сообщение закреплено');
   }catch(e){ toast('ошибка'); }
 }
 
 // ── SEARCH ──
-let searchQuery = '';
+let searchQuery='';
 function toggleChatSearch(){
-  const bar=document.getElementById('chat-search-bar');
-  if(!bar) return;
+  const bar=document.getElementById('chat-search-bar'); if(!bar) return;
   const hidden=bar.classList.contains('hidden');
   bar.classList.toggle('hidden',!hidden);
-  if(hidden){ setTimeout(()=>document.getElementById('chat-search-inp')?.focus(),50); }
+  if(hidden) setTimeout(()=>document.getElementById('chat-search-inp')?.focus(),50);
   else{ searchQuery=''; document.getElementById('chat-search-inp').value=''; renderMsgs(); }
 }
-function searchMessages(q){
-  searchQuery=q.toLowerCase(); renderMsgs();
-  if(q){ const first=document.querySelector('.search-highlight'); first?.scrollIntoView({behavior:'smooth',block:'center'}); }
-}
-function highlightText(text, query){
+function searchMessages(q){ searchQuery=q.toLowerCase(); renderMsgs(); if(q) document.querySelector('.search-highlight')?.scrollIntoView({behavior:'smooth',block:'center'}); }
+function highlightText(text,query){
   if(!query) return esc(text);
-  const escaped = esc(text);
-  const escapedQ = esc(query);
-  return escaped.replace(new RegExp(escapedQ,'gi'), m=>`<span class="search-highlight">${m}</span>`);
+  return esc(text).replace(new RegExp(esc(query),'gi'),m=>`<span class="search-highlight">${m}</span>`);
 }
 
 // ── MENTIONS ──
 function handleChatInput(val){
-  const atIdx = val.lastIndexOf('@');
-  const afterAt = atIdx >= 0 ? val.slice(atIdx + 1) : '';
-  const hasSpace = afterAt.includes(' ');
-  if(atIdx >= 0 && !hasSpace){
-    const query = afterAt.toLowerCase();
-    const allMembers = fbMembers.length ? fbMembers : D.members;
-    const members = allMembers.filter(m=>m.name !== D.currentUser?.name);
-    const matches = query ? members.filter(m=>m.name.toLowerCase().startsWith(query)) : members;
-    if(matches.length) renderMentionList(matches, atIdx);
-    else hideMentionList();
-  } else {
-    hideMentionList();
-  }
+  const atIdx=val.lastIndexOf('@');
+  const afterAt=atIdx>=0?val.slice(atIdx+1):'';
+  if(atIdx>=0&&!afterAt.includes(' ')){
+    const query=afterAt.toLowerCase();
+    const allMembers=fbMembers.length?fbMembers:D.members;
+    const members=allMembers.filter(m=>m.name!==D.currentUser?.name);
+    const matches=query?members.filter(m=>m.name.toLowerCase().startsWith(query)):members;
+    if(matches.length) renderMentionList(matches,atIdx); else hideMentionList();
+  } else hideMentionList();
 }
-function renderMentionList(members, atIdx){
+function renderMentionList(members,atIdx){
   const el=document.getElementById('mention-list'); if(!el) return;
   if(!members.length){ hideMentionList(); return; }
-  el.innerHTML = members.slice(0,5).map(m=>{
+  el.innerHTML=members.slice(0,5).map(m=>{
     const c=avatarColor(m.name);
     return `<div class="mention-item" onclick="insertMention('${m.name}',${atIdx})">
       <div style="width:28px;height:28px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0">${m.name[0].toUpperCase()}</div>
@@ -154,21 +146,18 @@ function renderMentionList(members, atIdx){
   el.classList.remove('hidden');
 }
 function hideMentionList(){ document.getElementById('mention-list')?.classList.add('hidden'); }
-function insertMention(name, atIdx){
+function insertMention(name,atIdx){
   const inp=document.getElementById('chat-inp'); if(!inp) return;
-  inp.value = inp.value.slice(0,atIdx)+'@'+name+' ';
+  inp.value=inp.value.slice(0,atIdx)+'@'+name+' ';
   inp.focus(); hideMentionList();
 }
 
 // ── EMOJI PICKER ──
 const EMOJI_LIST=['😀','😂','🥰','😍','🤔','😎','🥲','😭','😤','🤯','👍','👎','❤️','🔥','💯','✅','❌','⚡','🎉','🙏','😴','🤓','👀','💀','🫡','🤝','💪','🫶','🤦','🙈','📚','📝','⏰','📅','💡','🔔','📌','🗂️','💬','🏠'];
-
 function toggleEmojiPicker(){
   const picker=document.getElementById('emoji-picker'); if(!picker) return;
-  if(picker.classList.contains('hidden')){
-    picker.innerHTML=EMOJI_LIST.map(e=>`<button class="emoji-item" onclick="insertEmoji('${e}')">${e}</button>`).join('');
-    picker.classList.remove('hidden');
-  } else picker.classList.add('hidden');
+  if(picker.classList.contains('hidden')){ picker.innerHTML=EMOJI_LIST.map(e=>`<button class="emoji-item" onclick="insertEmoji('${e}')">${e}</button>`).join(''); picker.classList.remove('hidden'); }
+  else picker.classList.add('hidden');
 }
 function insertEmoji(emoji){
   const inp=document.getElementById('chat-inp'); if(!inp) return;
@@ -186,11 +175,11 @@ document.addEventListener('click',e=>{
 
 // ── RENDER MESSAGES ──
 function renderMentionInText(text){
-  const members = fbMembers.length?fbMembers:D.members;
-  let result = searchQuery ? highlightText(text, searchQuery) : esc(text);
+  const members=fbMembers.length?fbMembers:D.members;
+  let result=searchQuery?highlightText(text,searchQuery):esc(text);
   members.forEach(m=>{
-    const tag = '@'+m.name;
-    result = result.split(tag).join(`<span style="color:var(--gold);font-weight:500" onclick="openMemberProfile('${m.name}')">${tag}</span>`);
+    const tag='@'+m.name;
+    result=result.split(tag).join(`<span style="color:var(--gold);font-weight:500;cursor:pointer" onclick="openMemberProfile('${m.name}')">${tag}</span>`);
   });
   return result;
 }
@@ -229,7 +218,24 @@ function renderMsgs(){
     const canEdit=me&&m._key===lastMyKey;
     const canDel=isAdmin||canEdit;
     const isPinned=m._key===pinnedMsgKey;
+
+    // Reply preview inside bubble
+    let replyHtml='';
+    if(m.replyTo){
+      const orig=msgs.find(x=>x._key===m.replyTo.key);
+      const origText=orig?orig.text:m.replyTo.text;
+      const c=avatarColor(m.replyTo.author);
+      replyHtml=`<div class="msg-reply-preview" onclick="document.getElementById('msg-${m.replyTo.key}')?.scrollIntoView({behavior:'smooth',block:'center'})">
+        <div class="msg-reply-line" style="background:${c.bd}"></div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:${c.tx}">${esc(m.replyTo.author)}</div>
+          <div style="font-size:12px;color:var(--text2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:220px">${esc(origText||'').slice(0,60)}</div>
+        </div>
+      </div>`;
+    }
+
     const actions=`<div class="msg-actions">
+      <button class="msg-act" onclick="setReply('${m._key}','${esc(m.author).replace(/'/g,"\\'")}','${esc(m.text).replace(/'/g,"\\'")}')">↩</button>
       ${canEdit?`<button class="msg-act" onclick="openMsgEdit('${m._key}','${esc(m.text).replace(/'/g,"\\'")}')">✎</button>`:''}
       ${isAdmin?`<button class="msg-act" onclick="pinMsg('${m._key}')">${isPinned?'📌':'📍'}</button>`:''}
       ${canDel?`<button class="msg-act" onclick="delMsg('${m._key}')">✕</button>`:''}
@@ -240,7 +246,10 @@ function renderMsgs(){
       <div class="msg-col">
         ${showName?`<div class="msg-name" style="color:${avatarColor(m.author).tx};cursor:pointer" onclick="openMemberProfile('${m.author}')">${esc(m.author)}</div>`:''}
         ${isPinned?'<div class="msg-pinned-mark">📌</div>':''}
-        <div class="msg-bbl" style="${bblStyle}">${renderMentionInText(m.text)}</div>
+        <div class="msg-bbl" style="${bblStyle}">
+          ${replyHtml}
+          ${renderMentionInText(m.text)}
+        </div>
         <div class="msg-footer">
           <span class="msg-time">${m.time}</span>
           ${m.edited?'<span class="msg-edited">ред.</span>':''}
@@ -261,14 +270,16 @@ function sendMsg(){
   hideMentionList();
   document.getElementById('emoji-picker')?.classList.add('hidden');
   D.cat.mood=Math.min(100,D.cat.mood+1); save();
-  // check for mentions and notify
   const members=fbMembers.length?fbMembers:D.members;
   members.forEach(m=>{
-    if(m.name!==D.currentUser?.name && txt.includes('@'+m.name)){
+    if(m.name!==D.currentUser?.name&&txt.includes('@'+m.name))
       notifyIfNeeded(`📣 ${D.currentUser?.name} упомянул вас`,txt);
-    }
   });
-  fbSend(D.currentUser?.name||'Аноним',txt);
+  // notify replied-to author
+  if(replyTo && replyTo.author !== D.currentUser?.name)
+    notifyIfNeeded(`↩ ${D.currentUser?.name} ответил вам`,txt);
+  fbSend(D.currentUser?.name||'Аноним', txt, replyTo);
+  clearReply();
 }
 
 // ── UNREAD TRACKING ──

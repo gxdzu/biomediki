@@ -139,8 +139,11 @@ async function fbPollChat() {
   } catch(e) { fbMessages = D.chat.general || []; }
 }
 
-async function fbSend(author, text) {
-  const msg = { author, text, time: nowTime(), ts: Date.now() };
+async function fbSend(author, text, replyTo=null) {
+  const msg = {
+    author, text, time: nowTime(), ts: Date.now(),
+    ...(replyTo ? {replyTo: {key: replyTo.key, author: replyTo.author, text: replyTo.text}} : {})
+  };
   fbMessages.push(msg); // optimistic
   renderMsgs();
   try {

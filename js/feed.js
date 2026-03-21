@@ -59,6 +59,18 @@ function countReactions(post, type){
   return Object.values(post.reactions).filter(r=>r===type).length;
 }
 
+function showReactions(key){
+  const post = fbFeed.find(p=>p._key===key);
+  if(!post||!post.reactions) return;
+  const reactions = post.reactions;
+  const likes = Object.entries(reactions).filter(([,v])=>v==='👍').map(([k])=>k);
+  const dislikes = Object.entries(reactions).filter(([,v])=>v==='👎').map(([k])=>k);
+  let msg = '';
+  if(likes.length) msg += `👍 ${likes.join(', ')}`;
+  if(dislikes.length) msg += (msg?'\n':'') + `👎 ${dislikes.join(', ')}`;
+  if(msg) toast(msg);
+}
+
 // ── комментарии ──
 async function openPost(key){
   curPostKey = key;
@@ -204,7 +216,7 @@ function renderFeed(){
       <div class="feed-post-text">${esc(p.text)}</div>
       <div class="feed-reactions" onclick="event.stopPropagation()">
         <button class="react-btn ${myReact==='👍'?'active':''}" onclick="reactToPost('${p._key}','👍')">
-          👍 <span>${likes||''}</span>
+          👍 <span onclick="event.stopPropagation();showReactions('${p._key}')">${likes||''}</span>
         </button>
         <button class="react-btn ${myReact==='👎'?'active':''}" onclick="reactToPost('${p._key}','👎')">
           👎 <span>${dislikes||''}</span>

@@ -56,3 +56,4 @@ window.reactToPost=reactToPost;
 window.switchHwTab=switchHwTab; window.addPersonalHw=addPersonalHw;
 window.togglePersonalHw=togglePersonalHw; window.delPersonalHw=delPersonalHw;
 window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembersList;
+window.setReply=setReply; window.clearReply=clearReply; window.showReactions=showReactions;
