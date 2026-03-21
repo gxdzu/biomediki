@@ -39,9 +39,9 @@ async function doLogin(){
 
   const allInvites = fbInvites;
   // DEBUG
-  err.textContent = `найдено: ${allInvites.length}, ищу: "${raw}"`;
-  await new Promise(r=>setTimeout(r,1500));
-  err.textContent = allInvites.map(i=>i.code).join(', ');
+  const usedInvDbg = allInvites.find(i => i.code === raw && i.used);
+  const freshInvDbg = allInvites.find(i => i.code === raw && !i.used);
+  err.textContent = `used:${!!usedInvDbg} fresh:${!!freshInvDbg} members:${fbMembers.length}`;
   await new Promise(r=>setTimeout(r,3000));
   err.textContent = '';
 
