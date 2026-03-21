@@ -38,19 +38,21 @@ async function doLogin(){
   }
 
   const allInvites = fbInvites;
-  // DEBUG
-  const usedInvDbg = allInvites.find(i => i.code === raw && i.used);
-  const freshInvDbg = allInvites.find(i => i.code === raw && !i.used);
-  err.textContent = `used:${!!usedInvDbg} fresh:${!!freshInvDbg} members:${fbMembers.length}`;
-  await new Promise(r=>setTimeout(r,3000));
-  err.textContent = '';
 
   // Повторный вход по использованному инвайту
   const usedInv = allInvites.find(i => i.code === raw && i.used);
   if(usedInv){
+    // Ждём members или грузим напрямую
     if(fbMembers.length === 0){
       let w = 0;
       while(fbMembers.length === 0 && w < 3000){ await new Promise(r=>setTimeout(r,300)); w+=300; }
+    }
+    // Если всё равно пусто — грузим напрямую из Firebase
+    if(fbMembers.length === 0){
+      try{
+        const data = await fbGet('members');
+        if(data) fbMembers = Object.entries(data).map(([k,v])=>({...v,_key:k}));
+      }catch(e){}
     }
     const member = fbMembers.find(m => m.code === raw || m.name === usedInv.usedBy);
     if(member){
@@ -60,6 +62,11 @@ async function doLogin(){
         bio: member.bio||'', socials: member.socials||{},
         avatarUrl: member.avatarUrl||'', _key: member._key
       };
+      save(); launchApp(); return;
+    }
+    // Если member всё равно не найден — входим по имени из инвайта
+    if(usedInv.usedBy){
+      D.currentUser = {name: usedInv.usedBy, role:'member', subgroup:0, code:raw, bio:'', socials:{}, avatarUrl:''};
       save(); launchApp(); return;
     }
   }
