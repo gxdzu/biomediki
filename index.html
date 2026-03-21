@@ -159,7 +159,16 @@
         <div class="hw-list" id="hw-list"></div>
         <div id="personal-hw-add" class="hidden" style="padding:0 0 16px">
           <input class="prof-inp" id="phw-title" placeholder="название задания" maxlength="80" style="margin-bottom:8px">
-          <input class="prof-inp" id="phw-due" type="date" style="margin-bottom:8px">
+          <textarea class="prof-inp" id="phw-desc" placeholder="описание (необязательно)" rows="2" style="margin-bottom:8px;resize:none;line-height:1.5"></textarea>
+          <input class="prof-inp" id="phw-url" placeholder="ссылка (необязательно)" type="url" style="margin-bottom:8px">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input class="prof-inp" id="phw-due" type="date" style="flex:1">
+            <select class="prof-inp" id="phw-urg" style="flex:1">
+              <option value="high">🔴 Срочно</option>
+              <option value="mid" selected>🟡 Обычное</option>
+              <option value="low">🟢 Не горит</option>
+            </select>
+          </div>
           <button class="save-btn" onclick="addPersonalHw()">добавить</button>
         </div>
       </div>
@@ -577,10 +586,16 @@
       <div class="adm-form">
         <input class="adm-inp" id="n-htitle" placeholder="Название задания" type="text">
         <input class="adm-inp" id="n-hsubj" placeholder="Предмет" type="text">
-        <input class="adm-inp" id="n-hdue" type="date" style="color-scheme:dark">
-        <select class="adm-inp" id="n-hurg">
-          <option value="high">Срочно</option><option value="mid">Обычное</option><option value="low">Не горит</option>
-        </select>
+        <textarea class="adm-inp" id="n-hdesc" placeholder="Описание (необязательно)" rows="2" style="resize:none;line-height:1.5"></textarea>
+        <input class="adm-inp" id="n-hurl" placeholder="Ссылка на материал (необязательно)" type="url">
+        <div style="display:flex;gap:8px">
+          <input class="adm-inp" id="n-hdue" type="date" style="color-scheme:dark;flex:1">
+          <select class="adm-inp" id="n-hurg" style="flex:1">
+            <option value="high">🔴 Срочно</option>
+            <option value="mid" selected>🟡 Обычное</option>
+            <option value="low">🟢 Не горит</option>
+          </select>
+        </div>
         <button class="adm-btn" onclick="addHw()">добавить задание</button>
       </div>
     </div>
