@@ -285,9 +285,13 @@
 
     <!-- MATERIALS -->
     <section class="screen screen-flex" id="screen-links">
-      <!-- Fixed header -->
       <div style="flex-shrink:0;border-bottom:.5px solid var(--bdr);background:var(--bg1)">
-        <div class="scr-hdr" style="padding-bottom:8px"><div class="scr-title">материалы</div></div>
+        <div class="scr-hdr" style="padding-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+          <div class="scr-title">материалы</div>
+          <button class="prof-edit-btn" style="position:static" onclick="openLinkEditor()">
+            <svg viewBox="0 0 20 20" width="16" height="16"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
         <div style="padding:0 16px 10px">
           <input class="chat-search-inp" id="links-search" placeholder="поиск материалов..." oninput="renderLinks()" style="width:100%">
         </div>
@@ -296,28 +300,8 @@
           <button class="hw-tab" id="links-tab-personal" onclick="switchLinksTab('personal')">личные</button>
         </div>
       </div>
-      <!-- Scrollable list -->
       <div style="flex:1;overflow-y:auto;padding:12px 16px">
         <div id="links-list"></div>
-        <!-- Add form inline at bottom of list -->
-        <div style="margin-top:12px;padding:14px;background:var(--bg2);border:.5px solid var(--bdr);border-radius:var(--r)">
-          <div style="font-size:10px;letter-spacing:.1em;color:var(--text3);margin-bottom:10px">добавить материал</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <input class="adm-inp" id="n-ltitle" placeholder="Название" type="text">
-            <div style="display:flex;gap:8px">
-              <input class="adm-inp" id="n-lsubj" placeholder="Предмет" type="text" style="flex:1">
-              <select class="adm-inp" id="n-ltype" style="flex:0.8">
-                <option value="конспект">Конспект</option>
-                <option value="задачи">Задачи</option>
-                <option value="презентация">Презентация</option>
-                <option value="книга">Книга</option>
-                <option value="другое">Другое</option>
-              </select>
-            </div>
-            <input class="adm-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
-            <button class="adm-btn" onclick="addLink()">добавить</button>
-          </div>
-        </div>
         <div style="height:16px"></div>
       </div>
     </section>
@@ -620,6 +604,29 @@
     <div class="adm-sec">
       <div class="adm-sec-ttl">участники</div>
       <div id="mem-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LINK EDITOR MODAL -->
+<div id="link-editor" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:380px">
+    <div class="modal-title">добавить материал</div>
+    <input class="modal-inp" id="n-ltitle" placeholder="Название" type="text">
+    <div style="display:flex;gap:8px">
+      <input class="modal-inp" id="n-lsubj" placeholder="Предмет" type="text" style="flex:1">
+      <select class="modal-inp" id="n-ltype" style="flex:0.8">
+        <option value="конспект">Конспект</option>
+        <option value="задачи">Задачи</option>
+        <option value="презентация">Презентация</option>
+        <option value="книга">Книга</option>
+        <option value="другое">Другое</option>
+      </select>
+    </div>
+    <input class="modal-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
+    <div class="modal-row" style="margin-top:10px">
+      <button class="modal-btn" onclick="addLink()">добавить</button>
+      <button class="modal-btn danger" onclick="closeLinkEditor()">отмена</button>
     </div>
   </div>
 </div>
