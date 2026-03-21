@@ -653,7 +653,25 @@
         <option value="другое">Другое</option>
       </select>
     </div>
-    <input class="modal-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
+    <!-- Toggle: upload vs link -->
+    <div style="display:flex;gap:6px;margin:8px 0 6px">
+      <button class="react-btn active" id="link-mode-upload" onclick="setLinkMode('upload')" style="font-size:11px">📎 с устройства</button>
+      <button class="react-btn" id="link-mode-url" onclick="setLinkMode('url')" style="font-size:11px">🔗 ссылка</button>
+    </div>
+    <div id="link-upload-mode">
+      <div id="link-upload-progress" style="display:none;margin-bottom:6px">
+        <div style="background:var(--bg3);border-radius:20px;height:4px;overflow:hidden">
+          <div id="link-upload-bar" style="height:100%;background:var(--gold);width:0%;transition:width .2s;border-radius:20px"></div>
+        </div>
+        <div id="link-upload-pct" style="font-size:11px;color:var(--text3);text-align:center;margin-top:2px"></div>
+      </div>
+      <button class="modal-btn" id="link-upload-btn" style="width:100%;margin-bottom:4px" onclick="linkPickFile()">выбрать файл с устройства</button>
+      <div id="link-upload-name" style="font-size:11px;color:var(--grn);padding:2px 0;display:none"></div>
+    </div>
+    <div id="link-url-mode" style="display:none">
+      <input class="modal-inp" id="n-lurl" placeholder="Ссылка (Google Drive, Notion...)" type="url">
+    </div>
+    <input type="hidden" id="n-lurl-hidden">
     <div class="modal-row" style="margin-top:10px">
       <button class="modal-btn" onclick="addLink()">добавить</button>
       <button class="modal-btn danger" onclick="closeLinkEditor()">отмена</button>
