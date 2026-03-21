@@ -14,8 +14,9 @@ async function hashCode(str){
 async function doLogin(){
   const raw = document.getElementById('inv-inp').value.trim().toUpperCase();
   const err = document.getElementById('g-err');
+  if(!raw){ err.textContent='введи код'; return; }
 
-  // Admin — compare hash only, never store plain code
+  // Admin check
   const inputHash = await hashCode(raw);
   if(inputHash === ADMIN_HASH){
     let m = D.members.find(x=>x.role==='admin');
@@ -26,7 +27,17 @@ async function doLogin(){
     launchApp(); return;
   }
 
-  // Merge Firebase + local invites
+  // If Firebase hasn't loaded yet — wait up to 3 seconds
+  if(fbInvites.length === 0 && D.invites.length === 0){
+    err.textContent = 'загрузка...';
+    let waited = 0;
+    while(fbInvites.length === 0 && waited < 3000){
+      await new Promise(r => setTimeout(r, 300));
+      waited += 300;
+    }
+    err.textContent = '';
+  }
+
   const allInvites = fbInvites.length ? fbInvites : D.invites;
 
   // Re-login with used invite
@@ -49,14 +60,8 @@ async function doLogin(){
     return;
   }
 
-  if(fbInvites.length===0 && D.invites.length===0){
-    err.textContent='подождите, идёт загрузка...';
-    setTimeout(()=>err.textContent='', 2000);
-    return;
-  }
-
-  err.textContent='неверный код';
-  document.getElementById('inv-inp').style.borderColor='rgba(196,116,116,.6)';
+  err.textContent = 'неверный код';
+  document.getElementById('inv-inp').style.borderColor = 'rgba(196,116,116,.6)';
   setTimeout(()=>{ err.textContent=''; document.getElementById('inv-inp').style.borderColor=''; }, 2500);
 }
 
