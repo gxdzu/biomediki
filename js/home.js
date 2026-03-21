@@ -19,7 +19,6 @@ function renderHome(){
   if(hwEl){const c=D.homework.filter(h=>!h.doneBy.includes(D.currentUser?.name)).length;hwEl.textContent=c||'✓';}
   const linksEl=document.getElementById('home-links-count');
   if(linksEl) linksEl.textContent=(fbLinks.length||D.links?.length||0).toString();
-  if(calCountEl){const n=new Date();n.setHours(0,0,0,0);const c=D.homework.filter(h=>h.dueDate&&new Date(h.dueDate+'T00:00:00')>=n&&!h.doneBy.includes(D.currentUser?.name)).length;calCountEl.textContent=c||'✓';}
   // schedule today
   const sd=document.getElementById('home-sched');
   if(sd){
@@ -40,27 +39,22 @@ function renderHome(){
   renderPostOfDay();
 }
 
-// ══════════════════════════════════════════════
-// post дня — вызывается из renderHome
-
+// ── POST Dня ──
 function renderPostOfDay(){
-  const el = document.getElementById('home-post-day');
-  if(!el) return;
-  const best = getBestPost();
-  if(!best){ el.innerHTML=''; return; }
-  const likes = countReactions(best,'👍');
-  const c = avatarColor(best.author);
-  el.innerHTML = `
+  const el=document.getElementById('home-post-day'); if(!el) return;
+  const best=getBestPost();
+  if(!best){el.innerHTML='';return;}
+  const likes=countReactions(best,'👍');
+  const c=avatarColor(best.author);
+  el.innerHTML=`
     <div class="wgt-lbl" style="margin-bottom:10px">пост дня</div>
     <div class="feed-post" style="margin:0;cursor:pointer" onclick="openPost('${best._key}')">
       <div class="feed-post-hdr">
         <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};width:32px;height:32px;font-size:14px">${(best.author||'?')[0].toUpperCase()}</div>
-        <div class="feed-post-meta">
-          <div class="feed-post-author" style="font-size:12px">${esc(best.author)}</div>
-        </div>
+        <div class="feed-post-meta"><div class="feed-post-author" style="font-size:12px">${esc(best.author)}</div></div>
         <span style="font-size:12px;color:var(--gold);margin-left:auto">👍 ${likes}</span>
       </div>
-      ${getMediaHtml(best.mediaUrl||best.img, true)}
+      ${getMediaHtml(best.mediaUrl||best.img,true)}
       <div class="feed-post-text" style="font-size:13px;-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">${esc(best.text)}</div>
     </div>`;
 }

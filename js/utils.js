@@ -87,17 +87,32 @@ function urgencyFromDate(dateStr){
 }
 
 // ══════════════════════════════════════════════
-// MATERIALS — Firebase sync
+// MATERIALS — Firebase sync + personal
 // ══════════════════════════════════════════════
 let fbLinks = [];
+let linksTab = 'common'; // 'common' | 'personal'
+
+function switchLinksTab(tab){
+  linksTab = tab;
+  document.getElementById('links-tab-common')?.classList.toggle('active', tab==='common');
+  document.getElementById('links-tab-personal')?.classList.toggle('active', tab==='personal');
+  renderLinks();
+}
+
+function getPersonalLinks(){
+  const key='sg_plinks_'+(D.currentUser?.name||'');
+  try{ return JSON.parse(localStorage.getItem(key)||'[]'); }catch(e){ return []; }
+}
+function savePersonalLinks(arr){
+  localStorage.setItem('sg_plinks_'+(D.currentUser?.name||''), JSON.stringify(arr));
+}
 
 async function fbPollLinks(){
   try {
     const data = await fbGet('links');
     const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})) : [];
     if(JSON.stringify(arr) !== JSON.stringify(fbLinks)){
-      fbLinks = arr;
-      D.links = arr;
+      fbLinks = arr; D.links = arr;
       if(curScreen==='links') renderLinks();
     }
   } catch(e){}
@@ -127,34 +142,59 @@ const LINK_ICONS = {
 };
 
 function renderLinks(){
-  const el = document.getElementById('links-list');
-  if(!el) return;
-  const items = fbLinks.length ? fbLinks : (D.links||[]);
-  // group by subject
-  const bySubj = {};
-  items.forEach(l=>{
-    const s = l.subject||'общее';
-    if(!bySubj[s]) bySubj[s]=[];
-    bySubj[s].push(l);
-  });
-  if(!items.length){
-    el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px">материалы появятся здесь</div>`;
+  const el = document.getElementById('links-list'); if(!el) return;
+  const query = (document.getElementById('links-search')?.value||'').toLowerCase().trim();
+  const isAdmin = D.currentUser?.role==='admin';
+
+  if(linksTab==='personal'){
+    let items = getPersonalLinks();
+    if(query) items = items.filter(l=>(l.title+l.subject+l.url).toLowerCase().includes(query));
+    if(!items.length){
+      el.innerHTML=`<div style="text-align:center;padding:30px 20px;color:var(--text3);font-family:var(--serif);font-style:italic">личных материалов нет</div>`;
+      return;
+    }
+    el.innerHTML = items.map(l=>`
+      <div style="display:flex;align-items:center;gap:0;margin-bottom:8px">
+        <a href="${l.url}" target="_blank" style="text-decoration:none;flex:1">
+          <div class="link-card" style="margin-bottom:0">
+            <div class="link-icon">${LINK_ICONS[l.type]||LINK_ICONS.другое}</div>
+            <div class="link-body">
+              <div class="link-title">${esc(l.title)}</div>
+              <div class="link-meta">${l.subject||''} · ${l.type}</div>
+            </div>
+          </div>
+        </a>
+        <button class="inv-del" onclick="delPersonalLink(${l.id})" style="margin-left:4px">×</button>
+      </div>`).join('');
     return;
   }
+
+  // COMMON
+  let items = fbLinks.length ? fbLinks : (D.links||[]);
+  if(query) items = items.filter(l=>(l.title+l.subject+l.url).toLowerCase().includes(query));
+  if(!items.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px">${query?'ничего не найдено':'материалы появятся здесь'}</div>`;
+    return;
+  }
+  const bySubj = {};
+  items.forEach(l=>{ const s=l.subject||'общее'; if(!bySubj[s]) bySubj[s]=[]; bySubj[s].push(l); });
   el.innerHTML = Object.entries(bySubj).map(([subj,links])=>`
     <div style="margin-bottom:20px">
       <div class="sec-title" style="padding:0 0 8px">${subj}</div>
       ${links.map(l=>`
-        <a href="${l.url}" target="_blank" style="text-decoration:none">
-          <div class="link-card">
-            <div class="link-icon">${LINK_ICONS[l.type]||LINK_ICONS.другое}</div>
-            <div class="link-body">
-              <div class="link-title">${esc(l.title)}</div>
-              <div class="link-meta">${l.type}</div>
+        <div style="display:flex;align-items:center;gap:0;margin-bottom:8px">
+          <a href="${l.url}" target="_blank" style="text-decoration:none;flex:1">
+            <div class="link-card" style="margin-bottom:0">
+              <div class="link-icon">${LINK_ICONS[l.type]||LINK_ICONS.другое}</div>
+              <div class="link-body">
+                <div class="link-title">${esc(l.title)}</div>
+                <div class="link-meta">${l.type}</div>
+              </div>
+              <svg viewBox="0 0 16 16" width="12" height="12" style="flex-shrink:0;color:var(--text3)"><path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
-            <svg viewBox="0 0 16 16" width="12" height="12" style="flex-shrink:0;color:var(--text3)"><path d="M4 8h8M9 5l3 3-3 3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
-        </a>`).join('')}
+          </a>
+          ${isAdmin?`<button class="inv-del" onclick="fbDelLink('${l._key}')" style="margin-left:4px">×</button>`:''}
+        </div>`).join('')}
     </div>`).join('');
 }
 
@@ -162,8 +202,20 @@ function addLink(){
   const title=v('n-ltitle').trim(), subject=v('n-lsubj').trim();
   const url=v('n-lurl').trim(), type=v('n-ltype');
   if(!title||!url){toast('заполни название и ссылку');return}
-  ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>document.getElementById(id).value='');
-  fbAddLink({title, subject, url, type, ts: Date.now()});
+  ['n-ltitle','n-lsubj','n-lurl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(linksTab==='personal'){
+    const arr = getPersonalLinks();
+    arr.push({id:Date.now(), title, subject, url, type});
+    savePersonalLinks(arr);
+    renderLinks(); toast('добавлено');
+  } else {
+    fbAddLink({title, subject, url, type, ts:Date.now()});
+  }
+}
+
+function delPersonalLink(id){
+  savePersonalLinks(getPersonalLinks().filter(l=>l.id!==id));
+  renderLinks();
 }
 
 // ══════════════════════════════════════════════

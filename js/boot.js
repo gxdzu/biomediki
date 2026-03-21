@@ -60,3 +60,6 @@ window.setReply=setReply; window.clearReply=clearReply; window.showReactions=sho
 window.calPrev=calPrev; window.calNext=calNext; window.calSelectDay=calSelectDay;
 window.openDm=openDm; window.openDmFromSheet=openDmFromSheet; window.sendDm=sendDm;
 window.toggleMembersList=toggleMembersList; window.closeMembersList=closeMembersList;
+window.switchLinksTab=switchLinksTab; window.delPersonalLink=delPersonalLink;
+window.setDmReply=setDmReply; window.clearDmReply=clearDmReply;
+window.toggleDmEmoji=toggleDmEmoji; window.insertDmEmoji=insertDmEmoji;

@@ -30,7 +30,6 @@ function renderSchedule(){
     return `<button class="day-tab ${i===curDay?'active':''}" onclick="selDay(${i})">${d} ${dt.getDate()}${dot}</button>`;
   }).join('');
   renderLessons();
-  if(document.getElementById('cal-grid')) renderCalendar();
 }
 
 function prevWeek(){curWkOff--;renderSchedule()}
@@ -109,20 +108,20 @@ function delLessonByIdx(idx){
 }
 
 // ── AUTO WEEK TYPE ──
-// Anchor: week of 21 March 2026 (ISO week 12) = RED
-// Even ISO week = red, odd = blue
+// Anchor: Monday 16 March 2026 = start of RED week
+const WEEK_ANCHOR = new Date(2026, 2, 16); // 16 марта 2026
+
 function getAutoWeekType(date){
   const d = date || new Date();
-  const jan4 = new Date(d.getFullYear(), 0, 4); // always in week 1
-  const startOfWeek1 = new Date(jan4);
-  startOfWeek1.setDate(jan4.getDate() - (jan4.getDay()||7) + 1);
-  const weekNum = Math.round((d - startOfWeek1) / 604800000) + 1;
-  return weekNum % 2 === 0 ? 'red' : 'blue';
+  // Find Monday of current week
+  const monday = new Date(d);
+  monday.setHours(0,0,0,0);
+  monday.setDate(d.getDate() - (d.getDay()===0 ? 6 : d.getDay()-1));
+  const diffWeeks = Math.round((monday - WEEK_ANCHOR) / 604800000);
+  return diffWeeks % 2 === 0 ? 'red' : 'blue';
 }
 
-
 function getCurrentWeekType(){
-  // If admin manually set — use that; otherwise auto
   if(fbWeekType) return fbWeekType;
   return getAutoWeekType();
 }
