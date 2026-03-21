@@ -13,16 +13,13 @@ function renderSchedule(){
   const fri=new Date(mon); fri.setDate(fri.getDate()+4);
   document.getElementById('wk-lbl').textContent=`${mon.getDate()} — ${fri.getDate()} ${MON_RU[fri.getMonth()]}`;
 
-  // Week type badge
-  const wt = fbWeekType || D.weekType || 'red';
+  // Week type — auto by default, admin can override via Firebase
+  const wt = getCurrentWeekType();
   const badge = document.getElementById('week-type-badge');
   if(badge){ badge.textContent = wt==='red'?'красная':'синяя'; badge.className=`week-badge ${wt}`; }
-
-  // Week buttons in admin
   document.getElementById('wk-red-btn')?.classList.toggle('active', wt==='red');
   document.getElementById('wk-blue-btn')?.classList.toggle('active', wt==='blue');
 
-  // Schedule quote
   const sq = document.getElementById('sched-quote');
   if(sq) sq.textContent = D.quote||QUOTES[new Date().getDay()%QUOTES.length];
 
@@ -33,6 +30,7 @@ function renderSchedule(){
     return `<button class="day-tab ${i===curDay?'active':''}" onclick="selDay(${i})">${d} ${dt.getDate()}${dot}</button>`;
   }).join('');
   renderLessons();
+  if(document.getElementById('cal-grid')) renderCalendar();
 }
 
 function prevWeek(){curWkOff--;renderSchedule()}
@@ -41,7 +39,7 @@ function selDay(i){curDay=i;renderSchedule()}
 
 function renderLessons(){
   const el=document.getElementById('sched-list');
-  const wt = fbWeekType || D.weekType || 'red';
+  const wt = getCurrentWeekType();
   const userSg = D.currentUser?.subgroup||0;
   let ls = D.schedule.filter(l=>l.day===curDay);
 
@@ -110,26 +108,34 @@ function delLessonByIdx(idx){
   fbDelLesson(lesson._key,idx);
 }
 
-// Week type sync from Firebase
-async function fbPollWeekType(){
-  try{
-    const data = await fbGet('weekType');
-    if(data && data !== fbWeekType){
-      fbWeekType = data;
-      D.weekType = data;
-      if(curScreen==='schedule') renderSchedule();
-      if(document.getElementById('admin') && !document.getElementById('admin').classList.contains('hidden')) renderAdmin();
-    }
-  }catch(e){}
+// ── AUTO WEEK TYPE ──
+// Anchor: week of 21 March 2026 (ISO week 12) = RED
+// Even ISO week = red, odd = blue
+function getAutoWeekType(date){
+  const d = date || new Date();
+  const jan4 = new Date(d.getFullYear(), 0, 4); // always in week 1
+  const startOfWeek1 = new Date(jan4);
+  startOfWeek1.setDate(jan4.getDate() - (jan4.getDay()||7) + 1);
+  const weekNum = Math.round((d - startOfWeek1) / 604800000) + 1;
+  return weekNum % 2 === 0 ? 'red' : 'blue';
+}
+
+
+function getCurrentWeekType(){
+  // If admin manually set — use that; otherwise auto
+  if(fbWeekType) return fbWeekType;
+  return getAutoWeekType();
 }
 
 async function setWeekType(type){
   fbWeekType = type; D.weekType = type; save();
-  document.getElementById('wk-red-btn')?.classList.toggle('active',type==='red');
-  document.getElementById('wk-blue-btn')?.classList.toggle('active',type==='blue');
+  document.getElementById('wk-red-btn')?.classList.toggle('active', type==='red');
+  document.getElementById('wk-blue-btn')?.classList.toggle('active', type==='blue');
   renderSchedule();
-  try{ await fbSet('weekType', type); toast(type==='red'?'красная неделя':'синяя неделя'); }
-  catch(e){ toast('обновлено локально'); }
+  try{
+    await fbSet('weekType', type||null);
+    toast(type==='red'?'красная неделя':type==='blue'?'синяя неделя':'авто-режим');
+  }catch(e){ toast('обновлено локально'); }
 }
 
 // ══════════════════════════════════════════════
@@ -246,4 +252,19 @@ function togglePersonalHw(id){
 function delPersonalHw(id){
   savePersonalHw(getPersonalHw().filter(h=>h.id!==id));
   renderHw();
+}
+
+// Week type Firebase sync
+async function fbPollWeekType(){
+  try{
+    const data = await fbGet('weekType');
+    // null or empty = auto mode
+    const newType = data && typeof data === 'string' ? data : '';
+    if(newType !== fbWeekType){
+      fbWeekType = newType;
+      D.weekType = newType;
+      if(curScreen==='schedule') renderSchedule();
+      if(document.getElementById('admin')&&!document.getElementById('admin').classList.contains('hidden')) renderAdmin();
+    }
+  }catch(e){}
 }

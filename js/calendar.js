@@ -31,7 +31,7 @@ function getCalEvents(year, month){
 
   // Schedule lessons for this month (show each lesson on correct weekday)
   const userSg = D.currentUser?.subgroup||0;
-  const wt = (typeof fbWeekType !== 'undefined' ? fbWeekType : null) || D.weekType || 'red';
+  const wt = (typeof getCurrentWeekType === 'function') ? getCurrentWeekType() : 'red';
   for(let day=1; day<=endOfMonth.getDate(); day++){
     const d = new Date(year, month, day);
     const weekDay = d.getDay()===0?6:d.getDay()-1; // 0=mon

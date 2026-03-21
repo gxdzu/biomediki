@@ -27,7 +27,6 @@ function navigate(s){
   if(s==='feed') renderFeed();
   if(s==='post') renderPostScreen();
   if(s==='faq') renderFaq();
-  if(s==='calendar') renderCalendar();
   if(s==='dms') renderDmList();
   if(s!=='dm'&&dmPolling){clearInterval(dmPolling);dmPolling=null;}
   if(s==='dm') renderDmMsgs(dmMessages[dmKey(D.currentUser?.name||'',curDmPartner||'')] || []);
