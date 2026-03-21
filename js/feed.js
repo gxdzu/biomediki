@@ -2,7 +2,16 @@
 // FEED — лента с реакциями и комментариями
 // ══════════════════════════════════════════════
 let fbFeed = [];
-let curPostKey = null; // для экрана комментариев
+let curPostKey = null;
+
+// ── медиа рендер (фото, видео, YouTube) ──
+function getMediaHtml(url, compact=false){
+  if(!url) return '';
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(ytMatch) return `<div class="video-wrap${compact?' compact':''}"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>`;
+  if(/\.(mp4|webm|ogg)(\?|$)/i.test(url)) return `<video class="feed-post-img${compact?' compact':''}" src="${url}" controls playsinline webkit-playsinline style="width:100%"></video>`;
+  return `<img class="feed-post-img${compact?' compact':''}" src="${url}" onerror="this.style.display='none'" loading="lazy">`;
+}
 
 async function fbPollFeed(){
   try{
@@ -25,9 +34,17 @@ async function reactToPost(key, type){
   if(!post) return;
   const reactions = post.reactions||{};
   const myReact = reactions[myName];
-  // toggle: same → remove, different → switch
   if(myReact===type) delete reactions[myName];
-  else reactions[myName] = type;
+  else {
+    reactions[myName] = type;
+    // уведомить автора если это не сам автор
+    if(post.author !== myName){
+      notifyIfNeeded(
+        `${type === '👍' ? '👍' : '👎'} ${myName} отреагировал на пост`,
+        post.text.slice(0,60)
+      );
+    }
+  }
   post.reactions = reactions;
   try{
     await fbSet(`feed/${key}/reactions`, reactions);
@@ -57,14 +74,16 @@ async function submitComment(){
   const inp = document.getElementById('comment-inp');
   const text = inp?.value.trim();
   if(!text||!curPostKey) return;
-  const comment = {
-    author: D.currentUser?.name||'Аноним',
-    text, ts: Date.now(), time: nowTime()
-  };
+  const myName = D.currentUser?.name||'Аноним';
+  const comment = { author: myName, text, ts: Date.now(), time: nowTime() };
   try{
     await fbPost(`feed/${curPostKey}/comments`, comment);
     inp.value='';
-    // reload post data
+    // уведомить автора поста
+    const post = fbFeed.find(p=>p._key===curPostKey);
+    if(post && post.author !== myName){
+      notifyIfNeeded(`💬 ${myName} прокомментировал пост`, text.slice(0,60));
+    }
     await fbPollFeed();
     renderPostScreen();
   }catch(e){ toast('ошибка'); }

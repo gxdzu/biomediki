@@ -41,16 +41,6 @@ function renderHome(){
 
 // ══════════════════════════════════════════════
 // post дня — вызывается из renderHome
-function getMediaHtml(url, compact=false){
-  if(!url) return '';
-  // YouTube
-  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-  if(ytMatch) return `<div class="video-wrap${compact?' compact':''}"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" frameborder="0" allowfullscreen loading="lazy"></iframe></div>`;
-  // Video file
-  if(/\.(mp4|webm|ogg)(\?|$)/i.test(url)) return `<video class="feed-post-img${compact?' compact':''}" src="${url}" controls playsinline></video>`;
-  // Image
-  return `<img class="feed-post-img${compact?' compact':''}" src="${url}" onerror="this.style.display='none'" loading="lazy">`;
-}
 
 function renderPostOfDay(){
   const el = document.getElementById('home-post-day');
@@ -69,7 +59,7 @@ function renderPostOfDay(){
         </div>
         <span style="font-size:12px;color:var(--gold);margin-left:auto">👍 ${likes}</span>
       </div>
-      ${best.mediaUrl ? getMediaHtml(best.mediaUrl, true) : ''}
+      ${getMediaHtml(best.mediaUrl||best.img, true)}
       <div class="feed-post-text" style="font-size:13px;-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">${esc(best.text)}</div>
     </div>`;
 }
