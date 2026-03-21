@@ -166,37 +166,40 @@ function renderHw(){
   }
 }
 
+function urgPriority(u){
+  if(u==='high') return {icon:'🔴', label:'срочно', cls:'high'};
+  if(u==='mid')  return {icon:'🟡', label:'обычное', cls:'mid'};
+  return               {icon:'🟢', label:'не горит', cls:'low'};
+}
+
 function hwCardHtml(hw){
   const done=hw.doneBy.includes(D.currentUser?.name);
-  return `<div class="hw-card ${done?'done':''}" onclick="toggleHw(${hw.id})">
-    <div class="hw-chk">${done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
-    <div class="hw-body">
-      <div class="hw-ttl">${hw.title}</div>
-      <div class="hw-meta"><div class="hw-subj">${hw.subject}</div><div class="hw-badge ${urgencyFromDate(hw.dueDate)||hw.urgency}">${hw.dueDate?formatDue(hw.dueDate):hw.due}</div></div>
-      <div class="hw-cnt">${hw.doneBy.length} из ${D.members.length} сделали</div>
+  const prio=urgPriority(urgencyFromDate(hw.dueDate)||hw.urgency);
+  const dueStr=hw.dueDate?formatDue(hw.dueDate):hw.due||'';
+  return `<div class="hw-card ${done?'done':''}" id="hwcard-${hw.id}">
+    <div style="display:flex;align-items:flex-start;gap:10px" onclick="toggleHw(${hw.id})">
+      <div class="hw-chk" style="flex-shrink:0;margin-top:2px">${done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
+      <div class="hw-body" style="flex:1;min-width:0">
+        <div class="hw-ttl">${hw.title}</div>
+        <div class="hw-meta" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px">
+          <div class="hw-subj">${hw.subject}</div>
+          ${dueStr?`<div class="hw-badge ${prio.cls}">${prio.icon} ${dueStr}</div>`:`<div class="hw-badge ${prio.cls}">${prio.icon} ${prio.label}</div>`}
+        </div>
+        ${hw.doneBy.length?`<div class="hw-cnt">${hw.doneBy.length} из ${(fbMembers.length?fbMembers:D.members).length||1} сделали</div>`:''}
+      </div>
+      ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="event.stopPropagation();delHw(${hw.id})" style="flex-shrink:0">×</button>`:''}
     </div>
-    ${D.currentUser?.role==='admin'?`<button class="del-btn" onclick="event.stopPropagation();delHw(${hw.id})">×</button>`:''}
+    ${hw.desc||hw.url?`<div class="hw-details" onclick="event.stopPropagation()">
+      ${hw.desc?`<div class="hw-desc">${esc(hw.desc)}</div>`:''}
+      ${hw.url?`<a href="${hw.url}" target="_blank" class="hw-link">
+        <svg viewBox="0 0 16 16" width="12" height="12"><path d="M6 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1v-3M9 1h6v6M8 8l7-7" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        открыть материал
+      </a>`:''}
+    </div>`:''}
   </div>`;
 }
 
-function renderPersonalHw(){
-  document.getElementById('hw-fils').innerHTML='';
-  const arr=getPersonalHw();
-  const el=document.getElementById('hw-list');
-  if(!arr.length){
-    el.innerHTML='<div class="personal-hw-empty">личных заданий нет<br><span style="font-size:12px">добавь ниже</span></div>';
-    return;
-  }
-  el.innerHTML=arr.map(hw=>`
-    <div class="hw-card ${hw.done?'done':''}" onclick="togglePersonalHw(${hw.id})">
-      <div class="hw-chk">${hw.done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
-      <div class="hw-body">
-        <div class="hw-ttl">${hw.title}</div>
-        ${hw.dueDate?`<div class="hw-meta"><div class="hw-badge ${urgencyFromDate(hw.dueDate)}">${formatDue(hw.dueDate)}</div></div>`:''}
-      </div>
-      <button class="del-btn" onclick="event.stopPropagation();delPersonalHw(${hw.id})">×</button>
-    </div>`).join('');
-}
+
 function setFil(f){hwFil=f;renderHw()}
 function toggleHw(id){
   const hw=D.homework.find(h=>h.id===id);
@@ -230,27 +233,60 @@ function savePersonalHw(arr){
 }
 
 function addPersonalHw(){
-  const title = document.getElementById('phw-title')?.value.trim();
-  const due = document.getElementById('phw-due')?.value;
+  const title=document.getElementById('phw-title')?.value.trim();
+  const desc=document.getElementById('phw-desc')?.value.trim()||'';
+  const url=document.getElementById('phw-url')?.value.trim()||'';
+  const due=document.getElementById('phw-due')?.value||'';
+  const urgency=document.getElementById('phw-urg')?.value||'mid';
   if(!title){ toast('введи название'); return; }
-  const arr = getPersonalHw();
-  arr.push({id: Date.now(), title, dueDate: due||'', done: false});
+  const arr=getPersonalHw();
+  arr.push({id:Date.now(),title,desc,url,dueDate:due,urgency,done:false});
   savePersonalHw(arr);
-  document.getElementById('phw-title').value='';
-  document.getElementById('phw-due').value='';
+  ['phw-title','phw-desc','phw-url','phw-due'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   renderHw(); toast('добавлено');
 }
 
 function togglePersonalHw(id){
-  const arr = getPersonalHw();
-  const item = arr.find(h=>h.id===id);
-  if(item) item.done = !item.done;
+  const arr=getPersonalHw();
+  const item=arr.find(h=>h.id===id);
+  if(item) item.done=!item.done;
   savePersonalHw(arr); renderHw();
 }
 
 function delPersonalHw(id){
   savePersonalHw(getPersonalHw().filter(h=>h.id!==id));
   renderHw();
+}
+
+function renderPersonalHw(){
+  document.getElementById('hw-fils').innerHTML='';
+  const arr=getPersonalHw();
+  const el=document.getElementById('hw-list');
+  if(!arr.length){
+    el.innerHTML='<div class="personal-hw-empty">личных заданий нет<br><span style="font-size:12px">добавь ниже</span></div>';
+    return;
+  }
+  const prio=u=>u==='high'?{icon:'🔴',cls:'high'}:u==='mid'?{icon:'🟡',cls:'mid'}:{icon:'🟢',cls:'low'};
+  el.innerHTML=arr.map(hw=>{
+    const p=prio(urgencyFromDate(hw.dueDate)||hw.urgency||'mid');
+    const dueStr=hw.dueDate?formatDue(hw.dueDate):'';
+    return `<div class="hw-card ${hw.done?'done':''}">
+      <div style="display:flex;align-items:flex-start;gap:10px" onclick="togglePersonalHw(${hw.id})">
+        <div class="hw-chk" style="flex-shrink:0;margin-top:2px">${hw.done?`<svg viewBox="0 0 12 12" width="11" height="11"><path d="M1.5 6l3 3 6-6" stroke="var(--grn)" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}</div>
+        <div class="hw-body" style="flex:1;min-width:0">
+          <div class="hw-ttl">${hw.title}</div>
+          <div class="hw-meta" style="margin-top:4px">
+            ${dueStr?`<div class="hw-badge ${p.cls}">${p.icon} ${dueStr}</div>`:`<div class="hw-badge ${p.cls}">${p.icon}</div>`}
+          </div>
+        </div>
+        <button class="del-btn" onclick="event.stopPropagation();delPersonalHw(${hw.id})" style="flex-shrink:0">×</button>
+      </div>
+      ${hw.desc||hw.url?`<div class="hw-details" onclick="event.stopPropagation()">
+        ${hw.desc?`<div class="hw-desc">${hw.desc}</div>`:''}
+        ${hw.url?`<a href="${hw.url}" target="_blank" class="hw-link">открыть материал</a>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('');
 }
 
 // Week type Firebase sync

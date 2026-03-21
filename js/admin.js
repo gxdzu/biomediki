@@ -141,11 +141,19 @@ function calcEnd(time){
   return `${eh}:${String(em%60).padStart(2,'0')}`;
 }
 function addHw(){
-  const title=v('n-htitle').trim(),subject=v('n-hsubj').trim();
-  const dueDate=v('n-hdue'),urgency=v('n-hurg');
-  if(!title||!subject||!dueDate){toast('заполни все поля');return}
-  const hw={id:D.hwNextId++,title,subject,dueDate,due:formatDue(dueDate),urgency:urgency||urgencyFromDate(dueDate),doneBy:[]};
-  ['n-htitle','n-hsubj'].forEach(id=>document.getElementById(id).value='');
+  const title=v('n-htitle').trim(), subject=v('n-hsubj').trim();
+  const desc=v('n-hdesc').trim(), url=v('n-hurl').trim();
+  const dueDate=v('n-hdue'), urgency=v('n-hurg');
+  if(!title||!subject){toast('заполни название и предмет');return}
+  const hw={
+    id:D.hwNextId++, title, subject,
+    desc: desc||'', url: url||'',
+    dueDate: dueDate||'',
+    due: dueDate?formatDue(dueDate):'',
+    urgency: urgency||urgencyFromDate(dueDate)||'mid',
+    doneBy:[]
+  };
+  ['n-htitle','n-hsubj','n-hdesc','n-hurl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('n-hdue').value='';
   fbAddHw(hw);
 }
