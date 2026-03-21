@@ -2,7 +2,16 @@
 // DATA
 // ══════════════════════════════════════════════
 const SK = 'sg304v3';
-const ADMIN_CODE = 'BIO-7X4K-MED9';
+// Admin auth — code is not stored in source, verified via hash
+function checkAdminCode(raw){
+  const c = raw.toUpperCase();
+  let h = 0;
+  for(let i=0;i<c.length;i++) h = Math.imul(31,h)+c.charCodeAt(i)|0;
+  const salted = c.split('').reverse().join('')+'sg304v3';
+  let h2 = 0;
+  for(let i=0;i<salted.length;i++) h2 = Math.imul(31,h2)+salted.charCodeAt(i)|0;
+  return Math.abs(h).toString(36)+Math.abs(h2).toString(36) === 'rut1311rwpvn';
+}
 
 const DEFAULTS = {
   invites:[
@@ -10,7 +19,7 @@ const DEFAULTS = {
     {code:'MNOP-3391',used:false,usedBy:null},
     {code:'WXYZ-5520',used:false,usedBy:null},
   ],
-  members:[{name:'Саша',role:'admin',code:ADMIN_CODE,subgroup:0}],
+  members:[{name:'Саша',role:'admin',code:'',subgroup:0}],
   schedule:[],
   homework:[],
   feed:[],

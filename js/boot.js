@@ -45,10 +45,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   fbPollInvites();
   updateOnlineStatus();
   if(D.currentUser) launchApp();
-  let taps=0;
-  document.querySelector('.g-title')?.addEventListener('click',()=>{
-    if(++taps>=5){document.getElementById('inv-inp').value='BIO-7X4K-MED9';taps=0}
-  });
   document.getElementById('inv-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 });
 
@@ -91,3 +87,5 @@ window.openDmMsgEdit=openDmMsgEdit; window.saveDmMsgEdit=saveDmMsgEdit; window.c
 window.delDmMsg=delDmMsg;
 window.switchLinksTab=switchLinksTab; window.delPersonalLink=delPersonalLink;
 window.openLinkEditor=openLinkEditor; window.closeLinkEditor=closeLinkEditor;
+window.openHwEdit=openHwEdit; window.closeHwEdit=closeHwEdit; window.saveHwEdit=saveHwEdit;
+window.checkAdminCode=checkAdminCode;

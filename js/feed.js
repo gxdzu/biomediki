@@ -117,8 +117,8 @@ function renderPostScreen(){
   el.innerHTML = `
     <div class="feed-post" style="border-radius:0;border-left:none;border-right:none;border-top:none">
       <div class="feed-post-hdr">
-        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx}">${(post.author||'?')[0].toUpperCase()}</div>
-        <div class="feed-post-meta">
+        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};cursor:pointer" onclick="openMemberProfile('${post.author}')">${(post.author||'?')[0].toUpperCase()}</div>
+        <div class="feed-post-meta" style="cursor:pointer" onclick="openMemberProfile('${post.author}')">
           <div class="feed-post-author">${esc(post.author)}</div>
           <div class="feed-post-time">${post.time||''}</div>
         </div>
@@ -205,8 +205,8 @@ function renderFeed(){
     const commCount=p.comments?Object.keys(p.comments).length:0;
     return `<div class="feed-post" onclick="openPost('${p._key}')">
       <div class="feed-post-hdr">
-        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx}">${(p.author||'?')[0].toUpperCase()}</div>
-        <div class="feed-post-meta">
+        <div class="feed-post-av" style="background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};cursor:pointer" onclick="event.stopPropagation();openMemberProfile('${p.author}')">${(p.author||'?')[0].toUpperCase()}</div>
+        <div class="feed-post-meta" style="cursor:pointer" onclick="event.stopPropagation();openMemberProfile('${p.author}')">
           <div class="feed-post-author">${esc(p.author)}</div>
           <div class="feed-post-time">${p.time||''}</div>
         </div>

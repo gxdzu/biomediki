@@ -228,3 +228,79 @@ function delPersonalLink(id){
 }
 
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// DEADLINE REMINDERS
+// ══════════════════════════════════════════════
+let _reminderLastFired = {};
+
+function checkDeadlineReminders(){
+  if(typeof Notification==='undefined'||Notification.permission!=='granted') return;
+  const myName=D.currentUser?.name; if(!myName) return;
+  const now=new Date(); now.setSeconds(0,0);
+  D.homework.forEach(hw=>{
+    if(!hw.dueDate) return;
+    if(hw.doneBy?.includes(myName)) return; // already done
+    const due=new Date(hw.dueDate+'T00:00:00');
+    const diffH=Math.round((due-now)/3600000);
+    // fire at ~24h and ~1h before, but only once per window
+    const key=hw.id+'_'+diffH;
+    if(_reminderLastFired[key]) return;
+    if(diffH===24){
+      _reminderLastFired[key]=true;
+      notifyIfNeeded(`📅 Завтра дедлайн`,`${hw.title} · ${hw.subject}`);
+    } else if(diffH===1){
+      _reminderLastFired[key]=true;
+      notifyIfNeeded(`⏰ Через час дедлайн!`,`${hw.title} · ${hw.subject}`);
+    } else if(diffH===0){
+      _reminderLastFired[key]=true;
+      notifyIfNeeded(`🔴 Дедлайн сегодня!`,`${hw.title} · ${hw.subject}`);
+    }
+  });
+}
+
+// Check every minute
+setInterval(checkDeadlineReminders, 60000);
+
+// ══════════════════════════════════════════════
+// DEADLINE REMINDERS
+// ══════════════════════════════════════════════
+let reminderChecked = false;
+
+function checkDeadlineReminders(){
+  if(reminderChecked) return;
+  if(typeof Notification==='undefined'||Notification.permission!=='granted') return;
+  reminderChecked = true;
+
+  const myName = D.currentUser?.name;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+  const dayAfter  = new Date(now); dayAfter.setDate(dayAfter.getDate()+2);
+
+  D.homework.forEach(hw=>{
+    if(!hw.dueDate) return;
+    if(hw.doneBy?.includes(myName)) return; // already done
+    const due = new Date(hw.dueDate+'T00:00:00');
+
+    // Today
+    if(due.getTime()===now.getTime()){
+      new Notification('⏰ Сдать сегодня!', {
+        body: `${hw.title} · ${hw.subject}`,
+        icon: ''
+      });
+    }
+    // Tomorrow
+    else if(due.getTime()===tomorrow.getTime()){
+      new Notification('📅 Сдать завтра', {
+        body: `${hw.title} · ${hw.subject}`,
+        icon: ''
+      });
+    }
+    // In 2 days
+    else if(due.getTime()===dayAfter.getTime()){
+      new Notification('📌 Послезавтра дедлайн', {
+        body: `${hw.title} · ${hw.subject}`,
+        icon: ''
+      });
+    }
+  });
+}

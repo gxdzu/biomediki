@@ -39,8 +39,9 @@ function renderAdminLists(){
       <div class="adm-hw-item">
         <div class="adm-item-info">
           <div class="adm-item-name">${hw.title}</div>
-          <div class="adm-item-meta">${hw.subject} · ${hw.due}</div>
+          <div class="adm-item-meta">${hw.subject} · ${hw.due||hw.dueDate||'без срока'} · ${hw.urgency==='high'?'🔴':hw.urgency==='mid'?'🟡':'🟢'}</div>
         </div>
+        <button class="msg-act" onclick="openHwEdit(${hw.id})" style="margin-right:4px">✎</button>
         <button class="inv-del" onclick="delHwAdmin(${hw.id})">×</button>
       </div>`).join(''):'<div style="color:var(--text3);font-size:12px;padding:8px 0">заданий нет</div>';
   }
@@ -58,8 +59,44 @@ function renderAdminLists(){
   }
 }
 function delHwAdmin(id){
-  const hw = D.homework.find(h=>h.id===id);
-  if (hw) fbDelHw(hw._key);
+  const hw=D.homework.find(h=>h.id===id);
+  if(hw) fbDelHw(hw._key);
+}
+
+let editingHwId=null;
+function openHwEdit(id){
+  const hw=D.homework.find(h=>h.id===id); if(!hw) return;
+  editingHwId=id;
+  document.getElementById('hw-edit-title').value=hw.title||'';
+  document.getElementById('hw-edit-subj').value=hw.subject||'';
+  document.getElementById('hw-edit-desc').value=hw.desc||'';
+  document.getElementById('hw-edit-url').value=hw.url||'';
+  document.getElementById('hw-edit-due').value=hw.dueDate||'';
+  document.getElementById('hw-edit-urg').value=hw.urgency||'mid';
+  document.getElementById('hw-edit-modal').classList.remove('hidden');
+}
+function closeHwEdit(){
+  editingHwId=null;
+  document.getElementById('hw-edit-modal').classList.add('hidden');
+}
+async function saveHwEdit(){
+  const hw=D.homework.find(h=>h.id===editingHwId); if(!hw) return;
+  hw.title   =document.getElementById('hw-edit-title').value.trim()||hw.title;
+  hw.subject =document.getElementById('hw-edit-subj').value.trim()||hw.subject;
+  hw.desc    =document.getElementById('hw-edit-desc').value.trim();
+  hw.url     =document.getElementById('hw-edit-url').value.trim();
+  hw.dueDate =document.getElementById('hw-edit-due').value;
+  hw.due     =hw.dueDate?formatDue(hw.dueDate):'';
+  hw.urgency =document.getElementById('hw-edit-urg').value;
+  try{
+    if(hw._key) await fbSet(`homework/${hw._key}`,{
+      id:hw.id,title:hw.title,subject:hw.subject,desc:hw.desc,url:hw.url,
+      dueDate:hw.dueDate,due:hw.due,urgency:hw.urgency,doneBy:hw.doneBy||[]
+    });
+    save(); renderHw(); renderAdminLists();
+    toast('задание обновлено');
+  }catch(e){ save(); renderHw(); renderAdminLists(); toast('обновлено локально'); }
+  closeHwEdit();
 }
 // ── INVITES via Firebase ──
 let fbInvites = [];
