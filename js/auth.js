@@ -3,7 +3,6 @@
 // ══════════════════════════════════════════════
 let pendingInviteCode = null;
 
-// Admin code stored as SHA-256 hash only — never the plain code
 const ADMIN_HASH = 'a6574587459245cdfb4f72cf92360a111af5c825b1ad1d3865c9b1e91dd8827e';
 
 async function hashCode(str){
@@ -27,38 +26,40 @@ async function doLogin(){
     launchApp(); return;
   }
 
-  // If Firebase hasn't loaded yet — wait up to 3 seconds
-  if(fbInvites.length === 0 && D.invites.length === 0){
+  // ВСЕГДА ждём Firebase — локальный кэш может быть устаревшим
+  if(fbInvites.length === 0){
     err.textContent = 'загрузка...';
     let waited = 0;
-    while(fbInvites.length === 0 && waited < 3000){
+    while(fbInvites.length === 0 && waited < 5000){
       await new Promise(r => setTimeout(r, 300));
       waited += 300;
     }
     err.textContent = '';
   }
 
-  const allInvites = fbInvites.length ? fbInvites : D.invites;
+  const allInvites = fbInvites;
 
-  // Re-login with used invite
-  const usedInv = allInvites.find(i => i.code===raw && i.used);
+  // Повторный вход по использованному инвайту
+  const usedInv = allInvites.find(i => i.code === raw && i.used);
   if(usedInv){
-    // Wait for members to load if needed
     if(fbMembers.length === 0){
       let w = 0;
       while(fbMembers.length === 0 && w < 3000){ await new Promise(r=>setTimeout(r,300)); w+=300; }
     }
-    const allMembers = fbMembers.length ? fbMembers : D.members;
-    const member = allMembers.find(m => m.code===raw || m.name===usedInv.usedBy);
+    const member = fbMembers.find(m => m.code === raw || m.name === usedInv.usedBy);
     if(member){
-      D.currentUser = {name:member.name, role:member.role||'member', subgroup:member.subgroup||0, code:raw,
-        bio:member.bio||'', socials:member.socials||{}, avatarUrl:member.avatarUrl||'', _key:member._key};
+      D.currentUser = {
+        name: member.name, role: member.role||'member',
+        subgroup: member.subgroup||0, code: raw,
+        bio: member.bio||'', socials: member.socials||{},
+        avatarUrl: member.avatarUrl||'', _key: member._key
+      };
       save(); launchApp(); return;
     }
   }
 
-  // Fresh unused invite
-  const inv = allInvites.find(i => i.code===raw && !i.used);
+  // Первый вход по новому инвайту
+  const inv = allInvites.find(i => i.code === raw && !i.used);
   if(inv){
     pendingInviteCode = raw;
     document.getElementById('gate').classList.add('hidden');
