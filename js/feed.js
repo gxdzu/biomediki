@@ -26,7 +26,7 @@ function formatPostTime(post){
   return post.time||'';
 }
 
-
+async function fbPollFeed(){
   try{
     const data = await fbGet('feed');
     const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.ts-a.ts) : [];
