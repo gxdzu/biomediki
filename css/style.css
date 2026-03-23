@@ -412,7 +412,7 @@ a{text-decoration:none}
 .feed-post-meta{flex:1}
 .feed-post-author{font-size:13px;color:var(--text);font-weight:500}
 .feed-post-time{font-size:11px;color:var(--text3)}
-.feed-post-img{width:100%;border-radius:var(--rs);margin:8px 0;max-height:280px;object-fit:cover;display:block}
+.feed-post-img{width:100%;border-radius:var(--rs);margin:8px 0;max-height:280px;object-fit:contain;display:block;background:var(--bg2)}
 .feed-post-text{font-size:14px;color:var(--text);line-height:1.6}
 .feed-empty{text-align:center;padding:40px 20px;color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px}
 
