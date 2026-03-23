@@ -16,7 +16,17 @@ function getMediaHtml(url, compact=false){
   return `<img class="feed-post-img${compact?' compact':''}" src="${url}" onerror="this.style.display='none'" loading="lazy">`;
 }
 
-async function fbPollFeed(){
+function formatPostTime(post){
+  if(post.time && post.time.includes(' ')) return post.time; // уже дата+время
+  if(post.ts){
+    const n = new Date(post.ts);
+    const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+    return `${n.getDate()} ${months[n.getMonth()]}, ${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;
+  }
+  return post.time||'';
+}
+
+
   try{
     const data = await fbGet('feed');
     const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>b.ts-a.ts) : [];
@@ -124,7 +134,7 @@ function renderPostScreen(){
         ${av}
         <div class="feed-post-meta" style="cursor:pointer" onclick="openMemberProfile('${post.author}')">
           <div class="feed-post-author">${esc(post.author)}</div>
-          <div class="feed-post-time">${post.time||''}</div>
+          <div class="feed-post-time">${formatPostTime(post)}</div>
         </div>
         ${canDel?`<button class="msg-act" onclick="deletePost('${post._key}')" style="margin-left:auto">✕</button>`:''}
       </div>
@@ -158,8 +168,8 @@ function renderPostScreen(){
 // ── публикация ──
 async function publishPost(){
   const text = document.getElementById('post-text').value.trim();
-  if(!text){ toast('напиши что-нибудь'); return; }
   const imgUrl = document.getElementById('post-img').value.trim();
+  if(!text && !imgUrl){ toast('добавь текст или медиа'); return; }
   const post = {
     author: D.currentUser?.name||'Аноним',
     text, ts: Date.now(), time: nowTime(),
@@ -229,7 +239,7 @@ function renderFeed(){
         ${av}
         <div class="feed-post-meta" style="cursor:pointer" onclick="event.stopPropagation();openMemberProfile('${p.author}')">
           <div class="feed-post-author">${esc(p.author)}</div>
-          <div class="feed-post-time">${p.time||''}</div>
+          <div class="feed-post-time">${formatPostTime(p)}</div>
         </div>
         ${canDel?`<button class="msg-act" onclick="event.stopPropagation();deletePost('${p._key}')" style="margin-left:auto">✕</button>`:''}
       </div>

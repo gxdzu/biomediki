@@ -17,6 +17,7 @@ function saveDmSeen(){ localStorage.setItem('sg_dm_seen',JSON.stringify(dmLastSe
 
 // ── OPEN DM ──
 function openDm(partnerName){
+  if(curDmPartner !== partnerName) _dmMsgsLastJson = ''; // сброс кеша при смене собеседника
   curDmPartner=partnerName;
   // Update header avatar with real photo if available
   const avEl=document.getElementById('dm-hdr-av');
@@ -108,6 +109,9 @@ async function delDmMsg(ts){
 }
 
 // ── LOAD & RENDER ──
+let _dmMsgsLastJson = '';
+let _dmListLastJson = '';
+
 async function loadDmMessages(){
   const myName=D.currentUser?.name; if(!myName||!curDmPartner) return;
   const key=dmKey(myName,curDmPartner);
@@ -122,6 +126,9 @@ async function loadDmMessages(){
 
 function renderDmMsgs(msgs){
   const el=document.getElementById('dm-msgs'); if(!el) return;
+  const newJson=JSON.stringify(msgs);
+  if(newJson===_dmMsgsLastJson) return; // нет изменений — не мигаем
+  _dmMsgsLastJson=newJson;
   if(!msgs.length){el.innerHTML='<div class="chat-empty">начните диалог...</div>';return;}
   const wasAtBottom=el.scrollHeight-el.scrollTop-el.clientHeight<80;
   const myName=D.currentUser?.name;
@@ -218,11 +225,19 @@ async function renderDmList(){
     }catch(e){ return {member:m,last:null,unread:0}; }
   }));
   previews.sort((a,b)=>{ if(!a.last&&!b.last) return 0; if(!a.last) return 1; if(!b.last) return -1; return (b.last.ts||0)-(a.last.ts||0); });
+  const newJson=JSON.stringify(previews.map(p=>({n:p.member.name,av:p.member.avatarUrl,ts:p.last?.ts,u:p.unread})));
+  if(newJson===_dmListLastJson) return; // нет изменений — не мигаем
+  _dmListLastJson=newJson;
   el.innerHTML=previews.map(({member:m,last,unread})=>{
     const online=Date.now()-getLastSeen(m.name)<90000;
+    // Аватарка без мерцания: eager + decoding=sync
+    const c=avatarColor(m.name);
+    const avHtml=m.avatarUrl
+      ? `<div style="width:46px;height:46px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd}"><img src="${m.avatarUrl}" width="46" height="46" style="width:100%;height:100%;object-fit:cover;display:block" loading="eager" decoding="sync"></div>`
+      : `<div style="width:46px;height:46px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:500;flex-shrink:0">${(m.name||'?')[0].toUpperCase()}</div>`;
     return `<div class="dm-item" onclick="openDm('${m.name}')">
       <div style="position:relative">
-        ${getMemberAvatarHtml(m.name,46)}
+        ${avHtml}
         ${online?`<div style="position:absolute;bottom:1px;right:1px;width:11px;height:11px;border-radius:50%;background:var(--grn);border:2px solid var(--bg)"></div>`:''}
       </div>
       <div class="dm-item-body">

@@ -103,7 +103,8 @@ async function fbDelMember(key) {
 
 function nowTime() {
   const n = new Date();
-  return `${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;
+  const months = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  return `${n.getDate()} ${months[n.getMonth()]}, ${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;
 }
 
 // ── poll all data every 4s ──
