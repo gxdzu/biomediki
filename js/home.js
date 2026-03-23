@@ -59,6 +59,6 @@ function renderPostOfDay(){
         <span style="font-size:12px;color:var(--gold);margin-left:auto">👍 ${likes}</span>
       </div>
       ${getMediaHtml(best.mediaUrl||best.img,true)}
-      <div class="feed-post-text" style="font-size:13px;-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">${esc(best.text)}</div>
+      <div class="feed-post-text" style="font-size:13px;-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">${esc(best.text||'')}</div>
     </div>`;
 }

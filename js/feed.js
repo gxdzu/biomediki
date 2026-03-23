@@ -54,7 +54,7 @@ async function reactToPost(key, type){
     if(post.author !== myName){
       notifyIfNeeded(
         `${type === '👍' ? '👍' : '👎'} ${myName} отреагировал на пост`,
-        post.text.slice(0,60)
+        (post.text||"").slice(0,60)
       );
     }
   }
@@ -139,7 +139,7 @@ function renderPostScreen(){
         ${canDel?`<button class="msg-act" onclick="deletePost('${post._key}')" style="margin-left:auto">✕</button>`:''}
       </div>
       ${getMediaHtml(post.mediaUrl||post.img)}
-      <div class="feed-post-text" style="margin-bottom:12px">${esc(post.text)}</div>
+      <div class="feed-post-text" style="margin-bottom:12px">${esc(post.text||'')}</div>
       <div class="feed-reactions">
         <button class="react-btn ${myReact==='👍'?'active':''}" onclick="reactToPost('${post._key}','👍')">
           👍 <span>${likes||''}</span>
@@ -172,7 +172,7 @@ async function publishPost(){
   if(!text && !imgUrl){ toast('добавь текст или медиа'); return; }
   const post = {
     author: D.currentUser?.name||'Аноним',
-    text, ts: Date.now(), time: nowTime(),
+    text: text||'', ts: Date.now(), time: nowTime(),
     mediaUrl: imgUrl||null, reactions:{}, comments:{}
   };
   try{
@@ -244,7 +244,7 @@ function renderFeed(){
         ${canDel?`<button class="msg-act" onclick="event.stopPropagation();deletePost('${p._key}')" style="margin-left:auto">✕</button>`:''}
       </div>
       ${getMediaHtml(p.mediaUrl||p.img, true)}
-      <div class="feed-post-text">${esc(p.text)}</div>
+      <div class="feed-post-text">${esc(p.text||'')}</div>
       <div class="feed-reactions" onclick="event.stopPropagation()">
         <button class="react-btn ${myReact==='👍'?'active':''}" onclick="reactToPost('${p._key}','👍')">
           👍 <span onclick="event.stopPropagation();showReactions('${p._key}')">${likes||''}</span>

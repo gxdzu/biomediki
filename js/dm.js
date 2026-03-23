@@ -242,7 +242,7 @@ async function renderDmList(){
       </div>
       <div class="dm-item-body">
         <div class="dm-item-name">${esc(m.name)}</div>
-        <div class="dm-item-preview">${last?esc(last.text.slice(0,40))+(last.edited?' ред.':''):'начать диалог...'}</div>
+        <div class="dm-item-preview">${last?esc((last.text||'').slice(0,40))+(last.edited?' ред.':''):'начать диалог...'}</div>
       </div>
       ${unread?`<div class="dm-unread-badge">${unread}</div>`:''}
     </div>`;
