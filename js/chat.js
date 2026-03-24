@@ -312,7 +312,7 @@ function renderMsgs(){
   const myMsgs=msgs.filter(m=>m.author===myName);
   const lastMyKey=myMsgs.length?myMsgs[myMsgs.length-1]._key:null;
 
-  let html='<div style="flex:1"></div>'; let lastAuthor=null;
+  let html=''; let lastAuthor=null;
   msgs.forEach((m,idx)=>{
     const me=m.author===myName;
     const showName=!me&&m.author!==lastAuthor;
