@@ -409,9 +409,19 @@ function updateChatBadge(count){
 }
 function countUnread(){
   const myName=D.currentUser?.name;
-  // Суммируем непрочитанные по всем трём каналам
-  const allMsgs=[...fbMessages,...fbMsgsSg1,...fbMsgsSg2];
-  return allMsgs.filter(m=>m.author!==myName&&(m.ts||0)>lastSeenTs).length;
+  // Групповые чаты
+  const groupMsgs=[...fbMessages,...fbMsgsSg1,...fbMsgsSg2];
+  const groupUnread=groupMsgs.filter(m=>m.author!==myName&&(m.ts||0)>lastSeenTs).length;
+  
+  // Личные сообщения
+  let dmUnread=0;
+  Object.entries(dmMessages).forEach(([key,msgs])=>{
+    if(!msgs.length) return;
+    const last=msgs[msgs.length-1];
+    if(last.author!==myName&&(last.ts||0)>(dmLastSeen[key]||0)) dmUnread++;
+  });
+  
+  return groupUnread + dmUnread;
 }
 
 // ── CLOUDINARY — отправка фото в чат ──
