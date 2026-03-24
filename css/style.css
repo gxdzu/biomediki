@@ -218,7 +218,7 @@ a{text-decoration:none}
 .chat-hdr-info{flex:1}
 .chat-hdr-name{font-size:14px;font-weight:500;color:var(--text)}
 .chat-hdr-sub{font-size:11px;color:var(--text3);margin-top:1px}
-.chat-layout{flex:1;display:flex;overflow:hidden;min-height:0}
+.chat-layout{flex:1;display:flex;overflow:hidden;min-height:0;flex-direction:column}
 .chat-main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;padding-bottom:var(--nav);position:relative}
 .chat-msgs{
   flex:1;overflow-y:auto;
@@ -1006,6 +1006,9 @@ body:has(#screen-post.active) .bnav {
 #members-panel,
 .members-panel {
   display: none;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* VIDEO EMBED */
