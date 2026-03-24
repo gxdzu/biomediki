@@ -222,18 +222,43 @@ function renderFileBubble(text){
   }
 }
 
+// ── CHAT TABS (general / sg1 / sg2 / dms) ──
+function switchChatTab(tab){
+  curChat = tab;
+  // Обновляем активную вкладку
+  ['general','sg1','sg2','dms'].forEach(t=>{
+    const btn = document.getElementById('chat-tab-'+t);
+    if(btn) btn.classList.toggle('active', t===tab);
+  });
+  if(tab === 'dms'){
+    document.getElementById('chat-msgs-area').style.display = 'none';
+    document.getElementById('chat-inp-area').style.display = 'none';
+    document.getElementById('chat-dms-area').style.display = 'flex';
+    renderDmList();
+    return;
+  }
+  document.getElementById('chat-msgs-area').style.display = '';
+  document.getElementById('chat-inp-area').style.display = '';
+  document.getElementById('chat-dms-area').style.display = 'none';
+  _lastMsgsHash = '';
+  renderMsgs();
+  markChatRead();
+}
+
 function renderChat(){
   const members=fbMembers.length?fbMembers:D.members;
   const cnt=document.getElementById('chat-member-count');
   if(cnt) cnt.textContent=`${members.length} участник${members.length===1?'':'ов'}`;
-  renderPinnedBar(); renderMsgs();
+  renderPinnedBar();
+  // Восстанавливаем правильную вкладку
+  switchChatTab(curChat||'general');
 }
 
 let _lastMsgsHash = '';
 
 function renderMsgs(){
   const el=document.getElementById('chat-msgs'); if(!el) return;
-  let msgs=fbMessages.length?fbMessages:(D.chat?.general||[]);
+  let msgs = curChatMsgs();
   if(searchQuery) msgs=msgs.filter(m=>m.text?.toLowerCase().includes(searchQuery)||m.author?.toLowerCase().includes(searchQuery));
   if(!msgs.length){
     el.innerHTML=searchQuery?'<div class="chat-empty">ничего не найдено</div>':'<div class="chat-empty">начните разговор...</div>';
@@ -342,8 +367,9 @@ function sendMsg(){
 // ── UNREAD TRACKING ──
 let lastSeenTs=parseInt(localStorage.getItem('sg_last_seen')||'0');
 function markChatRead(){
-  if(!fbMessages.length) return;
-  lastSeenTs=fbMessages[fbMessages.length-1].ts||Date.now();
+  const msgs = curChatMsgs();
+  if(!msgs.length) return;
+  lastSeenTs=msgs[msgs.length-1].ts||Date.now();
   localStorage.setItem('sg_last_seen',String(lastSeenTs));
   updateChatBadge(0);
 }
@@ -354,7 +380,9 @@ function updateChatBadge(count){
 }
 function countUnread(){
   const myName=D.currentUser?.name;
-  return fbMessages.filter(m=>m.author!==myName&&(m.ts||0)>lastSeenTs).length;
+  // Суммируем непрочитанные по всем трём каналам
+  const allMsgs=[...fbMessages,...fbMsgsSg1,...fbMsgsSg2];
+  return allMsgs.filter(m=>m.author!==myName&&(m.ts||0)>lastSeenTs).length;
 }
 
 // ── CLOUDINARY — отправка фото в чат ──

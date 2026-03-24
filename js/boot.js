@@ -12,38 +12,54 @@ function toast(msg){
 }
 
 // ══════════════════════════════════════════════
-// ONLINE STATUS
+// ONLINE STATUS — хранится в Firebase для видимости между пользователями
 // ══════════════════════════════════════════════
+let _onlineCache = {}; // {name: ts} — локальный кеш
+
 function updateOnlineStatus(){
   const myName = D.currentUser?.name; if(!myName) return;
   const ts = Date.now();
-  try{ localStorage.setItem('sg_online_'+myName, ts); }catch(e){}
+  _onlineCache[myName] = ts;
+  // Пишем в Firebase
+  try { fbSet(`online/${encodeURIComponent(myName)}`, ts).catch(()=>{}); } catch(e){}
+  // Тоже в localStorage как резерв
+  try { localStorage.setItem('sg_online_'+myName, ts); } catch(e){}
 }
 
 function getLastSeen(name){
-  try{ return parseInt(localStorage.getItem('sg_online_'+name)||'0'); }catch(e){ return 0; }
+  // Сначала из кеша Firebase
+  if(_onlineCache[name]) return _onlineCache[name];
+  // Резерв — localStorage
+  try { return parseInt(localStorage.getItem('sg_online_'+name)||'0'); } catch(e){ return 0; }
+}
+
+async function fbPollOnline(){
+  try{
+    const data = await fbGet('online');
+    if(data) Object.entries(data).forEach(([k,v])=>{ _onlineCache[decodeURIComponent(k)]=v; });
+  }catch(e){}
 }
 
 function formatLastSeen(ts){
   if(!ts) return 'не в сети';
   const diff = Date.now() - ts;
-  if(diff < 60000) return 'в сети';
+  if(diff < 90000) return 'в сети';
   if(diff < 3600000) return `был(а) ${Math.floor(diff/60000)} мин назад`;
   if(diff < 86400000) return `был(а) ${Math.floor(diff/3600000)} ч назад`;
-  return `был(а) давно`;
+  return 'был(а) давно';
 }
 
-// Broadcast online status every 30s while app is open
+// Обновляем статус каждые 30 сек
 setInterval(updateOnlineStatus, 30000);
-
-// ══════════════════════════════════════════════
-// BOOT
+// Опрашиваем статусы других каждые 15 сек
+setInterval(fbPollOnline, 15000);
 // ══════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
   curDay=todayIdx();
   initTheme();
   fbPollInvites();
   updateOnlineStatus();
+  fbPollOnline();
   if(D.currentUser) launchApp();
   document.getElementById('inv-inp')?.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
@@ -89,6 +105,7 @@ window.togglePersonalHw=togglePersonalHw; window.delPersonalHw=delPersonalHw;
 window.setReply=setReply; window.clearReply=clearReply;
 window.calPrev=calPrev; window.calNext=calNext; window.calSelectDay=calSelectDay;
 window.openDm=openDm; window.openDmFromSheet=openDmFromSheet; window.sendDm=sendDm;
+window.switchChatTab=switchChatTab;
 window.setDmReply=setDmReply; window.clearDmReply=clearDmReply;
 window.toggleDmEmoji=toggleDmEmoji; window.insertDmEmoji=insertDmEmoji;
 window.openDmMsgEdit=openDmMsgEdit; window.saveDmMsgEdit=saveDmMsgEdit; window.closeDmMsgModal=closeDmMsgModal;

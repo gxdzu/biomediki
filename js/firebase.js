@@ -117,25 +117,67 @@ async function fbPollAll() {
   await Promise.all([fbPollChat(), fbPollSchedule(), fbPollHomework(), fbPollQuote(), fbPollLinks(), fbPollInvites(), fbPollMembers(), fbPollWeekType(), fbPollFeed(), fbPollPinned()]);
 }
 
-// ── CHAT ──
+// ── CHAT — три канала: general, sg1, sg2 ──
+let fbMsgsSg1 = [];
+let fbMsgsSg2 = [];
+
 async function fbPollChat() {
   try {
-    const data = await fbGet('chat');
-    const arr = data ? Object.entries(data).map(([k,v])=>({...v,_key:k})).sort((a,b)=>(a.ts||0)-(b.ts||0)) : [];
-    if (JSON.stringify(arr) !== JSON.stringify(fbMessages)) {
-      const oldLen = fbMessages.length;
-      fbMessages = arr;
-      if(arr.length > oldLen && curScreen !== 'chat') {
-        const last = arr[arr.length-1];
-        if(last.author !== D.currentUser?.name)
-          notifyIfNeeded(`💬 ${last.author}`, last.msgType==='image'?'📷 фото':last.text);
+    // Опрашиваем все три канала параллельно
+    const [dataG, data1, data2] = await Promise.all([
+      fbGet('chat'),
+      fbGet('chat_sg1'),
+      fbGet('chat_sg2'),
+    ]);
+
+    const parse = d => d ? Object.entries(d).map(([k,v])=>({...v,_key:k})).sort((a,b)=>(a.ts||0)-(b.ts||0)) : [];
+    const arrG = parse(dataG);
+    const arr1 = parse(data1);
+    const arr2 = parse(data2);
+
+    const changed =
+      JSON.stringify(arrG) !== JSON.stringify(fbMessages) ||
+      JSON.stringify(arr1) !== JSON.stringify(fbMsgsSg1) ||
+      JSON.stringify(arr2) !== JSON.stringify(fbMsgsSg2);
+
+    if(changed){
+      // Уведомления о новых сообщениях
+      const checkNew = (oldArr, newArr, label) => {
+        if(newArr.length > oldArr.length){
+          const last = newArr[newArr.length-1];
+          if(last.author !== D.currentUser?.name)
+            notifyIfNeeded(`💬 ${last.author} [${label}]`, last.msgType==='image'?'📷 фото':(last.text||''));
+        }
+      };
+      if(curScreen !== 'chat'){
+        checkNew(fbMessages, arrG, 'общий');
+        checkNew(fbMsgsSg1, arr1, 'пг1');
+        checkNew(fbMsgsSg2, arr2, 'пг2');
       }
-      if (curScreen === 'chat') { renderMsgs(); markChatRead(); }
+
+      fbMessages = arrG;
+      fbMsgsSg1  = arr1;
+      fbMsgsSg2  = arr2;
+
+      if(curScreen === 'chat'){ renderMsgs(); markChatRead(); }
       else updateChatBadge(countUnread());
-      // renderHome только если есть новые сообщения (для пост дня)
-      if (arr.length !== oldLen && curScreen === 'home') renderHome();
+      if(curScreen === 'home') renderHome();
     }
   } catch(e) { if(!fbMessages.length) fbMessages = D.chat?.general || []; }
+}
+
+// Получить массив сообщений текущего канала
+function curChatMsgs(){
+  if(curChat === 'sg1') return fbMsgsSg1;
+  if(curChat === 'sg2') return fbMsgsSg2;
+  return fbMessages;
+}
+
+// Firebase-путь текущего канала
+function curChatPath(){
+  if(curChat === 'sg1') return 'chat_sg1';
+  if(curChat === 'sg2') return 'chat_sg2';
+  return 'chat';
 }
 
 async function fbSend(author, text, replyTo=null, msgType='text') {
@@ -144,10 +186,14 @@ async function fbSend(author, text, replyTo=null, msgType='text') {
     ...(msgType!=='text' ? {msgType} : {}),
     ...(replyTo ? {replyTo: {key: replyTo.key, author: replyTo.author, text: replyTo.text}} : {})
   };
-  fbMessages.push(msg);
+  // Локально добавляем в нужный массив
+  if(curChat === 'sg1') fbMsgsSg1.push(msg);
+  else if(curChat === 'sg2') fbMsgsSg2.push(msg);
+  else fbMessages.push(msg);
+  _lastMsgsHash = '';
   renderMsgs();
   try {
-    await fbPost('chat', msg);
+    await fbPost(curChatPath(), msg);
   } catch(e) {
     if (!D.chat.general) D.chat.general = [];
     D.chat.general.push(msg);

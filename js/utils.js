@@ -24,7 +24,7 @@ function updateThemeLabel(){
 }
 
 // ══════════════════════════════════════════════
-// NOTIFICATIONS (Web Push via Notification API)
+// NOTIFICATIONS — через Service Worker (работает в фоне и на iOS PWA)
 // ══════════════════════════════════════════════
 function requestNotifs(){
   const el = document.getElementById('notif-label');
@@ -35,18 +35,22 @@ function requestNotifs(){
   if(Notification.permission === 'granted'){
     if(el) el.textContent = 'включены ✓';
     toast('уведомления уже включены');
+    // тест-уведомление через SW
+    notifyIfNeeded('Биомедики', 'уведомления работают 🐱');
     return;
   }
   Notification.requestPermission().then(p=>{
     if(p==='granted'){
       if(el) el.textContent = 'включены ✓';
       toast('уведомления включены');
-      new Notification('Биомедики', {body:'уведомления работают 🐱', icon:''});
+      notifyIfNeeded('Биомедики', 'уведомления работают 🐱');
     } else {
       if(el) el.textContent = 'отклонено';
+      toast('уведомления отклонены');
     }
   });
 }
+
 function updateNotifLabel(){
   const el = document.getElementById('notif-label');
   if(!el) return;
@@ -54,9 +58,19 @@ function updateNotifLabel(){
   else if(Notification.permission==='granted') el.textContent = 'включены ✓';
   else el.textContent = 'включить';
 }
+
+// Отправляем через SW — работает в фоне, показывает в трее
 function notifyIfNeeded(title, body){
-  if(typeof Notification!=='undefined' && Notification.permission==='granted'){
-    new Notification(title, {body, icon:''});
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+  // Не уведомляем о своих же действиях
+  const myName = typeof D !== 'undefined' ? D.currentUser?.name : null;
+  if(title && myName && title.includes(myName) && !title.startsWith('📚') && !title.startsWith('📅') && !title.startsWith('⏰') && !title.startsWith('🔴')) return;
+  if(navigator.serviceWorker?.controller){
+    // через SW — работает когда приложение свёрнуто
+    navigator.serviceWorker.controller.postMessage({ type:'NOTIFY', title, body, icon:'/biomediki/icon-192.png' });
+  } else {
+    // фоллбек — прямой вызов (только когда вкладка активна)
+    try { new Notification(title, { body, icon:'/biomediki/icon-192.png' }); } catch(e){}
   }
 }
 
@@ -207,36 +221,6 @@ function delPersonalLink(id){
 // ══════════════════════════════════════════════
 // DEADLINE REMINDERS
 // ══════════════════════════════════════════════
-let _reminderLastFired = {};
-
-function checkDeadlineReminders(){
-  if(typeof Notification==='undefined'||Notification.permission!=='granted') return;
-  const myName=D.currentUser?.name; if(!myName) return;
-  const now=new Date(); now.setSeconds(0,0);
-  D.homework.forEach(hw=>{
-    if(!hw.dueDate) return;
-    if(hw.doneBy?.includes(myName)) return; // already done
-    const due=new Date(hw.dueDate+'T00:00:00');
-    const diffH=Math.round((due-now)/3600000);
-    // fire at ~24h and ~1h before, but only once per window
-    const key=hw.id+'_'+diffH;
-    if(_reminderLastFired[key]) return;
-    if(diffH===24){
-      _reminderLastFired[key]=true;
-      notifyIfNeeded(`📅 Завтра дедлайн`,`${hw.title} · ${hw.subject}`);
-    } else if(diffH===1){
-      _reminderLastFired[key]=true;
-      notifyIfNeeded(`⏰ Через час дедлайн!`,`${hw.title} · ${hw.subject}`);
-    } else if(diffH===0){
-      _reminderLastFired[key]=true;
-      notifyIfNeeded(`🔴 Дедлайн сегодня!`,`${hw.title} · ${hw.subject}`);
-    }
-  });
-}
-
-// Check every minute
-setInterval(checkDeadlineReminders, 60000);
-
 // ══════════════════════════════════════════════
 // DEADLINE REMINDERS
 // ══════════════════════════════════════════════
