@@ -110,7 +110,7 @@ a{text-decoration:none}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;padding-bottom:var(--nav);animation:sin .28s ease}
 .screen.active{display:flex}
-.screen-post.active{display:flex;flex-direction:column;padding-bottom:0}
+.screen-post.active{display:flex;flex-direction:column;padding-bottom:0;overflow:hidden}
 .screen-flex.active{display:flex;flex-direction:column;padding-bottom:0}
 .scr-scroll{flex:1;overflow-y:auto;padding:0 16px 24px}
 .scr-scroll::-webkit-scrollbar{display:none}
@@ -217,7 +217,7 @@ a{text-decoration:none}
 .chat-hdr-name{font-size:14px;font-weight:500;color:var(--text)}
 .chat-hdr-sub{font-size:11px;color:var(--text3);margin-top:1px}
 .chat-layout{flex:1;display:flex;overflow:hidden;min-height:0}
-.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;padding-bottom:var(--nav)}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;padding-bottom:var(--nav);overflow:hidden}
 .chat-msgs{
   flex:1;overflow-y:auto;
   padding:12px 12px 8px;
@@ -289,7 +289,7 @@ a{text-decoration:none}
   padding-bottom:max(8px,env(safe-area-inset-bottom));
   align-items:flex-end;
   position:relative;
-  position:relative;
+  z-index:10;
 }
 .chat-inp{
   flex:1;background:var(--bg2);border:.5px solid var(--bdr);
@@ -313,7 +313,7 @@ a{text-decoration:none}
   color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px;
 }
 /* members panel — now hidden, info shown in header */
-.members-panel{display:none}
+.members-panel{display:none !important; visibility:hidden !important; opacity:0 !important; pointer-events:none !important; position:absolute !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; border:none !important; overflow:hidden !important;}
 
 /* ══════════════════════════════════════════════
    PROFILE — telegram style
@@ -685,10 +685,12 @@ a{text-decoration:none}
    EMOJI PICKER
 ══════════════════════════════════════════════ */
 .emoji-picker{
+  position:absolute;bottom:100%;left:0;right:0;
   flex-shrink:0;display:flex;flex-wrap:wrap;gap:2px;
   padding:8px 12px;background:var(--bg2);
   border-top:.5px solid var(--bdr);
   max-height:120px;overflow-y:auto;
+  z-index:60;
 }
 .emoji-picker::-webkit-scrollbar{display:none}
 .emoji-item{
@@ -806,7 +808,7 @@ a{text-decoration:none}
    MENTION AUTOCOMPLETE
 ══════════════════════════════════════════════ */
 .mention-list{
-  position:absolute;bottom:100%;left:12px;right:12px;
+  position:absolute;bottom:100%;left:0;right:0;
   background:var(--bg2);border:.5px solid var(--bdr2);
   border-radius:var(--r);overflow:hidden;z-index:50;
   box-shadow:0 -4px 20px rgba(0,0,0,.3);
@@ -1002,7 +1004,7 @@ body:has(#screen-post.active) .bnav {
 /* ══════════════════════════════════════════════
    REPLY TO MESSAGE
 ══════════════════════════════════════════════ */
-.reply-bar{flex-shrink:0;border-top:.5px solid var(--bdr);background:var(--bg1)}
+.reply-bar{flex-shrink:0;border-top:.5px solid var(--bdr);background:var(--bg1);position:absolute;bottom:100%;left:0;right:0;z-index:55;}
 .reply-bar-inner{display:flex;align-items:center;gap:10px;padding:8px 16px}
 .msg-reply-preview{
   display:flex;align-items:stretch;gap:8px;
