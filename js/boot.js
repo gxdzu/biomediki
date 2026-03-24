@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.addEventListener('scroll', e=>{
     const el = e.target;
     if(el.id==='chat-msgs' && el.scrollTop < 80) {
-      loadOlderMessages();
+      if(typeof loadOlderMessages === 'function') loadOlderMessages();
     }
   }, true);
 });
@@ -122,4 +122,4 @@ window.toggleChatAttach=toggleChatAttach; window.closeChatAttach=closeChatAttach
 window.chatPickFile=chatPickFile; window.chatPickLink=chatPickLink;
 window.setLinkMode=setLinkMode; window.linkPickFile=linkPickFile;
 window.toggleDmAttach=toggleDmAttach; window.closeDmAttach=closeDmAttach; window.dmPickFile=dmPickFile;
-window.loadOlderMessages=loadOlderMessages;
+

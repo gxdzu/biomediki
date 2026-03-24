@@ -472,3 +472,6 @@ function feedAvatarHtml(name, size=36){
   if(url) return `<div style="width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;border:.5px solid ${c.bd};cursor:pointer" onclick="openMemberProfile('${name}')"><img src="${url}" style="width:100%;height:100%;object-fit:cover"></div>`;
   return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${c.bg};border:.5px solid ${c.bd};color:${c.tx};display:flex;align-items:center;justify-content:center;font-size:${Math.round(size*.38)}px;font-weight:500;flex-shrink:0;cursor:pointer" onclick="openMemberProfile('${name}')">${letter}</div>`;
 }
+
+// Экспорт в глобальный scope сразу при загрузке скрипта
+window.switchChatTab = switchChatTab;
