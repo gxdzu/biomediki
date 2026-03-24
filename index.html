@@ -187,26 +187,68 @@
     </section>
 
     <!-- CHAT -->
+    <!-- ═══ СПИСОК ЧАТОВ (главный экран чатов) ═══ -->
     <section class="screen" id="screen-chat">
-      <div class="chat-hdr">
-        <div class="chat-hdr-avatar">Б</div>
+      <div class="scr-hdr" style="padding:14px 16px 10px">
+        <div class="scr-title">чаты</div>
+        <div id="chat-badge" style="display:none;background:var(--red);color:#fff;font-size:10px;border-radius:10px;padding:1px 8px;margin-left:8px"></div>
+      </div>
+      <div class="chat-list" id="chat-list-screen">
+        <!-- Групповые чаты -->
+        <div class="chat-list-section">общие чаты</div>
+        <div class="chat-list-item" onclick="openChatRoom('general')">
+          <div class="chat-list-av" style="background:var(--purple-bg,#2a1e3a);border-color:var(--purple,#8b7fcf)">Б</div>
+          <div class="chat-list-body">
+            <div class="chat-list-name">биомедики — общая</div>
+            <div class="chat-list-preview" id="preview-general">...</div>
+          </div>
+          <div class="chat-list-meta">
+            <div class="chat-list-time" id="time-general"></div>
+            <div class="chat-list-unread" id="unread-general" style="display:none"></div>
+          </div>
+        </div>
+        <div class="chat-list-item" onclick="openChatRoom('sg1')">
+          <div class="chat-list-av" style="background:#1e2d3a;border-color:#6a96c4">1</div>
+          <div class="chat-list-body">
+            <div class="chat-list-name">подгруппа 1</div>
+            <div class="chat-list-preview" id="preview-sg1">...</div>
+          </div>
+          <div class="chat-list-meta">
+            <div class="chat-list-time" id="time-sg1"></div>
+            <div class="chat-list-unread" id="unread-sg1" style="display:none"></div>
+          </div>
+        </div>
+        <div class="chat-list-item" onclick="openChatRoom('sg2')">
+          <div class="chat-list-av" style="background:#1e3328;border-color:#6ab4a0">2</div>
+          <div class="chat-list-body">
+            <div class="chat-list-name">подгруппа 2</div>
+            <div class="chat-list-preview" id="preview-sg2">...</div>
+          </div>
+          <div class="chat-list-meta">
+            <div class="chat-list-time" id="time-sg2"></div>
+            <div class="chat-list-unread" id="unread-sg2" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Личные сообщения -->
+        <div class="chat-list-section" style="margin-top:8px">личные сообщения</div>
+        <div id="dm-list"></div>
+      </div>
+    </section>
+
+    <!-- ═══ КОМНАТА ЧАТА (групповой) ═══ -->
+    <section class="screen screen-post" id="screen-chatroom">
+      <div class="chat-hdr" style="flex-shrink:0">
+        <button onclick="navigate('chat')" style="background:none;border:none;color:var(--text2);padding:0 8px 0 0;cursor:pointer">
+          <svg viewBox="0 0 16 16" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
+        </button>
+        <div class="chat-hdr-avatar" id="chatroom-av">Б</div>
         <div class="chat-hdr-info" style="cursor:pointer" onclick="toggleMembersList()">
-          <div class="chat-hdr-name">чаты</div>
-          <div class="chat-hdr-sub" id="chat-member-count">загрузка...</div>
+          <div class="chat-hdr-name" id="chatroom-title">чат</div>
+          <div class="chat-hdr-sub" id="chat-member-count">участников...</div>
         </div>
         <button class="prof-edit-btn" style="position:static;margin-left:auto" onclick="toggleChatSearch()">
           <svg viewBox="0 0 20 20" width="15" height="15"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M13 13l3 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        </button>
-      </div>
-
-      <!-- Вкладки чатов -->
-      <div class="chat-tabs">
-        <button class="chat-tab-btn active" id="chat-tab-general" onclick="switchChatTab('general')">общая</button>
-        <button class="chat-tab-btn" id="chat-tab-sg1" onclick="switchChatTab('sg1')">1 пдгр</button>
-        <button class="chat-tab-btn" id="chat-tab-sg2" onclick="switchChatTab('sg2')">2 пдгр</button>
-        <button class="chat-tab-btn" id="chat-tab-dms" onclick="switchChatTab('dms')">
-          личные
-          <div id="chat-badge" style="display:none;background:var(--red);color:#fff;font-size:9px;border-radius:8px;padding:1px 5px;margin-left:3px"></div>
         </button>
       </div>
 
@@ -227,9 +269,7 @@
         <svg viewBox="0 0 16 16" width="12" height="12" style="flex-shrink:0;color:var(--gold)"><path d="M9 1l5 5-8 8-2-1 1-3-4-4 1-2 3 1 4-4zM2 14l2-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <div class="pinned-text" id="pinned-text">закреплённое сообщение</div>
       </div>
-
-      <!-- Область сообщений (скрывается на вкладке ЛС) -->
-      <div id="chat-msgs-area" class="chat-layout">
+      <div class="chat-layout" style="flex:1;overflow:hidden">
         <div class="chat-main" style="position:relative">
           <div class="chat-msgs" id="chat-msgs"></div>
           <div id="mention-list" class="mention-list hidden"></div>
@@ -247,40 +287,30 @@
         </div>
         <div class="members-panel" id="members-panel"></div>
       </div>
-
-      <!-- Поле ввода (скрывается на вкладке ЛС) -->
-      <div id="chat-inp-area">
-        <div class="chat-inp-row">
-          <button class="emoji-btn" onclick="toggleEmojiPicker()">
-            <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
+      <div class="chat-inp-row" style="flex-shrink:0">
+        <button class="emoji-btn" onclick="toggleEmojiPicker()">
+          <svg viewBox="0 0 20 20" width="18" height="18"><circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.3" fill="none"/><path d="M7 12s1 2 3 2 3-2 3-2" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/><circle cx="7.5" cy="8.5" r="1" fill="currentColor"/><circle cx="12.5" cy="8.5" r="1" fill="currentColor"/></svg>
+        </button>
+        <button class="emoji-btn" onclick="toggleChatAttach()" title="прикрепить">
+          <svg viewBox="0 0 20 20" width="18" height="18"><path d="M16.5 10.5l-7.7 7.7a5 5 0 01-7-7l8.4-8.4a3 3 0 014.2 4.2L6.2 15.2a1 1 0 01-1.4-1.4L12 6.6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="chat-attach-sheet" class="attach-sheet hidden">
+          <button class="attach-opt" onclick="chatPickPhoto();closeChatAttach()">
+            <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            фото / видео
           </button>
-          <button class="emoji-btn" onclick="toggleChatAttach()" title="прикрепить">
-            <svg viewBox="0 0 20 20" width="18" height="18"><path d="M16.5 10.5l-7.7 7.7a5 5 0 01-7-7l8.4-8.4a3 3 0 014.2 4.2L6.2 15.2a1 1 0 01-1.4-1.4L12 6.6" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-          <div id="chat-attach-sheet" class="attach-sheet hidden">
-            <button class="attach-opt" onclick="chatPickPhoto();closeChatAttach()">
-              <svg viewBox="0 0 20 20" width="18" height="18"><rect x="2" y="4" width="16" height="13" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="7" cy="9" r="1.5" fill="currentColor"/><path d="M2 14l4-4 3 3 3-3 4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              фото / видео
-            </button>
-            <button class="attach-opt" onclick="chatPickFile();closeChatAttach()">
-              <svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 4h8l4 4v9a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M12 4v4h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-              файл
-            </button>
-          </div>
-          <input class="chat-inp" id="chat-inp" placeholder="сообщение..."
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
-            oninput="handleChatInput(this.value)">
-          <button class="chat-send" onclick="sendMsg()">
-            <svg viewBox="0 0 20 20" width="18" height="18"><path d="M3 10L17 3l-4 7 4 7L3 10z" fill="currentColor"/></svg>
+          <button class="attach-opt" onclick="chatPickFile();closeChatAttach()">
+            <svg viewBox="0 0 20 20" width="18" height="18"><path d="M4 4h8l4 4v9a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/><path d="M12 4v4h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><path d="M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            файл
           </button>
         </div>
+        <input class="chat-inp" id="chat-inp" placeholder="сообщение..."
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"
+          oninput="handleChatInput(this.value)">
+        <button class="chat-send" onclick="sendMsg()">
+          <svg viewBox="0 0 20 20" width="18" height="18"><path d="M3 10L17 3l-4 7 4 7L3 10z" fill="currentColor"/></svg>
+        </button>
       </div>
-
-      <!-- Список ЛС (показывается только на вкладке ЛС) -->
-      <div id="chat-dms-area" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
-        <div id="dm-list"></div>
-      </div>
-
     </section>
 
     <!-- CAT -->
@@ -470,7 +500,7 @@
     <!-- DM CHAT -->
     <section class="screen screen-post" id="screen-dm">
       <div class="chat-hdr" style="flex-shrink:0">
-        <button onclick="navigate('chat');switchChatTab('dms')" style="background:none;border:none;color:var(--text2);padding:0 8px 0 0;cursor:pointer">
+        <button onclick="navigate('chat')" style="background:none;border:none;color:var(--text2);padding:0 8px 0 0;cursor:pointer">
           <svg viewBox="0 0 16 16" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/></svg>
         </button>
         <div id="dm-hdr-av" class="chat-hdr-avatar" style="width:36px;height:36px;font-size:15px"></div>
