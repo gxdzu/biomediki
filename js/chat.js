@@ -225,14 +225,6 @@ function renderFileBubble(text){
 // ── ОТКРЫТЬ КОМНАТУ ЧАТА ──
 function openChatRoom(channel){
   curChat = channel;
-  // Сброс reply и emoji picker (НЕ search и members - они должны работать)
-  replyTo = null;
-  const overlays = ['reply-bar', 'emoji-picker', 'chat-attach-sheet', 'mention-list'];
-  overlays.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
-  // Заголовок и аватар
   const titles = { general:'биомедики — общая', sg1:'подгруппа 1', sg2:'подгруппа 2' };
   const avText = { general:'Б', sg1:'1', sg2:'2' };
   const avStyles = {
@@ -312,9 +304,14 @@ function renderMsgs(){
   const myMsgs=msgs.filter(m=>m.author===myName);
   const lastMyKey=myMsgs.length?myMsgs[myMsgs.length-1]._key:null;
 
-  let html=''; let lastAuthor=null;
+  let html='<div style="flex:1"></div>'; let lastDate=null,lastAuthor=null;
   msgs.forEach((m,idx)=>{
     const me=m.author===myName;
+    if(m.ts&&!searchQuery){
+      const d=new Date(m.ts);
+      const ds=`${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
+      if(ds!==lastDate){html+=`<div class="chat-day-sep">${ds}</div>`;lastDate=ds;}
+    }
     const showName=!me&&m.author!==lastAuthor;
     const nextSameAuthor=msgs[idx+1]&&msgs[idx+1].author===m.author;
     const canEdit=me&&m._key===lastMyKey;

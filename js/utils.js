@@ -61,17 +61,15 @@ function updateNotifLabel(){
 
 // Отправляем через SW — работает в фоне, показывает в трее
 function notifyIfNeeded(title, body){
-  // Системные уведомления отключены — только inline-тосты в приложении
-  return;
-  
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   // Не уведомляем о своих же действиях
   const myName = typeof D !== 'undefined' ? D.currentUser?.name : null;
   if(title && myName && title.includes(myName) && !title.startsWith('📚') && !title.startsWith('📅') && !title.startsWith('⏰') && !title.startsWith('🔴')) return;
-  
-  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   if(navigator.serviceWorker?.controller){
+    // через SW — работает когда приложение свёрнуто
     navigator.serviceWorker.controller.postMessage({ type:'NOTIFY', title, body, icon:'/biomediki/icon-192.png' });
   } else {
+    // фоллбек — прямой вызов (только когда вкладка активна)
     try { new Notification(title, { body, icon:'/biomediki/icon-192.png' }); } catch(e){}
   }
 }

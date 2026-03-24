@@ -134,8 +134,15 @@ function renderDmMsgs(msgs){
   const myName=D.currentUser?.name;
   const myMsgs=msgs.filter(m=>m.author===myName);
   const lastMyTs=myMsgs.length?myMsgs[myMsgs.length-1].ts:null;
+  let lastDate=null;
   el.innerHTML=msgs.map((m,idx)=>{
     const me=m.author===myName;
+    let dateSep='';
+    if(m.ts){
+      const d=new Date(m.ts);
+      const ds=`${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
+      if(ds!==lastDate){dateSep=`<div class="chat-day-sep">${ds}</div>`;lastDate=ds;}
+    }
     let replyHtml='';
     if(m.replyTo){
       const c=avatarColor(m.replyTo.author);
@@ -153,7 +160,7 @@ function renderDmMsgs(msgs){
       ${canEdit?`<button class="msg-act" onclick="openDmMsgEdit(${m.ts},'${esc(m.text).replace(/'/g,"\\'")}')">✎</button>`:''}
       ${canDel?`<button class="msg-act" onclick="delDmMsg(${m.ts})">✕</button>`:''}
     </div>`;
-    return `<div class="msg-row ${me?'me':''}">
+    return `${dateSep}<div class="msg-row ${me?'me':''}">
       ${!me?`<div style="width:28px;flex-shrink:0"></div>`:''}
       <div class="msg-col">
         <div class="msg-bbl" style="${bblStyle}">${replyHtml}${

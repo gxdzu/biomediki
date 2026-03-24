@@ -159,8 +159,7 @@ async function fbPollChat() {
       fbMsgsSg1  = arr1;
       fbMsgsSg2  = arr2;
 
-      if(curScreen === 'chat'){ renderChatList(); updateChatBadge(countUnread()); }
-      else if(curScreen === 'chatroom'){ renderMsgs(); markChatRead(); }
+      if(curScreen === 'chat'){ renderMsgs(); markChatRead(); }
       else updateChatBadge(countUnread());
       if(curScreen === 'home') renderHome();
     }
