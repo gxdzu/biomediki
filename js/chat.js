@@ -225,6 +225,17 @@ function renderFileBubble(text){
 // ── ОТКРЫТЬ КОМНАТУ ЧАТА ──
 function openChatRoom(channel){
   curChat = channel;
+  // Сброс всех overlay-элементов
+  replyTo = null;
+  document.getElementById('reply-bar')?.classList.add('hidden');
+  document.getElementById('emoji-picker')?.classList.add('hidden');
+  document.getElementById('chat-attach-sheet')?.classList.add('hidden');
+  document.getElementById('chat-search-bar')?.classList.add('hidden');
+  document.getElementById('members-sheet')?.classList.add('hidden');
+  document.getElementById('mention-list')?.classList.add('hidden');
+  searchQuery = '';
+  const searchInp = document.getElementById('chat-search-inp');
+  if(searchInp) searchInp.value = '';
   // Заголовок и аватар
   const titles = { general:'биомедики — общая', sg1:'подгруппа 1', sg2:'подгруппа 2' };
   const avText = { general:'Б', sg1:'1', sg2:'2' };
