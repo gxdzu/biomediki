@@ -251,21 +251,29 @@ function openChatRoom(channel){
 function renderChatList(){
   const myName = D.currentUser?.name;
   // Превью для групповых чатов
-  const updatePreview = (id, msgs) => {
+  const updatePreview = (id, msgs, lastSeen) => {
     const el = document.getElementById('preview-'+id);
     const te = document.getElementById('time-'+id);
+    const ue = document.getElementById('unread-'+id);
     if(!el) return;
     const last = msgs[msgs.length-1];
     if(last){
       el.textContent = (last.author===myName?'Вы: ':last.author+': ') + (last.msgType==='image'?'📷 фото': last.msgType==='file'?'📎 файл':(last.text||'').slice(0,40));
       if(te) te.textContent = last.time ? last.time.split(',')[1]?.trim()||last.time : '';
+      // Непрочитанные
+      const unread = msgs.filter(m=>m.author!==myName&&(m.ts||0)>lastSeen).length;
+      if(ue){ ue.style.display = unread>0?'block':'none'; ue.textContent = unread; }
     } else {
       el.textContent = 'нет сообщений';
+      if(ue) ue.style.display = 'none';
     }
   };
-  updatePreview('general', fbMessages);
-  updatePreview('sg1', fbMsgsSg1);
-  updatePreview('sg2', fbMsgsSg2);
+  updatePreview('general', fbMessages, lastSeenTs);
+  updatePreview('sg1', fbMsgsSg1, lastSeenTs);
+  updatePreview('sg2', fbMsgsSg2, lastSeenTs);
+
+  // Обновляем глобальный бейдж
+  updateChatBadge(countUnread());
 
   // Превью ЛС — рендерим список
   renderDmList();
@@ -304,14 +312,9 @@ function renderMsgs(){
   const myMsgs=msgs.filter(m=>m.author===myName);
   const lastMyKey=myMsgs.length?myMsgs[myMsgs.length-1]._key:null;
 
-  let html='<div style="flex:1"></div>'; let lastDate=null,lastAuthor=null;
+  let html='<div style="flex:1"></div>'; let lastAuthor=null;
   msgs.forEach((m,idx)=>{
     const me=m.author===myName;
-    if(m.ts&&!searchQuery){
-      const d=new Date(m.ts);
-      const ds=`${d.getDate()} ${['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'][d.getMonth()]}`;
-      if(ds!==lastDate){html+=`<div class="chat-day-sep">${ds}</div>`;lastDate=ds;}
-    }
     const showName=!me&&m.author!==lastAuthor;
     const nextSameAuthor=msgs[idx+1]&&msgs[idx+1].author===m.author;
     const canEdit=me&&m._key===lastMyKey;
