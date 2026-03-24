@@ -314,8 +314,6 @@ a{text-decoration:none}
   flex:1;display:flex;align-items:center;justify-content:center;
   color:var(--text3);font-family:var(--serif);font-style:italic;font-size:16px;
 }
-/* members panel — now hidden, info shown in header */
-.members-panel{display:none !important; visibility:hidden !important; opacity:0 !important; pointer-events:none !important; position:absolute !important; width:0 !important; height:0 !important; margin:0 !important; padding:0 !important; border:none !important; overflow:hidden !important;}
 
 /* ══════════════════════════════════════════════
    PROFILE — telegram style
@@ -1007,8 +1005,20 @@ body:has(#screen-post.active) .bnav {
   display: none;
 }
 
+#members-panel,
 .members-panel {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
 }
 
 /* VIDEO EMBED */
