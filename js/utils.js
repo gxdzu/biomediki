@@ -61,6 +61,12 @@ function updateNotifLabel(){
 
 // Отправляем через SW — работает в фоне, показывает в трее
 function notifyIfNeeded(title, body){
+  // Всегда показываем inline-тост (Telegram-стиль)
+  if(title && body) {
+    const shortBody = body.length > 60 ? body.slice(0, 57) + '...' : body;
+    toast(title + ' ' + shortBody);
+  }
+  
   if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   // Не уведомляем о своих же действиях
   const myName = typeof D !== 'undefined' ? D.currentUser?.name : null;
