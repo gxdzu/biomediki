@@ -270,7 +270,8 @@
         <div class="pinned-text" id="pinned-text">закреплённое сообщение</div>
       </div>
       <div class="chat-layout" style="flex:1;overflow:hidden">
-        <div class="chat-main">
+        <div class="chat-main" style="position:relative">
+          <div class="members-panel" id="members-panel"></div>
           <div class="chat-msgs" id="chat-msgs"></div>
           <div id="mention-list" class="mention-list hidden"></div>
           <div id="reply-bar" class="reply-bar hidden">
@@ -945,12 +946,12 @@
 <script src="js/nav.js"></script>
 <script src="js/home.js"></script>
 <script src="js/schedule.js"></script>
-<script src="js/dm.js"></script>
 <script src="js/chat.js"></script>
 <script src="js/cat.js"></script>
 <script src="js/admin.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/calendar.js"></script>
+<script src="js/dm.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/editor.js"></script>
 <script src="js/faq.js"></script>
