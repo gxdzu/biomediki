@@ -11,26 +11,25 @@ function todayIdx(){
 function navigate(s){
   curScreen=s;
   document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.s===s||( b.dataset.s==='chat'&&s==='dm')));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',
+    b.dataset.s===s || (b.dataset.s==='chat' && (s==='chatroom'||s==='dm'))
+  ));
   const el=document.getElementById('screen-'+s);
   if(el) el.classList.add('active');
 
-  // Hide bottom nav on post/dm screens
   const nav=document.querySelector('.bnav');
-  if(nav) nav.style.display = (s==='post'||s==='dm')?'none':'flex';
+  if(nav) nav.style.display = (s==='post'||s==='dm'||s==='chatroom')?'none':'flex';
 
   if(s==='home') renderHome();
   if(s==='schedule') renderSchedule();
   if(s==='hw') renderHw();
-  if(s==='chat'){
-    _lastMsgsHash='';
-    renderChat(); markChatRead();
-  }
+  if(s==='chat'){ renderChatList(); updateChatBadge(countUnread()); }
+  if(s==='chatroom'){ _lastMsgsHash=''; renderChat(); markChatRead(); }
   if(s==='links') renderLinks();
   if(s==='feed') renderFeed();
   if(s==='post') renderPostScreen();
   if(s==='faq') renderFaq();
-  if(s==='dms'){ navigate('chat'); switchChatTab('dms'); return; } // редирект в таб
+  if(s==='dms'){ navigate('chat'); return; }
   if(s!=='dm'&&dmPolling){clearInterval(dmPolling);dmPolling=null;}
   if(s==='dm') renderDmMsgs(dmMessages[dmKey(D.currentUser?.name||'',curDmPartner||'')] || []);
   if(s==='cat') renderCat();

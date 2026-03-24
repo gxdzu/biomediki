@@ -105,7 +105,7 @@ window.togglePersonalHw=togglePersonalHw; window.delPersonalHw=delPersonalHw;
 window.setReply=setReply; window.clearReply=clearReply;
 window.calPrev=calPrev; window.calNext=calNext; window.calSelectDay=calSelectDay;
 window.openDm=openDm; window.openDmFromSheet=openDmFromSheet; window.sendDm=sendDm;
-window.switchChatTab=switchChatTab;
+window.openChatRoom=openChatRoom;
 window.setDmReply=setDmReply; window.clearDmReply=clearDmReply;
 window.toggleDmEmoji=toggleDmEmoji; window.insertDmEmoji=insertDmEmoji;
 window.openDmMsgEdit=openDmMsgEdit; window.saveDmMsgEdit=saveDmMsgEdit; window.closeDmMsgModal=closeDmMsgModal;

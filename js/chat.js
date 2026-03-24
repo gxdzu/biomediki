@@ -222,27 +222,46 @@ function renderFileBubble(text){
   }
 }
 
-// ── CHAT TABS (general / sg1 / sg2 / dms) ──
-function switchChatTab(tab){
-  curChat = tab;
-  // Обновляем активную вкладку
-  ['general','sg1','sg2','dms'].forEach(t=>{
-    const btn = document.getElementById('chat-tab-'+t);
-    if(btn) btn.classList.toggle('active', t===tab);
-  });
-  if(tab === 'dms'){
-    document.getElementById('chat-msgs-area').style.display = 'none';
-    document.getElementById('chat-inp-area').style.display = 'none';
-    document.getElementById('chat-dms-area').style.display = 'flex';
-    renderDmList();
-    return;
-  }
-  document.getElementById('chat-msgs-area').style.display = '';
-  document.getElementById('chat-inp-area').style.display = '';
-  document.getElementById('chat-dms-area').style.display = 'none';
-  _lastMsgsHash = '';
-  renderMsgs();
-  markChatRead();
+// ── ОТКРЫТЬ КОМНАТУ ЧАТА ──
+function openChatRoom(channel){
+  curChat = channel;
+  // Заголовок и аватар
+  const titles = { general:'биомедики — общая', sg1:'подгруппа 1', sg2:'подгруппа 2' };
+  const avText = { general:'Б', sg1:'1', sg2:'2' };
+  const avStyles = {
+    general:'background:#2a1e3a;border-color:#8b7fcf;color:#8b7fcf',
+    sg1:'background:#1e2d3a;border-color:#6a96c4;color:#6a96c4',
+    sg2:'background:#1e3328;border-color:#6ab4a0;color:#6ab4a0'
+  };
+  const titleEl = document.getElementById('chatroom-title');
+  const avEl = document.getElementById('chatroom-av');
+  if(titleEl) titleEl.textContent = titles[channel]||channel;
+  if(avEl){ avEl.textContent = avText[channel]||'Б'; avEl.style.cssText = avStyles[channel]||''; }
+  navigate('chatroom');
+}
+
+// ── СПИСОК ЧАТОВ ──
+function renderChatList(){
+  const myName = D.currentUser?.name;
+  // Превью для групповых чатов
+  const updatePreview = (id, msgs) => {
+    const el = document.getElementById('preview-'+id);
+    const te = document.getElementById('time-'+id);
+    if(!el) return;
+    const last = msgs[msgs.length-1];
+    if(last){
+      el.textContent = (last.author===myName?'Вы: ':last.author+': ') + (last.msgType==='image'?'📷 фото': last.msgType==='file'?'📎 файл':(last.text||'').slice(0,40));
+      if(te) te.textContent = last.time ? last.time.split(',')[1]?.trim()||last.time : '';
+    } else {
+      el.textContent = 'нет сообщений';
+    }
+  };
+  updatePreview('general', fbMessages);
+  updatePreview('sg1', fbMsgsSg1);
+  updatePreview('sg2', fbMsgsSg2);
+
+  // Превью ЛС — рендерим список
+  renderDmList();
 }
 
 function renderChat(){
@@ -250,8 +269,8 @@ function renderChat(){
   const cnt=document.getElementById('chat-member-count');
   if(cnt) cnt.textContent=`${members.length} участник${members.length===1?'':'ов'}`;
   renderPinnedBar();
-  // Восстанавливаем правильную вкладку
-  switchChatTab(curChat||'general');
+  _lastMsgsHash='';
+  renderMsgs();
 }
 
 let _lastMsgsHash = '';
@@ -474,4 +493,4 @@ function feedAvatarHtml(name, size=36){
 }
 
 // Экспорт в глобальный scope сразу при загрузке скрипта
-window.switchChatTab = switchChatTab;
+window.openChatRoom = openChatRoom;
