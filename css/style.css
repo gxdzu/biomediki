@@ -829,6 +829,17 @@ a{text-decoration:none}
 }
 .hw-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .personal-hw-empty{text-align:center;padding:30px;color:var(--text3);font-family:var(--serif);font-style:italic}
+/* Вкладки чата */
+.chat-tabs{display:flex;gap:0;border-bottom:.5px solid var(--bdr);background:var(--bg1);flex-shrink:0}
+.chat-tab-btn{
+  flex:1;padding:9px 4px;text-align:center;font-size:11px;letter-spacing:.05em;
+  color:var(--text3);cursor:pointer;background:none;border:none;
+  border-bottom:2px solid transparent;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:3px;
+}
+.chat-tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+#chat-msgs-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
+#chat-inp-area{flex-shrink:0}
+#chat-dms-area{flex:1}
 
 /* ============================================
    POST SCREEN FIXES
