@@ -110,6 +110,8 @@ a{text-decoration:none}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;padding-bottom:var(--nav);animation:sin .28s ease}
 .screen.active{display:flex}
+#screen-chat.active{flex-direction:column;padding-bottom:var(--nav)}
+#screen-chat.active > .chat-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .screen-post.active{display:flex;flex-direction:column;padding-bottom:0;overflow:hidden}
 .screen-flex.active{display:flex;flex-direction:column;padding-bottom:0}
 .scr-scroll{flex:1;overflow-y:auto;padding:0 16px 24px}
@@ -840,7 +842,21 @@ a{text-decoration:none}
 }
 .chat-tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
 /* Список чатов мессенджер-стиль */
-.chat-list{overflow-y:auto;flex:1}
+.chat-list{overflow-y:auto;flex:1;min-height:0;-webkit-overflow-scrolling:touch}
+.dm-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px 16px;border-bottom:.5px solid var(--bdr);
+  cursor:pointer;transition:background .15s;
+}
+.dm-item:hover{background:var(--bg2)}
+.dm-item-body{flex:1;min-width:0}
+.dm-item-name{font-size:14px;color:var(--text);margin-bottom:3px}
+.dm-item-preview{font-size:12px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dm-unread-badge{
+  min-width:20px;height:20px;border-radius:10px;
+  background:var(--grn);color:#fff;font-size:11px;
+  display:flex;align-items:center;justify-content:center;padding:0 5px;
+}
 .chat-list-section{font-size:10px;letter-spacing:.1em;color:var(--text3);padding:12px 16px 6px;text-transform:uppercase}
 .chat-list-item{display:flex;align-items:center;gap:12px;padding:10px 16px;cursor:pointer;transition:background .15s}
 .chat-list-item:hover,.chat-list-item:active{background:var(--bg2)}
@@ -1043,24 +1059,6 @@ body:has(#screen-post.active) .bnav {
 .cal-event-label{font-size:13px;color:var(--text)}
 .cal-event-type{font-size:10px;color:var(--text3);letter-spacing:.06em;margin-top:2px}
 .cal-events{margin-top:8px}
-
-/* ══════════════════════════════════════════════
-   DIRECT MESSAGES
-══════════════════════════════════════════════ */
-.dm-item{
-  display:flex;align-items:center;gap:12px;
-  padding:12px 16px;border-bottom:.5px solid var(--bdr);
-  cursor:pointer;transition:background .15s;
-}
-.dm-item:hover{background:var(--bg2)}
-.dm-item-body{flex:1;min-width:0}
-.dm-item-name{font-size:14px;color:var(--text);margin-bottom:3px}
-.dm-item-preview{font-size:12px;color:var(--text3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.dm-unread-badge{
-  min-width:20px;height:20px;border-radius:10px;
-  background:var(--grn);color:#fff;font-size:11px;
-  display:flex;align-items:center;justify-content:center;padding:0 5px;
-}
 
 /* ══════════════════════════════════════════════
    HOMEWORK DETAILS
