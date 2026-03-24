@@ -225,23 +225,13 @@ function renderFileBubble(text){
 // ── ОТКРЫТЬ КОМНАТУ ЧАТА ──
 function openChatRoom(channel){
   curChat = channel;
-  pinnedMsgKey = null; // сброс закрепленного сообщения
-  // Сброс всех overlay-элементов
+  // Сброс reply и emoji picker (НЕ search и members - они должны работать)
   replyTo = null;
-  const overlays = [
-    'reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar',
-    'members-sheet', 'mention-list', 'pinned-bar'
-  ];
+  const overlays = ['reply-bar', 'emoji-picker', 'chat-attach-sheet', 'mention-list'];
   overlays.forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.style.display = 'none';
-      el.classList.add('hidden');
-    }
+    if (el) el.classList.add('hidden');
   });
-  searchQuery = '';
-  const searchInp = document.getElementById('chat-search-inp');
-  if(searchInp) searchInp.value = '';
   // Заголовок и аватар
   const titles = { general:'биомедики — общая', sg1:'подгруппа 1', sg2:'подгруппа 2' };
   const avText = { general:'Б', sg1:'1', sg2:'2' };
@@ -285,12 +275,6 @@ function renderChat(){
   const members=fbMembers.length?fbMembers:D.members;
   const cnt=document.getElementById('chat-member-count');
   if(cnt) cnt.textContent=`${members.length} участник${members.length===1?'':'ов'}`;
-  // Гарантированно скрываем все overlay-элементы
-  const overlays = ['reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar', 'mention-list'];
-  overlays.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
   renderPinnedBar();
   _lastMsgsHash='';
   renderMsgs();

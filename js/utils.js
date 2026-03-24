@@ -61,16 +61,11 @@ function updateNotifLabel(){
 
 // Отправляем через SW — работает в фоне, показывает в трее
 function notifyIfNeeded(title, body){
-  // Всегда показываем inline-тост (Telegram-стиль)
-  if(title && body) {
-    const shortBody = body.length > 60 ? body.slice(0, 57) + '...' : body;
-    toast(title + ' ' + shortBody);
-  }
-  
-  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   // Не уведомляем о своих же действиях
   const myName = typeof D !== 'undefined' ? D.currentUser?.name : null;
   if(title && myName && title.includes(myName) && !title.startsWith('📚') && !title.startsWith('📅') && !title.startsWith('⏰') && !title.startsWith('🔴')) return;
+  
+  if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
   if(navigator.serviceWorker?.controller){
     // через SW — работает когда приложение свёрнуто
     navigator.serviceWorker.controller.postMessage({ type:'NOTIFY', title, body, icon:'/biomediki/icon-192.png' });

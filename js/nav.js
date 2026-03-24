@@ -24,7 +24,7 @@ function navigate(s){
   if(s==='schedule') renderSchedule();
   if(s==='hw') renderHw();
   if(s==='chat'){ renderChatList(); updateChatBadge(countUnread()); }
-  if(s==='chatroom'){ _lastMsgsHash=''; renderChat(); markChatRead(); clearChatOverlays(); }
+  if(s==='chatroom'){ _lastMsgsHash=''; renderChat(); markChatRead(); }
   if(s==='links') renderLinks();
   if(s==='feed') renderFeed();
   if(s==='post') renderPostScreen();
@@ -48,22 +48,4 @@ function addAdminFab(){
   b.innerHTML=`<svg viewBox="0 0 20 20" width="18" height="18"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.5L10 14.8l-4.9 2.4.9-5.5L2 7.8l5.5-.8L10 2z" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linejoin="round"/></svg>`;
   b.onclick=openAdmin;
   document.body.appendChild(b);
-}
-
-function clearChatOverlays(){
-  replyTo = null;
-  const overlays = [
-    'reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar',
-    'members-sheet', 'mention-list', 'pinned-bar'
-  ];
-  overlays.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.style.display = 'none';
-      el.classList.add('hidden');
-    }
-  });
-  searchQuery = '';
-  const searchInp = document.getElementById('chat-search-inp');
-  if(searchInp) searchInp.value = '';
 }
