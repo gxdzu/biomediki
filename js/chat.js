@@ -225,14 +225,20 @@ function renderFileBubble(text){
 // ── ОТКРЫТЬ КОМНАТУ ЧАТА ──
 function openChatRoom(channel){
   curChat = channel;
+  pinnedMsgKey = null; // сброс закрепленного сообщения
   // Сброс всех overlay-элементов
   replyTo = null;
-  document.getElementById('reply-bar')?.classList.add('hidden');
-  document.getElementById('emoji-picker')?.classList.add('hidden');
-  document.getElementById('chat-attach-sheet')?.classList.add('hidden');
-  document.getElementById('chat-search-bar')?.classList.add('hidden');
-  document.getElementById('members-sheet')?.classList.add('hidden');
-  document.getElementById('mention-list')?.classList.add('hidden');
+  const overlays = [
+    'reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar',
+    'members-sheet', 'mention-list', 'pinned-bar'
+  ];
+  overlays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = 'none';
+      el.classList.add('hidden');
+    }
+  });
   searchQuery = '';
   const searchInp = document.getElementById('chat-search-inp');
   if(searchInp) searchInp.value = '';
@@ -279,6 +285,12 @@ function renderChat(){
   const members=fbMembers.length?fbMembers:D.members;
   const cnt=document.getElementById('chat-member-count');
   if(cnt) cnt.textContent=`${members.length} участник${members.length===1?'':'ов'}`;
+  // Гарантированно скрываем все overlay-элементы
+  const overlays = ['reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar', 'mention-list'];
+  overlays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
   renderPinnedBar();
   _lastMsgsHash='';
   renderMsgs();

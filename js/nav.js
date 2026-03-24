@@ -52,12 +52,17 @@ function addAdminFab(){
 
 function clearChatOverlays(){
   replyTo = null;
-  document.getElementById('reply-bar')?.classList.add('hidden');
-  document.getElementById('emoji-picker')?.classList.add('hidden');
-  document.getElementById('chat-attach-sheet')?.classList.add('hidden');
-  document.getElementById('chat-search-bar')?.classList.add('hidden');
-  document.getElementById('members-sheet')?.classList.add('hidden');
-  document.getElementById('mention-list')?.classList.add('hidden');
+  const overlays = [
+    'reply-bar', 'emoji-picker', 'chat-attach-sheet', 'chat-search-bar',
+    'members-sheet', 'mention-list', 'pinned-bar'
+  ];
+  overlays.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.display = 'none';
+      el.classList.add('hidden');
+    }
+  });
   searchQuery = '';
   const searchInp = document.getElementById('chat-search-inp');
   if(searchInp) searchInp.value = '';
